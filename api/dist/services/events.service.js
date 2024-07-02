@@ -226,6 +226,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
+            event.donationTargetAmount = dto.donationTargetAmount;
             event.transferType = dto.transferType;
             event.transferAccountNumber = dto.transferAccountNumber;
             event.transferAccountName = dto.transferAccountName;
@@ -456,6 +457,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
+            event.donationTargetAmount = dto.donationTargetAmount;
             if (!dto.transferType ||
                 dto.transferType === "" ||
                 ![payment_constant_1.PAYMENT_METHOD.CARD, payment_constant_1.PAYMENT_METHOD.CASH, payment_constant_1.PAYMENT_METHOD.WALLET].some((x) => { var _a; return x === ((_a = dto.transferType) === null || _a === void 0 ? void 0 : _a.toUpperCase()); })) {

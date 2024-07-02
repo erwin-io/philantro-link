@@ -6,6 +6,7 @@ export declare class UpdateDonationEventDto extends DefaultEventDto {
     transferType: string;
     transferAccountNumber: string;
     transferAccountName: string;
+    donationTargetAmount: string;
 }
 export declare class UpdateAssistanceEventDto extends DefaultEventDto {
 }

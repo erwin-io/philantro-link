@@ -5,9 +5,11 @@ import {
   IsUppercase,
   IsDateString,
   Matches,
+  IsNumberString,
 } from "class-validator";
 import { DefaultEventDto } from "./events-base.dto";
 import moment from "moment";
+import { Transform } from "class-transformer";
 
 export class UpdateCharityVolunteerEventDto extends DefaultEventDto {
   @ApiProperty({
@@ -41,6 +43,18 @@ export class UpdateDonationEventDto extends DefaultEventDto {
     message: "Not allowed, Transfer Account Name is required!"
   })
   transferAccountName: string;
+
+  @ApiProperty()
+  @IsNotEmpty({
+    message: "Not allowed, Donation target amount is required!"
+  })
+  @IsNumberString({
+    message: "Not allowed, Donation target amount should be number!"
+  })
+  @Transform(({ obj, key }) => {
+    return obj[key].toString();
+  })
+  donationTargetAmount: string;
 }
 
 export class UpdateAssistanceEventDto extends DefaultEventDto {}

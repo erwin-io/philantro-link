@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // Based on: https://github.com/microsoft/vscode-recipes/tree/master/Angular-CLI
+    {
+      "name": "start api",
+      "request": "launch",
+      "type": "node",
+      "preLaunchTask": "npm: start:dev",
+      "webRoot": "${workspaceFolder}/api"
+    },
+    {
+      "name": "start web",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "preLaunchTask": "npm: start_web",
+      "url": "http://localhost:4200/#",
+
+      // Note: The ./client directory
+      "webRoot": "${workspaceFolder}/web",
+
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      }
+    }
+  ]
+}

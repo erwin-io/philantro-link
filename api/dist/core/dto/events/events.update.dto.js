@@ -17,6 +17,7 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const events_base_dto_1 = require("./events-base.dto");
 const moment_1 = __importDefault(require("moment"));
+const class_transformer_1 = require("class-transformer");
 class UpdateCharityVolunteerEventDto extends events_base_dto_1.DefaultEventDto {
 }
 __decorate([
@@ -56,6 +57,19 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], UpdateDonationEventDto.prototype, "transferAccountName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, Donation target amount is required!"
+    }),
+    (0, class_validator_1.IsNumberString)({
+        message: "Not allowed, Donation target amount should be number!"
+    }),
+    (0, class_transformer_1.Transform)(({ obj, key }) => {
+        return obj[key].toString();
+    }),
+    __metadata("design:type", String)
+], UpdateDonationEventDto.prototype, "donationTargetAmount", void 0);
 exports.UpdateDonationEventDto = UpdateDonationEventDto;
 class UpdateAssistanceEventDto extends events_base_dto_1.DefaultEventDto {
 }

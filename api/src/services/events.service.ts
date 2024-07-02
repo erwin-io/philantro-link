@@ -281,6 +281,7 @@ export class EventsService {
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
+      event.donationTargetAmount = dto.donationTargetAmount;
       event.transferType = dto.transferType;
       event.transferAccountNumber = dto.transferAccountNumber;
       event.transferAccountName = dto.transferAccountName;
@@ -566,6 +567,7 @@ export class EventsService {
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
+      event.donationTargetAmount = dto.donationTargetAmount;
       if (
         !dto.transferType ||
         dto.transferType === "" ||
