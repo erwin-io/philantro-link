@@ -1,0 +1,20 @@
+::ng-deep mat-tab-group {
+  .tab-label {
+    gap: 5px!important;
+    display: flex!important;
+    align-items: center!important;
+    .mat-badge-content {
+      position: static!important;
+      font-size: 0.8em!important;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+  }
+  mat-card {
+    margin: 8px!important;
+  }
+}
+

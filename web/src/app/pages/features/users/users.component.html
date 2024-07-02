@@ -1,0 +1,26 @@
+<mat-toolbar color="#fff" class="mat-elevation-z4">
+    <span id="title">Users</span>
+    <span class="toolbar-item-spacer"></span>
+</mat-toolbar>
+<div class="component-floating-actions vertical-actions">
+  <button mat-fab color="primary" aria-label="New user" matTooltip="New user" routerLink="/users/add">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+<div class="content">
+  <div class="inner-content">
+    <mat-card [ngClass]="{ 'hidden': isLoading }">
+        <mat-card-content fxLayout="column" >
+          <app-data-table
+          [isLoading]="isLoading"
+          [dataSource]="dataSource"
+          [columnDefs]="appConfig.config.tableColumns.users"
+          [total]="total"
+          (pageChange)="pageChange($event)"
+          (sortChange)="sortChange($event)"
+          (filterChange)="filterChange($event)"
+          ></app-data-table>
+        </mat-card-content>
+    </mat-card>
+    </div>
+</div>

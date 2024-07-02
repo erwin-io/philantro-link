@@ -1,0 +1,44 @@
+import { EventsByGeoDto } from "src/controller/dashboard/dashboard.controller";
+import { Events } from "src/db/entities/Events";
+import { SupportTicket } from "src/db/entities/SupportTicket";
+import { Transactions } from "src/db/entities/Transactions";
+import { Users } from "src/db/entities/Users";
+import { Repository } from "typeorm";
+export declare class DashboardService {
+    private readonly usersRepo;
+    private readonly eventsRepo;
+    private readonly supportTicketRepo;
+    private readonly transactionsRepo;
+    constructor(usersRepo: Repository<Users>, eventsRepo: Repository<Events>, supportTicketRepo: Repository<SupportTicket>, transactionsRepo: Repository<Transactions>);
+    getDashboardSummary(): Promise<{
+        totalClients: number;
+        totalEventsPending: number;
+        totalEventsRegistered: number;
+        totalSupportTicket: number;
+    }>;
+    getEventsByGeo(params: EventsByGeoDto): Promise<{
+        eventId: string;
+        eventCode: string;
+        dateTime: Date;
+        eventType: string;
+        eventName: string;
+        eventDesc: string;
+        eventLocName: string;
+        eventLocMap: object;
+        eventAssistanceItems: string[];
+        eventStatus: string;
+        active: boolean;
+        transferType: string;
+        transferAccountNumber: string;
+        transferAccountName: string;
+        donationTargetAmount: string;
+        inProgress: boolean;
+        eventImages: import("../db/entities/EventImage").EventImage[];
+        eventMessages: import("../db/entities/EventMessage").EventMessage[];
+        thumbnailFile: import("../db/entities/Files").Files;
+        user: Users;
+        interesteds: import("../db/entities/Interested").Interested[];
+        respondeds: import("../db/entities/Responded").Responded[];
+        transactions: Transactions[];
+    }[]>;
+}

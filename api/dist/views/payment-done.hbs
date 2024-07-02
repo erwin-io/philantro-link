@@ -1,0 +1,56 @@
+
+{{#if invalidUrl }}
+
+<div class="receipt-container">
+  <div class="receipt light">
+    <div class="receipt-header">
+      <div class="fail-icon">&#10006;</div>
+      <h2>Invalid URL!</h2>
+    </div>
+  </div>
+</div>
+{{else}}
+<div class="receipt-container">
+  <div class="receipt light">
+    <div class="receipt-header">
+      {{#if (eq transaction.status 'COMPLETED')}}
+      <div class="success-icon">&#10004;</div>
+      <h2>Transaction Complete!</h2>
+      {{else}}
+      <div class="fail-icon">&#10006;</div>
+      <h2>Transaction Incomplete!</h2>
+      {{/if}}
+      <h1>{{formatCurrency transaction.amount}}</h1>
+    </div>
+    <div class="receipt-details">
+      <div class="detail">
+        <span>Ref Number</span>
+        <span>{{transaction.transactionCode}}</span>
+      </div>
+      <div class="detail">
+        <span>Payment Date time</span>
+        <span>{{ formatDateTime transaction.dateTime 'MMM dd, yyyy h:mm a' }}</span>
+      </div>
+      <div class="detail">
+        <span>Payment Method</span>
+        <span>{{transaction.bank}} - {{transaction.paymentType}}</span>
+      </div>
+      <div class="detail">
+        <span>Sender Name</span>
+        <span>{{transaction.accountName}}</span>
+      </div>
+      <div class="detail">
+        <span>Sender Account</span>
+        <span>{{transaction.accountNumber}}</span>
+      </div>
+      <div class="detail">
+        <span>Amount</span>
+        <span>{{formatCurrency transaction.amount 'PHP'}}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{/if}}
+<script>
+</script>

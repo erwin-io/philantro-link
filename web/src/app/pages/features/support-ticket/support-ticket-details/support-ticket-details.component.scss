@@ -1,0 +1,36 @@
+
+::ng-deep {
+  .support-ticket {
+    .hidden {
+      display: none!important;
+    }
+    .message-list {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 3px!important;
+      .message-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        .message-content {
+          padding: 10px;
+          border-radius: 5px;
+        }
+        &.me {
+          align-items: end;
+          .message-content {
+            background-color: #651FFF!important;
+            color: #ffff;
+          }
+        }
+        &.others {
+          align-items: start;
+          .message-content {
+            background-color: #E0E0E0!important;
+          }
+        }
+      }
+    }
+  }
+}

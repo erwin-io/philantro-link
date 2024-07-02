@@ -1,0 +1,53 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  .login-grid {
+    max-width: 720px!important;
+    width: 100%;
+    align-items: center!important;
+    .login-grid-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .form {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      box-sizing: border-box;
+      width: 100%;
+      .fieldset {
+        border: none;
+        width: 100%;
+        min-width: 0!important;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        row-gap: 10px;
+        .forgot-password {
+          display: flex;
+          width: 100%;
+          flex-grow: 1;
+          flex-direction: column;
+          align-items: flex-end;
+          row-gap: 10px;
+          margin-bottom: 10px!important;
+        }
+        button {
+          min-height: 40px;
+          height: 40px;
+        }
+      }
+    }
+    @media only screen and (max-width: 599px) {
+      overflow-y: auto!important;
+      overflow-x: hidden!important;
+      .login-grid-cell {
+        width: 100%!important;
+      }
+      .form {
+        margin-bottom: 60px!important;
+      }
+    }
+  }
+  }

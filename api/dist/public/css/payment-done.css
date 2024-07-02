@@ -1,0 +1,55 @@
+
+.receipt-container {
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.receipt {
+  width: 100%!important;
+  max-width: 400px!important;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.receipt-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.success-icon {
+  font-size: 5em;
+  color: green;
+}
+
+.fail-icon {
+  font-size: 5em;
+  color: red;
+}
+
+.receipt-header h2 {
+  margin: 10px 0;
+}
+
+.receipt-header p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.receipt-details {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.detail {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}

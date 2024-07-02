@@ -1,0 +1,7 @@
+
+
+
+<div class="map-wrapper" [ngClass.gt-md]="{ 'full-screen': true}">
+  <google-map #googleMap [center]="center" [options]="options" [zoom]="zoom" (mapInitialized)="onMapInitialized()">
+  </google-map>
+</div>

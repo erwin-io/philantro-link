@@ -1,0 +1,92 @@
+<mat-toolbar color="#fff" class="mat-elevation-z4">
+  <span id="title">Support Ticket</span>
+  <span class="toolbar-item-spacer"></span>
+</mat-toolbar>
+<div class="content">
+  <div class="inner-content">
+    <mat-tab-group (animationDone)="onAnimationDone()" (selectedTabChange)="onSelectedTabChange($event)" [(selectedIndex)]="tabIndex" >
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label" matBadge="{{total.open > 99 ? '99+' : total.open }}" *ngIf="total.open > 0; else matLabelOpen" matBadgeOverlap="false">Open</span>
+          <ng-template #matLabelOpen>Open</ng-template>
+        </ng-template>
+        <ng-template matTabContent>
+          <mat-card [ngClass]="{ 'hidden': isLoading }">
+            <mat-card-content fxLayout="column" >
+              <app-data-table
+              [isLoading]="isLoading"
+              [dataSource]="dataSource['open']"
+              [columnDefs]="appConfig.config.tableColumns.supportTicket"
+              [total]="total['open']"
+              (pageChange)="pageChange($event, 'open')"
+              (sortChange)="sortChange($event, 'open')"
+              (filterChange)="filterChange($event, 'open')"
+              ></app-data-table>
+            </mat-card-content>
+          </mat-card>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label" matBadge="{{total.active > 99 ? '99+' : total.active }}" *ngIf="total.active > 0; else matLabelActive" matBadgeOverlap="false">Active</span>
+          <ng-template #matLabelActive>Active</ng-template>
+        </ng-template>
+        <ng-template matTabContent>
+          <mat-card [ngClass]="{ 'hidden': isLoading }">
+            <mat-card-content fxLayout="column" >
+              <app-data-table
+              [isLoading]="isLoading"
+              [dataSource]="dataSource['active']"
+              [columnDefs]="appConfig.config.tableColumns.supportTicket"
+              [total]="total['active']"
+              (pageChange)="pageChange($event, 'active')"
+              (sortChange)="sortChange($event, 'active')"
+              (filterChange)="filterChange($event, 'active')"
+              ></app-data-table>
+            </mat-card-content>
+          </mat-card>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label" matBadge="{{total.completed > 99 ? '99+' : total.completed }}" *ngIf="total.completed > 0; else matLabelCompleted" matBadgeOverlap="false">Completed</span>
+          <ng-template #matLabelCompleted>Completed</ng-template>
+        </ng-template>
+        <ng-template matTabContent>
+          <mat-card [ngClass]="{ 'hidden': isLoading }">
+            <mat-card-content fxLayout="column" >
+              <app-data-table
+              [isLoading]="isLoading"
+              [dataSource]="dataSource['completed']"
+              [columnDefs]="appConfig.config.tableColumns.supportTicket"
+              [total]="total['completed']"
+              (pageChange)="pageChange($event, 'completed')"
+              (sortChange)="sortChange($event, 'completed')"
+              (filterChange)="filterChange($event, 'completed')"
+              ></app-data-table>
+            </mat-card-content>
+          </mat-card>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>Closed</ng-template>
+        <ng-template matTabContent>
+          <mat-card [ngClass]="{ 'hidden': isLoading }">
+            <mat-card-content fxLayout="column" >
+              <app-data-table
+              [isLoading]="isLoading"
+              [dataSource]="dataSource['closed']"
+              [columnDefs]="appConfig.config.tableColumns.supportTicket"
+              [total]="total['closed']"
+              (pageChange)="pageChange($event, 'closed')"
+              (sortChange)="sortChange($event, 'closed')"
+              (filterChange)="filterChange($event, 'closed')"
+              ></app-data-table>
+            </mat-card-content>
+          </mat-card>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+

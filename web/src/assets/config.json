@@ -1,0 +1,488 @@
+{
+  "appName": "PhilantroLink",
+  "reservationConfig": {
+    "maxCancellation": "3",
+    "daysCancellationLimitReset": "5",
+    "timeSlotHours": {
+      "start": "08:00",
+      "end": "17:00"
+    },
+    "timeSlotNotAvailableHours": [
+      "12:00"
+    ],
+    "dayOfWeekNotAvailable": [
+      "Sunday",
+      "Wednesday",
+      "Saturday"
+    ]
+  },
+  "tableColumns": {
+    "users": [
+      {
+        "name": "name",
+        "label": "Name",
+        "apiNotation": "name",
+        "sticky": true,
+        "type": "string",
+        "style": {
+          "width": "100px",
+          "left": "0px"
+        },
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Name"
+        },
+        "urlPropertyName": "url"
+      },
+      {
+        "name": "userProfilePic",
+        "label": "Profile Picture",
+        "type": "image",
+        "style": {
+          "width": "100px"
+        }
+      },
+      {
+        "name": "userName",
+        "label": "Username",
+        "apiNotation": "user.userName",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Username"
+        }
+      },
+      {
+        "name": "mobileNumber",
+        "label": "Mobile number",
+        "apiNotation": "mobileNumber",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Mobile number"
+        }
+      },
+      {
+        "name": "access",
+        "label": "Access",
+        "apiNotation": "access.name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Access"
+        }
+      },
+      {
+        "name": "userType",
+        "label": "Type",
+        "apiNotation": "userType",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Type"
+        }
+      }
+    ],
+    "access": [
+      {
+        "name": "accessCode",
+        "label": "Access #",
+        "sticky": true,
+        "apiNotation": "accessCode",
+        "type": "string",
+        "style": {
+          "width": "100px",
+          "left": "0px"
+        },
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Access #"
+        },
+        "urlPropertyName": "url"
+      },
+      {
+        "name": "name",
+        "label": "Access name",
+        "apiNotation": "name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Access name"
+        }
+      }
+    ],
+    "events": [
+      {
+        "sticky": true,
+        "name": "eventCode",
+        "label": "Code #",
+        "apiNotation": "eventCode",
+        "type": "string",
+        "style": {
+          "width": "100px",
+          "left": "0px"
+        },
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Code #"
+        },
+        "urlPropertyName": "url"
+      },
+      {
+        "name": "dateTime",
+        "label": "Date time",
+        "apiNotation": "dateTime",
+        "type": "date",
+        "format": {
+          "type": "date-time",
+          "custom": "MMM dd, yyyy h:mm a"
+        },
+        "filterOptions": {
+          "enable": true,
+          "label": "Date time",
+          "type": "date-range"
+        }
+      },
+      {
+        "name": "eventType",
+        "label": "Event Type",
+        "apiNotation": "eventType",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Event Type"
+        }
+      },
+      {
+        "name": "user",
+        "label": "Event Manager",
+        "apiNotation": "user.name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Event Manager"
+        }
+      }
+    ],
+    "activeEvents": [
+      {
+        "sticky": true,
+        "name": "eventCode",
+        "label": "Code #",
+        "apiNotation": "eventCode",
+        "type": "string",
+        "style": {
+          "width": "100px",
+          "left": "0px"
+        },
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Code #"
+        },
+        "urlPropertyName": "url"
+      },
+      {
+        "name": "dateTime",
+        "label": "Date time",
+        "apiNotation": "dateTime",
+        "type": "date",
+        "format": {
+          "type": "date-time",
+          "custom": "MMM dd, yyyy h:mm a"
+        },
+        "filterOptions": {
+          "enable": true,
+          "label": "Date time",
+          "type": "date-range"
+        }
+      },
+      {
+        "name": "eventType",
+        "label": "Event Type",
+        "apiNotation": "eventType",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Event Type"
+        }
+      },
+      {
+        "name": "inProgress",
+        "label": "In-progress",
+        "apiNotation": "inProgress",
+        "type": "boolean",
+        "filterOptions": {
+          "enable": true,
+          "type": "option-yes-no",
+          "placeholder": "In-progress"
+        }
+      },
+      {
+        "name": "user",
+        "label": "Event Manager",
+        "apiNotation": "user.name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Event Manager"
+        }
+      }
+    ],
+    "transactions": [
+      {
+        "name": "transactionCode",
+        "label": "Code #",
+        "sticky": true,
+        "apiNotation": "transactionCode",
+        "type": "string",
+        "style": {
+          "width": "100px",
+          "left": "0px"
+        },
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Code #"
+        },
+        "urlPropertyName": "url"
+      },
+      {
+        "name": "dateTime",
+        "label": "Date time",
+        "apiNotation": "dateTime",
+        "type": "date",
+        "format": {
+          "type": "date-time",
+          "custom": "MMM dd, yyyy h:mm a"
+        },
+        "filterOptions": {
+          "enable": true,
+          "label": "Date time",
+          "type": "date-range"
+        }
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "apiNotation": "amount",
+        "type": "number",
+        "format": {
+          "type": "currency"
+        },
+        "filterOptions": {
+          "enable": true,
+          "type": "number-range",
+          "placeholder": "Amount"
+        }
+      },
+      {
+        "name": "paymentType",
+        "label": "Payment Type",
+        "apiNotation": "paymentType",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Payment Type"
+        }
+      },
+      {
+        "name": "accountNumber",
+        "label": "Account #",
+        "apiNotation": "accountNumber",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Account #"
+        }
+      },
+      {
+        "name": "accountName",
+        "label": "Account name",
+        "apiNotation": "accountName",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Account name"
+        }
+      },
+      {
+        "name": "bank",
+        "label": "Bank",
+        "apiNotation": "bank",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Bank"
+        }
+      }
+    ],
+    "supportTicket": [
+      {
+        "sticky": true,
+        "name": "supportTicketCode",
+        "label": "Code #",
+        "apiNotation": "supportTicketCode",
+        "type": "string",
+        "style": {
+          "width": "100px",
+          "left": "0px"
+        },
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Code #"
+        },
+        "urlPropertyName": "url"
+      },
+      {
+        "name": "dateTimeSent",
+        "label": "Date time",
+        "apiNotation": "dateTimeSent",
+        "type": "date",
+        "format": {
+          "type": "date-time",
+          "custom": "MMM dd, yyyy h:mm a"
+        },
+        "filterOptions": {
+          "enable": true,
+          "label": "Date time",
+          "type": "date-range"
+        }
+      },
+      {
+        "name": "type",
+        "label": "Type",
+        "apiNotation": "type",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Type"
+        }
+      },
+      {
+        "name": "title",
+        "label": "Title",
+        "apiNotation": "title",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Title"
+        }
+      },
+      {
+        "name": "user",
+        "label": "Open by",
+        "apiNotation": "user.name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Open by"
+        }
+      }
+    ]
+  },
+  "sessionConfig": {
+    "sessionTimeout": "60"
+  },
+  "lookup": {
+    "accessPages": [
+      {
+        "page": "Dashboard",
+        "view": true,
+        "modify": true,
+        "rights": []
+      },
+      {
+        "page": "Events Manager",
+        "view": true,
+        "modify": true,
+        "rights": ["Approval"]
+      },
+      {
+        "page": "Transactions",
+        "view": true,
+        "modify": true,
+        "rights": []
+      },
+      {
+        "page": "Support Ticket",
+        "view": true,
+        "modify": true,
+        "rights": ["Approval"]
+      },
+      {
+        "page": "Users",
+        "view": true,
+        "modify": true,
+        "rights": []
+      },
+      {
+        "page": "Access",
+        "view": true,
+        "modify": true,
+        "rights": []
+      }
+    ]
+  },
+  "apiEndPoints": {
+    "auth": {
+      "login": "/auth/login/admin",
+      "registerTenant": "/auth/register/tenant"
+    },
+    "user": {
+      "getByCode": "/users/",
+      "createUsers": "/users/",
+      "updateProfile": "/users/updateProfile/",
+      "updateUsers": "/users/",
+      "getUsersByAdvanceSearch": "/users/page/",
+      "resetUserPassword": "/users/",
+      "approveAccessRequest": "/users/",
+      "delete": "/users/"
+    },
+    "access": {
+      "getByAdvanceSearch": "/access/page/",
+      "getByCode": "/access/",
+      "create": "/access/",
+      "update": "/access/",
+      "delete": "/access/"
+    },
+    "events": {
+      "getByAdvanceSearch": "/events/page/",
+      "getByCode": "/events/",
+      "createCharityVolunteerEvent": "/events/createCharityVolunteerEvent/",
+      "createDonationEvent": "/events/createDonationEvent/",
+      "createAssistanceEvent": "/events/createAssistanceEvent/",
+      "updateCharityVolunteerEvent": "/events/updateCharityVolunteerEvent/",
+      "updateDonationEvent": "/events/updateDonationEvent/",
+      "updateAssistanceEvent": "/events/updateAssistanceEvent/",
+      "updateStatus": "/events/updateStatus/"
+    },
+    "transactions": {
+      "getByCode": "/transactions/",
+      "getByAdvanceSearch": "/transactions/page/",
+      "getPaymentLink": "/transactions/getPaymentLink/",
+      "requestPaymentLink": "/transactions/requestPaymentLink/",
+      "expirePaymentLink": "/transactions/expirePaymentLink/",
+      "comleteTopUpPayment": "/transactions/comleteTopUpPayment/"
+    },
+    "supportTicket": {
+      "getByAdvanceSearch": "/support-ticket/page/",
+      "getByCode": "/support-ticket/",
+      "create": "/support-ticket/",
+      "update": "/support-ticket/",
+      "updateStatus": "/support-ticket/updateStatus/",
+      "getMessageByAdvanceSearch": "/support-ticket/message/page/",
+      "postMessage": "/support-ticket/message/"
+    },
+    "notifications": {
+      "getByAdvanceSearch": "/notifications/page/",
+      "getUnreadByUser": "/notifications/getUnreadByUser/",
+      "marAsRead": "/notifications/marAsRead/"
+    },
+    "message": {
+      "create": "/message/"
+    },
+    "dashboard": {
+      "getDashboardSummary": "/dashboard/getDashboardSummary/",
+      "getEventsByGeo": "/dashboard/getEventsByGeo/"
+    }
+  }
+}

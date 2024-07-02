@@ -1,0 +1,29 @@
+<mat-toolbar color="#fff" class="mat-elevation-z4">
+  <span id="title">Transactions</span>
+  <span class="toolbar-item-spacer"></span>
+  <div class="toolbar-action">
+  </div>
+</mat-toolbar>
+<div class="component-floating-actions vertical-actions">
+  <button mat-fab color="primary" aria-label="New Burial" matTooltip="New Burial" routerLink="/burial/new" *ngIf="pageAccess.modify">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+<div class="content">
+  <div class="inner-content">
+    <mat-card [ngClass]="{ 'hidden': isLoading }">
+      <mat-card-content fxLayout="column" >
+        <app-data-table
+        [isLoading]="isLoading"
+        [dataSource]="dataSource"
+        [columnDefs]="appConfig.config.tableColumns.transactions"
+        [total]="total"
+        (pageChange)="pageChange($event)"
+        (sortChange)="sortChange($event)"
+        (filterChange)="filterChange($event)"
+        ></app-data-table>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+

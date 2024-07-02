@@ -1,0 +1,83 @@
+<div class="content">
+  <div class="inner-content dashboard">
+    <div class="error" *ngIf="error && error !== ''">
+      <br>
+      {{error}}
+      <button mat-icon-button aria-label="Clear" (click)="error=null">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div fxFlex="100" fxLayout="column" fxLayoutGap="16px">
+      <div fxFlex="100" fxLayout="column" fxLayout.gt-md="row" fxLayoutGap="16px">
+        <mat-card fxFlex="100" class="card records">
+          <mat-card-content fxLayout="column" fxFlex="100" fxLayoutGap="16px">
+            <div fxLayout="column" fxLayout.gt-xs="row" fxFlex="100" fxLayoutGap="16px">
+              <div class="summary clients-registered" fxFlex="100" fxFlex.gt-xs="33.33%" routerLink="/users" [queryParams]="{ type: 'client'}">
+                <div class="summary-icon"><mat-icon>account_box</mat-icon></div>
+                <div class="summary-content">
+                  <p>Clients</p>
+                  <h3>{{totalClients}}</h3>
+                </div>
+              </div>
+              <div class="summary pending-events" fxFlex="100" fxFlex.gt-xs="33.33%" routerLink="/events">
+                <div class="summary-icon"><mat-icon>error</mat-icon></div>
+                <div class="summary-content">
+                  <p>Pending Events</p>
+                  <h3>{{totalEventsPending}}</h3>
+                </div>
+              </div>
+              <div class="summary registered-events" fxFlex="100" fxFlex.gt-xs="33.33%" routerLink="/events">
+                <div class="summary-icon"><mat-icon>event_available</mat-icon></div>
+                <div class="summary-content">
+                  <p>Registered Events</p>
+                  <h3>{{totalEventsRegistered}}</h3>
+                </div>
+              </div>
+              <div class="summary open-support-ticket" fxFlex="100" fxFlex.gt-xs="33.33%" routerLink="/support-ticket">
+                <div class="summary-icon"><mat-icon>info</mat-icon></div>
+                <div class="summary-content">
+                  <p>Open Ticket</p>
+                  <h3>{{totalSupportTicket}}</h3>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+    <div fxFlex="100" fxLayout="column" fxLayoutGap="16px">
+      <div fxFlex="100" fxLayout="column" fxLayoutGap="16px">
+        <mat-card fxFlex="100" class="map">
+          <mat-card-content fxLayout="column" fxFlex="100" >
+            <app-map-box class="app-map-box"></app-map-box>
+            <div class="map-legend">
+              <div fxLayout="column" fxLayoutGap="12px">
+                <div fxFlex="100" fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
+                  <img src="../../../../assets/img/event-pin-location.png" style="max-width: 30px;max-height: 30px;" alt="">
+                  <h5>REGISTERED</h5>
+                </div>
+                <div fxFlex="100" fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
+                  <img src="../../../../assets/img/pin-location.png" style="max-width: 30px;max-height: 30px;" alt="">
+                  <h5>PENDING</h5>
+                </div>
+              </div>
+              <!-- <div fxLayout="column" >
+                <mat-form-field
+                  appearance="outline"
+                  fxFlex="100%">
+                  <mat-label>SHOW ON MAP</mat-label>
+                  <mat-select [formControl]="eventStatusCtrl">
+                    <mat-option value="ALL">ALL</mat-option>
+                    <mat-option value="REGISTERED">REGISTERED</mat-option>
+                    <mat-option value="PENDING">PENDING</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div> -->
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+    <br>
+  </div>
+</div>

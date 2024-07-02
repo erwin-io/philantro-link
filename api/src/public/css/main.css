@@ -1,0 +1,15 @@
+
+body {
+    text-align: center;
+    padding: 40px 0;
+    background: #EBF0F5;
+    font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+  }
+
+  * {
+    font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+  }
+
+  h1,h2,h3,h4,h5,h6 {
+    margin: 0!important;
+  }

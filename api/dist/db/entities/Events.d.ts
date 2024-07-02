@@ -1,0 +1,32 @@
+import { EventImage } from "./EventImage";
+import { EventMessage } from "./EventMessage";
+import { Files } from "./Files";
+import { Users } from "./Users";
+import { Interested } from "./Interested";
+import { Responded } from "./Responded";
+import { Transactions } from "./Transactions";
+export declare class Events {
+    eventId: string;
+    eventCode: string | null;
+    dateTime: Date;
+    eventType: string;
+    eventName: string;
+    eventDesc: string | null;
+    eventLocName: string;
+    eventLocMap: object;
+    eventAssistanceItems: string[] | null;
+    eventStatus: string | null;
+    active: boolean;
+    transferType: string | null;
+    transferAccountNumber: string | null;
+    transferAccountName: string | null;
+    donationTargetAmount: string | null;
+    inProgress: boolean | null;
+    eventImages: EventImage[];
+    eventMessages: EventMessage[];
+    thumbnailFile: Files;
+    user: Users;
+    interesteds: Interested[];
+    respondeds: Responded[];
+    transactions: Transactions[];
+}

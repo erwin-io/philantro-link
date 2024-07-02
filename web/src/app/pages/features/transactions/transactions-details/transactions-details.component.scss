@@ -1,0 +1,84 @@
+
+::ng-deep {
+.transaction-container {
+  display: flex;
+  gap: 20px;
+
+.transaction-details, .uploading-items, .from-section {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  flex: 1;
+}
+
+.amount-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.amount-section h2 {
+  margin: 0;
+}
+
+.pending-approval {
+  color: orange;
+}
+
+.transaction-info p, .transaction-details-body p, .transaction-categories p, .from-section p {
+  margin: 5px 0;
+}
+
+.label-important {
+  background-color: red;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+.another-label {
+  background-color: grey;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+.green-dot {
+  color: green;
+}
+
+.uploading-items .file-list {
+  margin-top: 10px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+
+.file-item img {
+  width: 20px;
+  margin-right: 10px;
+}
+
+.uploaded {
+  margin-left: auto;
+  color: green;
+}
+
+.unsuccessful {
+  margin-left: auto;
+  color: red;
+}
+
+.uploading {
+  margin-left: auto;
+  color: blue;
+}
+
+}
+
+}

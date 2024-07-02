@@ -1,0 +1,97 @@
+<mat-toolbar color="#fff" class="mat-elevation-z4">
+  <button [disabled]="isLoading" style="margin-right: 10px!important;" mat-icon-button
+    matTooltip="Back"
+    routerLink="/transactions">
+    <mat-icon>
+      {{
+        isReadOnly? 'keyboard_arrow_left' : 'close'
+      }}
+    </mat-icon>
+  </button>
+  <span class="title">{{ '#' + transactionCode }}</span>
+  <span class="toolbar-item-spacer"></span>
+  <div class="toolbar-action">
+  </div>
+</mat-toolbar>
+<div class="content">
+  <div class="inner-content" fxLayout="column" >
+    <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row" fxLayoutGap="16px">
+      <div fxLayout="column" fxFlex.gt-xs="50%" fxLayoutGap="16px">
+        <mat-card fxFlex="100" class="details">
+          <mat-card-content fxFlex="100" fxLayout="column" fxLayoutGap="10px">
+            <div fxLayout="row" fxFlex="100" fxLayoutGap="5px" fxLayoutAlign="start">
+              <mat-icon>payments</mat-icon>
+              <p>Amount</p>
+            </div>
+            <h3>{{transaction?.amount | currency: 'PHP'}} PHP</h3>
+            <mat-divider></mat-divider>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <div fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">
+                <p>Transaction Date</p>
+                <h4>{{transaction?.dateTime | date: 'MMM dd, yyyy h:mm a'}}</h4>
+              </div>
+              <div fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">
+                <p>Transaction Code</p>
+                <h4>{{transaction?.transactionCode}}</h4>
+              </div>
+            </div>
+            <mat-divider></mat-divider>
+            <h4>Transaction Details</h4>
+            <mat-divider></mat-divider>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <p fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">Payment Method</p>
+              <h4 fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">{{transaction?.bank}} - {{transaction?.paymentType}}</h4>
+            </div>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <p fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">Sender Name</p>
+              <h4 fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">{{transaction?.fromAccountName}}</h4>
+            </div>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <p fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">Sender Account</p>
+              <h4 fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">{{transaction?.fromAccountNumber}}</h4>
+            </div>
+            <mat-divider></mat-divider>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <p fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">Recipient Name</p>
+              <h4 fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">{{transaction?.toAccountName}}</h4>
+            </div>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <p fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">Recipient Account</p>
+              <h4 fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">{{transaction?.toAccountNumber}}</h4>
+            </div>
+            <mat-divider></mat-divider>
+            <div fxFlex="100" fxLayout="column" fxLayout.gt-xs="row">
+              <p fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">Amount</p>
+              <h4 fxFlex="100" fxFlex.gt-xs="50%" fxLayout="column">{{transaction?.amount | currency: 'PHP'}}</h4>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div fxLayout="column" fxFlex.gt-xs="50%" fxLayoutGap="16px">
+        <mat-card fxFlex="100">
+          <mat-card-content >
+            <div fxFlex="100" fxLayout="column" fxLayoutGap="10px">
+              <h3>Event Details</h3>
+              <h3>{{transaction?.event?.eventName}}</h3>
+              <p>{{transaction?.event?.eventType}}</p>
+              <mat-divider></mat-divider>
+              <div fxFlex="100" fxLayout="column" fxLayoutAlign="start start">
+                <div fxFlex="100" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="10px">
+                  <mat-icon>person</mat-icon>
+                  <p>{{transaction?.user?.name}}</p>
+                </div>
+                <div fxFlex="100" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="10px">
+                  <mat-icon>location_on</mat-icon>
+                  <p>{{transaction?.event?.eventLocName}}</p>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+              <h4>Description</h4>
+              <p>{{transaction?.event?.eventDesc}}</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>
