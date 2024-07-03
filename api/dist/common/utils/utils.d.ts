@@ -1,3 +1,5 @@
+/// <reference types="node" />
+/// <reference types="node" />
 export declare const toPromise: <T>(data: T) => Promise<T>;
 export declare const getDbConnectionOptions: (connectionName?: string) => Promise<{
     name: string;
@@ -590,7 +592,7 @@ export declare const getDbConnectionOptions: (connectionName?: string) => Promis
     promiseLibrary?: any;
     readConcern?: any;
     maxStalenessSeconds?: number;
-    loggerLevel?: "info" | "debug" | "error" | "warn";
+    loggerLevel?: "debug" | "error" | "warn" | "info";
     checkServerIdentity?: boolean | Function;
     validateOptions?: any;
     appname?: string;

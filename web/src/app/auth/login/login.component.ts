@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { OneSignal } from 'onesignal-ngx';
 import { Users } from 'src/app/model/users';
 import { AuthService } from 'src/app/services/auth.service';
+import { LoaderService } from 'src/app/services/loader.service';
 import { OneSignalService } from 'src/app/services/one-signal.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { environment } from 'src/environments/environment.prod';
@@ -37,6 +38,7 @@ export class LoginComponent {
     private authService: AuthService,
     private storageService: StorageService,
     private oneSignalService: OneSignalService,
+    private loaderService: LoaderService,
     private snackBar: MatSnackBar,
     private router: Router) {
       // redirect to home if already logged in
@@ -56,23 +58,28 @@ export class LoginComponent {
     }
     try{
       const params = this.logInForm.value;
+      this.loaderService.show();
       this.authService.login(params)
         .subscribe(async res => {
           if (res.success) {
             this.oneSignalService.init(res.data);
             this.storageService.saveLoginProfile(res.data);
             this.authService.redirectToPage(false);
+            this.loaderService.hide();
           } else {
             this.error = Array.isArray(res.message) ? res.message[0] : res.message;
             this.snackBar.open(this.error, 'close', {panelClass: ['style-error']});
+            this.loaderService.hide();
           }
         }, async (res) => {
           this.error = res.error.message;
           this.snackBar.open(this.error, 'close', {panelClass: ['style-error']});
+          this.loaderService.hide();
         });
     } catch (e){
       this.error = Array.isArray(e.message) ? e.message[0] : e.message;
       this.snackBar.open(this.error, 'close', {panelClass: ['style-error']});
+      this.loaderService.hide();
     }
   }
 }
