@@ -109,13 +109,11 @@ export class TransactionsComponent  {
     this.getTransactionsPaginated()
   }
 
-  async getTransactionsPaginated(showProgress = true){
+  async getTransactionsPaginated(){
     try{
 
       this.isLoading = true;
-      if(showProgress === true) {
-        this.loaderService.show();
-      }
+      this.loaderService.show();
       await this.transactionService.getByAdvanceSearch({
         order: this.order,
         columnDef: this.filter,

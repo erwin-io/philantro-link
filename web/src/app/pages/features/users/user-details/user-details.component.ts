@@ -30,6 +30,7 @@ import { AccessPagesTableComponent } from '../../../../shared/access-pages-table
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { ImageViewerDialogComponent } from 'src/app/shared/image-viewer-dialog/image-viewer-dialog.component';
 import { getAge } from 'src/app/shared/utility/utility';
+import { LoaderService } from 'src/app/services/loader.service';
 
 @Component({
   selector: 'app-user-details',
@@ -74,6 +75,7 @@ export class UserDetailsComponent implements OnInit {
   constructor(
     private userService: UserService,
     private accessService: AccessService,
+    private loaderService: LoaderService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private appconfig: AppConfigService,
@@ -133,6 +135,7 @@ export class UserDetailsComponent implements OnInit {
 
   async initDetails() {
     try {
+      this.loaderService.show();
       if (this.isNew) {
         this.userForm = this.formBuilder.group(
           {
@@ -158,6 +161,7 @@ export class UserDetailsComponent implements OnInit {
           },
           { validators: this.checkPasswords }
         );
+        this.loaderService.hide();
         this.isLoading = false;
       } else {
         this.userForm = this.formBuilder.group({
@@ -184,6 +188,7 @@ export class UserDetailsComponent implements OnInit {
           pageSize: 10
         })
         ]).subscribe(([user, accessOptions])=> {
+          this.loaderService.hide();
           if(accessOptions.success) {
             this.optionsAccess = accessOptions.data.results.map(x=> {
               return { name: x.name, code: x.accessCode }
@@ -276,6 +281,7 @@ export class UserDetailsComponent implements OnInit {
       });
       await this.initAccessOptions();
     } catch(ex) {
+      this.loaderService.hide();
       this.isLoading = false;
       this.error = Array.isArray(ex.message) ? ex.message[0] : ex.message;
       this.snackBar.open(this.error, 'close', {
@@ -306,6 +312,7 @@ export class UserDetailsComponent implements OnInit {
   }
 
   async initAccessOptions() {
+    this.loaderService.show();
     this.isOptionsAccessLoading = true;
     const res = await this.accessService.getByAdvanceSearch({
       order: {},
@@ -316,6 +323,7 @@ export class UserDetailsComponent implements OnInit {
       pageIndex: 0,
       pageSize: 10
     }).toPromise();
+    this.loaderService.hide();
     this.optionsAccess = res.data.results.map(a=> { return { name: a.name, code: a.accessCode }});
     this.mapSearchAccess();
     this.isOptionsAccessLoading = false;
@@ -402,6 +410,7 @@ export class UserDetailsComponent implements OnInit {
         this.isProcessing = true;
         const params = this.formData;
         let res;
+        this.loaderService.show();
         if(this.isNew) {
           if(this.formData.userType !== "CLIENT") {
             res = await this.userService.createUsers(params).toPromise();
@@ -415,6 +424,7 @@ export class UserDetailsComponent implements OnInit {
             res = await this.userService.updateProfile(this.userCode, params).toPromise();
           }
         }
+        this.loaderService.hide();
 
         if (res.success) {
           this.snackBar.open('Saved!', 'close', {
@@ -436,6 +446,7 @@ export class UserDetailsComponent implements OnInit {
           dialogRef.close();
         }
       } catch (e) {
+        this.loaderService.hide();
         this.isProcessing = false;
         dialogRef.componentInstance.isProcessing = this.isProcessing;
         this.error = Array.isArray(e.message) ? e.message[0] : e.message;
@@ -478,6 +489,7 @@ export class UserDetailsComponent implements OnInit {
     dialogRef.componentInstance.conFirm.subscribe(async (data: any) => {
       try {
 
+        this.loaderService.show();
         const res = await this.userService.delete(this.userCode).toPromise();
         if (res.success) {
           this.snackBar.open('User deleted!', 'close', {
@@ -498,7 +510,9 @@ export class UserDetailsComponent implements OnInit {
           });
           dialogRef.close();
         }
+        this.loaderService.hide();
       } catch (e) {
+        this.loaderService.hide();
         this.isProcessing = false;
         dialogRef.componentInstance.isProcessing = this.isProcessing;
         this.error = Array.isArray(e.message) ? e.message[0] : e.message;

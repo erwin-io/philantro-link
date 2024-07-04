@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { Users } from 'src/app/model/users';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { LoaderService } from 'src/app/services/loader.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { UserService } from 'src/app/services/user.service';
 import { AlertDialogModel } from 'src/app/shared/alert-dialog/alert-dialog-model';
@@ -46,6 +47,7 @@ export class EditProfileComponent {
     private userService: UserService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
+    private loaderService: LoaderService,
     private appconfig: AppConfigService,
     private storageService: StorageService,
     private route: ActivatedRoute,
@@ -176,7 +178,9 @@ export class EditProfileComponent {
       try {
         this.isProcessing = true;
         const params = this.formData;
+        this.loaderService.show();
         const res = await this.userService.updateProfile(this.currentUserCode, params).toPromise();
+        this.loaderService.hide();
         if (res.success) {
           this.snackBar.open('Saved!', 'close', {
             panelClass: ['style-success'],
@@ -189,6 +193,7 @@ export class EditProfileComponent {
           this.user.mobileNumber = this.formData.mobileNumber;
           this.user.userProfilePic = res.data.userProfilePic;
           this.storageService.saveLoginProfile(this.user);
+          this.loaderService.hide();
           window.location.reload();
         } else {
           this.isProcessing = false;
@@ -200,8 +205,10 @@ export class EditProfileComponent {
             panelClass: ['style-error'],
           });
           dialogRef.close();
+          this.loaderService.hide();
         }
       } catch (e) {
+        this.loaderService.hide();
         this.isProcessing = false;
         dialogRef.componentInstance.isProcessing = this.isProcessing;
         this.error = Array.isArray(e.message) ? e.message[0] : e.message;

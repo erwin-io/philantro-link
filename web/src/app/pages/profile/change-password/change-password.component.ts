@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Users } from 'src/app/model/users';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { LoaderService } from 'src/app/services/loader.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { UserService } from 'src/app/services/user.service';
 import { AlertDialogModel } from 'src/app/shared/alert-dialog/alert-dialog-model';
@@ -32,6 +33,7 @@ export class ChangePasswordComponent {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private appconfig: AppConfigService,
+    private loaderService: LoaderService,
     private storageService: StorageService,
     private route: ActivatedRoute,
     public router: Router,
@@ -124,6 +126,7 @@ export class ChangePasswordComponent {
       try {
         const params = this.formData;
         this.isProcessing = true;
+        this.loaderService.show();
         let res = await this.authService.login({
           userName: this.user.userName,
           password: params.currentPassword,
@@ -159,7 +162,9 @@ export class ChangePasswordComponent {
           });
           dialogRef.close();
         }
+        this.loaderService.hide();
       } catch (e) {
+        this.loaderService.hide();
         this.isProcessing = false;
         dialogRef.componentInstance.isProcessing = this.isProcessing;
         this.error = Array.isArray(e.message) ? e.message[0] : e.message;

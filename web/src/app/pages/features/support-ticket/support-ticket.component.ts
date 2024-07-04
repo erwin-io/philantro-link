@@ -160,7 +160,7 @@ export class SupportTicketComponent  {
     this.getSupportTicketPaginated(table as any)
   }
 
-  async getSupportTicketPaginated(table: "open" | "active" | "completed" | "closed", showProgress = true){
+  async getSupportTicketPaginated(table: "open" | "active" | "completed" | "closed"){
     try{
       const findIndex = this.filter[table].findIndex(x=>x.apiNotation === "status");
       if(findIndex >= 0) {
@@ -180,9 +180,7 @@ export class SupportTicketComponent  {
       }
 
       this.isLoading = true;
-      if(showProgress === true) {
-        this.loaderService.show();
-      }
+      this.loaderService.show();
       await this.supportTicketService.getByAdvanceSearch({
         order: this.order[table],
         columnDef: this.filter[table],

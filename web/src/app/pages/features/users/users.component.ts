@@ -17,6 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Access } from 'src/app/model/access.model';
 import { convertNotationToObject } from 'src/app/shared/utility/utility';
 import { UsersTableColumn } from 'src/app/shared/utility/table';
+import { LoaderService } from 'src/app/services/loader.service';
 
 @Component({
   selector: 'app-users',
@@ -56,6 +57,7 @@ export class UsersComponent implements OnInit {
     public appConfig: AppConfigService,
     private storageService: StorageService,
     private route: ActivatedRoute,
+    private loaderService: LoaderService,
     public router: Router) {
       this.dataSource = new MatTableDataSource([]);
       if(this.route.snapshot.data) {
@@ -119,12 +121,14 @@ export class UsersComponent implements OnInit {
   getUsersPaginated(){
     try{
       this.isLoading = true;
+      this.loaderService.show();
       this.userService.getUsersByAdvanceSearch({
         order: this.order,
         columnDef: this.filter,
         pageIndex: this.pageIndex, pageSize: this.pageSize
       })
       .subscribe(async res => {
+        this.loaderService.hide();
         if(res.success){
           let data = res.data.results.map((d)=>{
             return {
@@ -144,17 +148,20 @@ export class UsersComponent implements OnInit {
           this.isLoading = false;
         }
         else{
+          this.loaderService.hide();
           this.error = Array.isArray(res.message) ? res.message[0] : res.message;
           this.snackBar.open(this.error, 'close', {panelClass: ['style-error']});
           this.isLoading = false;
         }
       }, async (err) => {
+        this.loaderService.hide();
         this.error = Array.isArray(err.message) ? err.message[0] : err.message;
         this.snackBar.open(this.error, 'close', {panelClass: ['style-error']});
         this.isLoading = false;
       });
     }
     catch(e){
+      this.loaderService.hide();
       this.error = Array.isArray(e.message) ? e.message[0] : e.message;
       this.snackBar.open(this.error, 'close', {panelClass: ['style-error']});
     }

@@ -183,7 +183,7 @@ export class EventsComponent  {
     this.getEventsPaginated(table as any)
   }
 
-  async getEventsPaginated(table: "pending" | "approved" | "completed" | "rejected" | "cancelled", showProgress = true){
+  async getEventsPaginated(table: "pending" | "approved" | "completed" | "rejected" | "cancelled"){
     try{
       const findIndex = this.filter[table].findIndex(x=>x.apiNotation === "eventStatus");
       if(findIndex >= 0) {
@@ -203,9 +203,7 @@ export class EventsComponent  {
       }
 
       this.isLoading = true;
-      if(showProgress === true) {
-        this.loaderService.show();
-      }
+      this.loaderService.show();
       await this.eventService.getByAdvanceSearch({
         order: this.order[table],
         columnDef: this.filter[table],

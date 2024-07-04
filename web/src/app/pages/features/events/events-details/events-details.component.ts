@@ -156,7 +156,9 @@ export class EventsDetailsComponent {
     this.isProcessing = true;
     dialogRef.componentInstance.isProcessing = this.isProcessing;
     try {
+      this.loaderService.show();
       let res = await this.eventService.updateStatus(this.eventCode, { status }).toPromise();
+      this.loaderService.hide();
       if (res.success) {
         this.snackBar.open('Successfully updated!', 'close', {
           panelClass: ['style-success'],
@@ -179,6 +181,7 @@ export class EventsDetailsComponent {
         dialogRef.close();
       }
     } catch (e) {
+      this.loaderService.hide();
       this.isProcessing = false;
       dialogRef.componentInstance.isProcessing = this.isProcessing;
       this.error = Array.isArray(e.message) ? e.message[0] : e.message;
