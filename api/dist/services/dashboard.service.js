@@ -118,6 +118,110 @@ let DashboardService = class DashboardService {
             return Object.assign({}, x);
         });
     }
+    async getClientEventFeed(params) {
+        const query = `
+      WITH radius_data AS (
+        SELECT "EventId" as "eventId",
+              earth_distance(
+                ll_to_earth(${params.latitude}::float, ${params.longitude}::float),
+                ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
+              ) AS distance
+        FROM dbo."Events"
+        WHERE "EventType" IN(${params.eventType.length > 1
+            ? `'` + params.eventType.join(`','`) + `'`
+            : `'` + params.eventType + `'`}) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${params.latitude}::float, ${params.longitude}::float), ${params.radius}::float) @> ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
+          AND earth_distance(ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float), ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)) <= ${params.radius}::float
+      ),
+      row_count AS (
+        SELECT COUNT(*) AS cnt FROM radius_data
+      ),
+      sampled_data AS (
+        SELECT *
+        FROM radius_data
+        ORDER BY distance,random() ASC
+        LIMIT ${params.limit <= 0 || isNaN(Number(params.limit))
+            ? `CASE
+                WHEN (SELECT cnt FROM row_count) > 500 THEN (SELECT CEIL(0.1 * cnt) FROM row_count)
+                ELSE (SELECT cnt FROM row_count)
+              END`
+            : params.limit + ` OFFSET ${params.skip}`}
+      )
+      SELECT *
+      FROM sampled_data`;
+        const eventIds = await this.eventsRepo
+            .query(query)
+            .then((res) => res.map((e) => e["eventId"]));
+        const result = await this.eventsRepo.find({
+            where: {
+                eventId: (0, typeorm_2.In)(eventIds),
+            },
+            relations: {
+                thumbnailFile: true,
+                user: {
+                    userProfilePic: {
+                        file: true,
+                    },
+                },
+            },
+        });
+        return result.map((x) => {
+            var _a;
+            (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
+            return Object.assign({}, x);
+        });
+    }
+    async getClientHelpFeed(params) {
+        const query = `
+      WITH radius_data AS (
+        SELECT "EventId" as "eventId",
+              earth_distance(
+                ll_to_earth(${params.latitude}::float, ${params.longitude}::float),
+                ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
+              ) AS distance
+        FROM dbo."Events"
+        WHERE "EventType" = 'ASSISTANCE' AND ("EventAssistanceItems" && ARRAY[${params.helpType.length > 1
+            ? `'` + params.helpType.join(`','`) + `'`
+            : `'` + params.helpType + `'`}]::varchar[]) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${params.latitude}::float, ${params.longitude}::float), ${params.radius}::float) @> ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
+          AND earth_distance(ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float), ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)) <= ${params.radius}::float
+      ),
+      row_count AS (
+        SELECT COUNT(*) AS cnt FROM radius_data
+      ),
+      sampled_data AS (
+        SELECT *
+        FROM radius_data
+        ORDER BY distance,random() ASC
+        LIMIT ${params.limit <= 0 || isNaN(Number(params.limit))
+            ? `CASE
+                WHEN (SELECT cnt FROM row_count) > 500 THEN (SELECT CEIL(0.1 * cnt) FROM row_count)
+                ELSE (SELECT cnt FROM row_count)
+              END`
+            : params.limit + ` OFFSET ${params.skip}`}
+      )
+      SELECT *
+      FROM sampled_data`;
+        const eventIds = await this.eventsRepo
+            .query(query)
+            .then((res) => res.map((e) => e["eventId"]));
+        const result = await this.eventsRepo.find({
+            where: {
+                eventId: (0, typeorm_2.In)(eventIds),
+            },
+            relations: {
+                thumbnailFile: true,
+                user: {
+                    userProfilePic: {
+                        file: true,
+                    },
+                },
+            },
+        });
+        return result.map((x) => {
+            var _a;
+            (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
+            return Object.assign({}, x);
+        });
+    }
 };
 DashboardService = __decorate([
     (0, common_1.Injectable)(),

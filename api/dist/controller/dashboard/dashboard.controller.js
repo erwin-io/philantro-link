@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DashboardController = exports.EventsByGeoDto = void 0;
+exports.DashboardController = exports.ClientHelpFeedDto = exports.ClientEventFeedDto = exports.EventsByGeoDto = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
@@ -41,6 +41,98 @@ __decorate([
     __metadata("design:type", String)
 ], EventsByGeoDto.prototype, "radius", void 0);
 exports.EventsByGeoDto = EventsByGeoDto;
+class ClientEventFeedDto {
+    constructor() {
+        this.latitude = 0;
+        this.longitude = 0;
+        this.radius = 0;
+        this.skip = 0;
+        this.limit = 10;
+    }
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientEventFeedDto.prototype, "latitude", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientEventFeedDto.prototype, "longitude", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientEventFeedDto.prototype, "radius", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        isArray: true,
+        type: String,
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, eventType is required!",
+    }),
+    __metadata("design:type", Array)
+], ClientEventFeedDto.prototype, "eventType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientEventFeedDto.prototype, "skip", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientEventFeedDto.prototype, "limit", void 0);
+exports.ClientEventFeedDto = ClientEventFeedDto;
+class ClientHelpFeedDto {
+    constructor() {
+        this.latitude = 0;
+        this.longitude = 0;
+        this.radius = 0;
+        this.skip = 0;
+        this.limit = 10;
+    }
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientHelpFeedDto.prototype, "latitude", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientHelpFeedDto.prototype, "longitude", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientHelpFeedDto.prototype, "radius", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        isArray: true,
+        type: String,
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, helpType is required!",
+    }),
+    __metadata("design:type", Array)
+], ClientHelpFeedDto.prototype, "helpType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientHelpFeedDto.prototype, "skip", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], ClientHelpFeedDto.prototype, "limit", void 0);
+exports.ClientHelpFeedDto = ClientHelpFeedDto;
 let DashboardController = class DashboardController {
     constructor(dashboardService) {
         this.dashboardService = dashboardService;
@@ -71,6 +163,32 @@ let DashboardController = class DashboardController {
             return res;
         }
     }
+    async getClientEventFeed(params) {
+        const res = {};
+        try {
+            res.data = await this.dashboardService.getClientEventFeed(params);
+            res.success = true;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async getClientHelpFeed(params) {
+        const res = {};
+        try {
+            res.data = await this.dashboardService.getClientHelpFeed(params);
+            res.success = true;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
 };
 __decorate([
     (0, common_1.Get)("/getDashboardSummary"),
@@ -85,6 +203,20 @@ __decorate([
     __metadata("design:paramtypes", [EventsByGeoDto]),
     __metadata("design:returntype", Promise)
 ], DashboardController.prototype, "getEventsByGeo", null);
+__decorate([
+    (0, common_1.Post)("/getClientEventFeed"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ClientEventFeedDto]),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "getClientEventFeed", null);
+__decorate([
+    (0, common_1.Post)("/getClientHelpFeed"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ClientHelpFeedDto]),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "getClientHelpFeed", null);
 DashboardController = __decorate([
     (0, common_1.Controller)("dashboard"),
     (0, swagger_1.ApiTags)("dashboard"),

@@ -6,9 +6,27 @@ export declare class EventsByGeoDto {
     longitude: string;
     radius: string;
 }
+export declare class ClientEventFeedDto {
+    latitude: number;
+    longitude: number;
+    radius: number;
+    eventType: string[];
+    skip: number;
+    limit: number;
+}
+export declare class ClientHelpFeedDto {
+    latitude: number;
+    longitude: number;
+    radius: number;
+    helpType: string[];
+    skip: number;
+    limit: number;
+}
 export declare class DashboardController {
     private readonly dashboardService;
     constructor(dashboardService: DashboardService);
     getDashboardUsers(): Promise<ApiResponseModel<any>>;
     getEventsByGeo(params: EventsByGeoDto): Promise<ApiResponseModel<any>>;
+    getClientEventFeed(params: ClientEventFeedDto): Promise<ApiResponseModel<any>>;
+    getClientHelpFeed(params: ClientHelpFeedDto): Promise<ApiResponseModel<any>>;
 }
