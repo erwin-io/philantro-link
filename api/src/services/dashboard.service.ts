@@ -164,15 +164,22 @@ export class DashboardService {
             : params.limit + ` OFFSET ${params.skip}`
         }
       )
-      SELECT *
+      SELECT *,(SELECT COUNT(*) FROM radius_data) AS total
       FROM sampled_data`;
 
-    const eventIds = await this.eventsRepo
+    const events: { eventId: string; total: string }[] = await this.eventsRepo
       .query(query)
-      .then((res) => res.map((e) => e["eventId"]));
+      .then((res) =>
+        res.map((e) => {
+          return {
+            eventId: e["eventId"],
+            total: e["total"],
+          };
+        })
+      );
     const result = await this.eventsRepo.find({
       where: {
-        eventId: In(eventIds),
+        eventId: In(events.map((x) => x.eventId)),
       },
       relations: {
         thumbnailFile: true,
@@ -184,12 +191,15 @@ export class DashboardService {
       },
     });
 
-    return result.map((x) => {
-      delete x.user?.password;
-      return {
-        ...x,
-      };
-    });
+    return {
+      results: result.map((x) => {
+        delete x.user?.password;
+        return {
+          ...x,
+        };
+      }),
+      total: events[0]?.total ?? 0,
+    };
   }
 
   async getClientHelpFeed(params: ClientHelpFeedDto) {
@@ -232,15 +242,22 @@ export class DashboardService {
             : params.limit + ` OFFSET ${params.skip}`
         }
       )
-      SELECT *
+      SELECT *,(SELECT COUNT(*) FROM radius_data) AS total
       FROM sampled_data`;
 
-    const eventIds = await this.eventsRepo
+    const events: { eventId: string; total: string }[] = await this.eventsRepo
       .query(query)
-      .then((res) => res.map((e) => e["eventId"]));
+      .then((res) =>
+        res.map((e) => {
+          return {
+            eventId: e["eventId"],
+            total: e["total"],
+          };
+        })
+      );
     const result = await this.eventsRepo.find({
       where: {
-        eventId: In(eventIds),
+        eventId: In(events.map((x) => x.eventId)),
       },
       relations: {
         thumbnailFile: true,
@@ -252,11 +269,14 @@ export class DashboardService {
       },
     });
 
-    return result.map((x) => {
-      delete x.user?.password;
-      return {
-        ...x,
-      };
-    });
+    return {
+      results: result.map((x) => {
+        delete x.user?.password;
+        return {
+          ...x,
+        };
+      }),
+      total: events[0]?.total ?? 0,
+    };
   }
 }

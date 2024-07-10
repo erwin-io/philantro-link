@@ -119,6 +119,7 @@ let DashboardService = class DashboardService {
         });
     }
     async getClientEventFeed(params) {
+        var _a, _b;
         const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
@@ -146,14 +147,19 @@ let DashboardService = class DashboardService {
               END`
             : params.limit + ` OFFSET ${params.skip}`}
       )
-      SELECT *
+      SELECT *,(SELECT COUNT(*) FROM radius_data) AS total
       FROM sampled_data`;
-        const eventIds = await this.eventsRepo
+        const events = await this.eventsRepo
             .query(query)
-            .then((res) => res.map((e) => e["eventId"]));
+            .then((res) => res.map((e) => {
+            return {
+                eventId: e["eventId"],
+                total: e["total"],
+            };
+        }));
         const result = await this.eventsRepo.find({
             where: {
-                eventId: (0, typeorm_2.In)(eventIds),
+                eventId: (0, typeorm_2.In)(events.map((x) => x.eventId)),
             },
             relations: {
                 thumbnailFile: true,
@@ -164,13 +170,17 @@ let DashboardService = class DashboardService {
                 },
             },
         });
-        return result.map((x) => {
-            var _a;
-            (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
-            return Object.assign({}, x);
-        });
+        return {
+            results: result.map((x) => {
+                var _a;
+                (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
+                return Object.assign({}, x);
+            }),
+            total: (_b = (_a = events[0]) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0,
+        };
     }
     async getClientHelpFeed(params) {
+        var _a, _b;
         const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
@@ -198,14 +208,19 @@ let DashboardService = class DashboardService {
               END`
             : params.limit + ` OFFSET ${params.skip}`}
       )
-      SELECT *
+      SELECT *,(SELECT COUNT(*) FROM radius_data) AS total
       FROM sampled_data`;
-        const eventIds = await this.eventsRepo
+        const events = await this.eventsRepo
             .query(query)
-            .then((res) => res.map((e) => e["eventId"]));
+            .then((res) => res.map((e) => {
+            return {
+                eventId: e["eventId"],
+                total: e["total"],
+            };
+        }));
         const result = await this.eventsRepo.find({
             where: {
-                eventId: (0, typeorm_2.In)(eventIds),
+                eventId: (0, typeorm_2.In)(events.map((x) => x.eventId)),
             },
             relations: {
                 thumbnailFile: true,
@@ -216,11 +231,14 @@ let DashboardService = class DashboardService {
                 },
             },
         });
-        return result.map((x) => {
-            var _a;
-            (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
-            return Object.assign({}, x);
-        });
+        return {
+            results: result.map((x) => {
+                var _a;
+                (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
+                return Object.assign({}, x);
+            }),
+            total: (_b = (_a = events[0]) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0,
+        };
     }
 };
 DashboardService = __decorate([

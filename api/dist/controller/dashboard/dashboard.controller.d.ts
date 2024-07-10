@@ -27,6 +27,12 @@ export declare class DashboardController {
     constructor(dashboardService: DashboardService);
     getDashboardUsers(): Promise<ApiResponseModel<any>>;
     getEventsByGeo(params: EventsByGeoDto): Promise<ApiResponseModel<any>>;
-    getClientEventFeed(params: ClientEventFeedDto): Promise<ApiResponseModel<any>>;
-    getClientHelpFeed(params: ClientHelpFeedDto): Promise<ApiResponseModel<any>>;
+    getClientEventFeed(params: ClientEventFeedDto): Promise<ApiResponseModel<{
+        results: any[];
+        total: any;
+    }>>;
+    getClientHelpFeed(params: ClientHelpFeedDto): Promise<ApiResponseModel<{
+        results: any[];
+        total: any;
+    }>>;
 }

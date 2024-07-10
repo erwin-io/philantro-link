@@ -141,7 +141,7 @@ export class DashboardController {
   @Post("/getClientEventFeed")
   //   @UseGuards(JwtAuthGuard)
   async getClientEventFeed(@Body() params: ClientEventFeedDto) {
-    const res: ApiResponseModel<any> = {} as any;
+    const res: ApiResponseModel<{ results: any[]; total: any }> = {} as any;
     try {
       res.data = await this.dashboardService.getClientEventFeed(params);
       res.success = true;
@@ -156,7 +156,7 @@ export class DashboardController {
   @Post("/getClientHelpFeed")
   //   @UseGuards(JwtAuthGuard)
   async getClientHelpFeed(@Body() params: ClientHelpFeedDto) {
-    const res: ApiResponseModel<any> = {} as any;
+    const res: ApiResponseModel<{ results: any[]; total: any }> = {} as any;
     try {
       res.data = await this.dashboardService.getClientHelpFeed(params);
       res.success = true;
