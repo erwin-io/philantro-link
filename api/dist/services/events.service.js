@@ -655,14 +655,30 @@ let EventsService = class EventsService {
                 var _a;
                 return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
             });
-            if (!interested &&
-                user.userCode !== ((_a = event.user) === null || _a === void 0 ? void 0 : _a.userCode) &&
+            if (user.userCode !== ((_a = event.user) === null || _a === void 0 ? void 0 : _a.userCode) &&
                 user.userType === user_type_constant_1.USER_TYPE.CLIENT) {
-                interested = new Interested_1.Interested();
-                interested.event = event;
-                interested.user = user;
-                interested = await entityManager.save(Interested_1.Interested, interested);
-                interestedCount = Number(interestedCount) + 1;
+                if (!interested) {
+                    interested = new Interested_1.Interested();
+                    interested.event = event;
+                    interested.user = user;
+                    interested = await entityManager.save(Interested_1.Interested, interested);
+                    interestedCount = interestedCount && !isNaN(Number(interestedCount)) ? Number(interestedCount) + 1 : 1;
+                }
+                else {
+                    interested = await entityManager.findOne(Interested_1.Interested, {
+                        where: {
+                            user: {
+                                userCode: dto.userCode,
+                            },
+                            event: {
+                                eventCode: eventCode,
+                            },
+                        },
+                        relations: {},
+                    });
+                    await entityManager.delete(Interested_1.Interested, interested);
+                    interestedCount = interestedCount && !isNaN(Number(interestedCount)) ? Number(interestedCount) - 1 : 0;
+                }
             }
             (_b = event.user) === null || _b === void 0 ? true : delete _b.password;
             (_c = event.user) === null || _c === void 0 ? true : delete _c.password;
@@ -716,14 +732,30 @@ let EventsService = class EventsService {
                 var _a;
                 return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
             });
-            if (!responded &&
-                user.userCode !== ((_a = event.user) === null || _a === void 0 ? void 0 : _a.userCode) &&
+            if (user.userCode !== ((_a = event.user) === null || _a === void 0 ? void 0 : _a.userCode) &&
                 user.userType === user_type_constant_1.USER_TYPE.CLIENT) {
-                responded = new Responded_1.Responded();
-                responded.event = event;
-                responded.user = user;
-                responded = await entityManager.save(Responded_1.Responded, responded);
-                respondedCount = Number(respondedCount) + 1;
+                if (!responded) {
+                    responded = new Responded_1.Responded();
+                    responded.event = event;
+                    responded.user = user;
+                    responded = await entityManager.save(Responded_1.Responded, responded);
+                    respondedCount = respondedCount && !isNaN(Number(respondedCount)) ? Number(respondedCount) + 1 : 1;
+                }
+                else {
+                    responded = await entityManager.findOne(Responded_1.Responded, {
+                        where: {
+                            user: {
+                                userCode: dto.userCode,
+                            },
+                            event: {
+                                eventCode: eventCode,
+                            },
+                        },
+                        relations: {},
+                    });
+                    await entityManager.delete(Responded_1.Responded, responded);
+                    respondedCount = respondedCount && !isNaN(Number(respondedCount)) ? Number(respondedCount) - 1 : 0;
+                }
             }
             (_b = event.user) === null || _b === void 0 ? true : delete _b.password;
             (_c = event.user) === null || _c === void 0 ? true : delete _c.password;

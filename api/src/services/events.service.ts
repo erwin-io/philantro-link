@@ -797,16 +797,31 @@ export class EventsService {
         .then((res) => {
           return res[0] ? res[0]["count"] ?? 0 : 0;
         });
-      if (
-        !interested &&
+      
+      if(
         user.userCode !== event.user?.userCode &&
-        user.userType === USER_TYPE.CLIENT
-      ) {
-        interested = new Interested();
-        interested.event = event;
-        interested.user = user;
-        interested = await entityManager.save(Interested, interested);
-        interestedCount = Number(interestedCount) + 1;
+        user.userType === USER_TYPE.CLIENT) {
+          if ( !interested ) {
+            interested = new Interested();
+            interested.event = event;
+            interested.user = user;
+            interested = await entityManager.save(Interested, interested);
+            interestedCount = interestedCount && !isNaN(Number(interestedCount)) ? Number(interestedCount) + 1 : 1;
+          } else {
+            interested = await entityManager.findOne(Interested, {
+              where: {
+                user: {
+                  userCode: dto.userCode,
+                },
+                event: {
+                  eventCode: eventCode,
+                },
+              },
+              relations: {},
+            });
+            await entityManager.delete(Interested, interested);
+            interestedCount = interestedCount && !isNaN(Number(interestedCount)) ? Number(interestedCount) - 1 : 0;
+          }
       }
       delete event.user?.password;
       delete event.user?.password;
@@ -864,16 +879,30 @@ export class EventsService {
         .then((res) => {
           return res[0] ? res[0]["count"] ?? 0 : 0;
         });
-      if (
-        !responded &&
+      if(
         user.userCode !== event.user?.userCode &&
-        user.userType === USER_TYPE.CLIENT
-      ) {
-        responded = new Responded();
-        responded.event = event;
-        responded.user = user;
-        responded = await entityManager.save(Responded, responded);
-        respondedCount = Number(respondedCount) + 1;
+        user.userType === USER_TYPE.CLIENT) {
+          if ( !responded ) {
+            responded = new Responded();
+            responded.event = event;
+            responded.user = user;
+            responded = await entityManager.save(Responded, responded);
+            respondedCount = respondedCount && !isNaN(Number(respondedCount)) ? Number(respondedCount) + 1 : 1;
+          } else {
+            responded = await entityManager.findOne(Responded, {
+              where: {
+                user: {
+                  userCode: dto.userCode,
+                },
+                event: {
+                  eventCode: eventCode,
+                },
+              },
+              relations: {},
+            });
+            await entityManager.delete(Responded, responded);
+            respondedCount = respondedCount && !isNaN(Number(respondedCount)) ? Number(respondedCount) - 1 : 0;
+          }
       }
       delete event.user?.password;
       delete event.user?.password;
