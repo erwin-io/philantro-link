@@ -279,6 +279,7 @@ let TransactionsService = class TransactionsService {
                         transactions.referenceCode = (_k = (_j = result === null || result === void 0 ? void 0 : result.data) === null || _j === void 0 ? void 0 : _j.data) === null || _k === void 0 ? void 0 : _k.id;
                         transactions = await entityManager.save(Transactions_1.Transactions, transactions);
                         return {
+                            transactions,
                             id: (_m = (_l = result === null || result === void 0 ? void 0 : result.data) === null || _l === void 0 ? void 0 : _l.data) === null || _m === void 0 ? void 0 : _m.id,
                             checkout_url,
                             payment_intent: {
@@ -292,6 +293,7 @@ let TransactionsService = class TransactionsService {
                         transactions.referenceCode = (_p = (_o = result === null || result === void 0 ? void 0 : result.data) === null || _o === void 0 ? void 0 : _o.data) === null || _p === void 0 ? void 0 : _p.id;
                         transactions = await entityManager.save(Transactions_1.Transactions, transactions);
                         return {
+                            transactions,
                             id: (_r = (_q = result === null || result === void 0 ? void 0 : result.data) === null || _q === void 0 ? void 0 : _q.data) === null || _r === void 0 ? void 0 : _r.id,
                             checkout_url,
                             paid: payments && payments.length > 0,

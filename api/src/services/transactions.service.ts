@@ -353,6 +353,7 @@ export class TransactionsService {
                 transactions
               );
               return {
+                transactions,
                 id: result?.data?.data?.id,
                 checkout_url,
                 payment_intent: {
@@ -368,6 +369,7 @@ export class TransactionsService {
                 transactions
               );
               return {
+                transactions,
                 id: result?.data?.data?.id,
                 checkout_url,
                 paid: payments && payments.length > 0,

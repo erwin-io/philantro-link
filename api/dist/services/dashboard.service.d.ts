@@ -43,6 +43,9 @@ export declare class DashboardService {
     }[]>;
     getClientEventFeed(params: ClientEventFeedDto): Promise<{
         results: {
+            interested: number;
+            responded: number;
+            raisedDonation: number;
             eventId: string;
             eventCode: string;
             dateTime: Date;

@@ -75,6 +75,7 @@ export declare class TransactionsService {
         userId: any;
         eventId: any;
     }): Promise<{
+        transactions: Transactions;
         id: any;
         checkout_url: any;
         payment_intent: {
@@ -83,6 +84,7 @@ export declare class TransactionsService {
         };
         paid: boolean;
     } | {
+        transactions: Transactions;
         id: any;
         checkout_url: any;
         paid: boolean;

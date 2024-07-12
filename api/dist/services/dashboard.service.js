@@ -123,6 +123,7 @@ let DashboardService = class DashboardService {
         const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
+        "DonationTargetAmount" as "donationTargetAmount",
               earth_distance(
                 ll_to_earth(${params.latitude}::float, ${params.longitude}::float),
                 ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
@@ -136,10 +137,42 @@ let DashboardService = class DashboardService {
       row_count AS (
         SELECT COUNT(*) AS cnt FROM radius_data
       ),
+      interested AS (
+        SELECT
+        "EventId" as "eventId",
+        COALESCE(COUNT(*),0) AS total
+        FROM
+        dbo."Interested" group by "EventId"
+      ),
+      responded AS (
+        SELECT
+        "EventId" as "eventId",
+        COALESCE(COUNT(*),0) AS total
+        FROM
+        dbo."Responded" group by "EventId"
+
+      ),
+      donation AS (
+        SELECT 
+        "EventId" as "eventId",
+        COALESCE(SUM("Amount"),0) as total
+        FROM dbo."Transactions" 
+        WHERE "Status" = 'COMPLETED'
+        GROUP BY "EventId"
+
+      ),
       sampled_data AS (
-        SELECT *
-        FROM radius_data
-        ORDER BY distance,random() ASC
+        SELECT 
+        rd.*,
+        COALESCE(i.total,0) as interested,
+        COALESCE(r.total,0) as responded,
+        COALESCE(d.total,0) as "raisedDonation"
+        FROM
+        radius_data rd
+        left join interested as i ON rd."eventId" = i."eventId" 
+        left join responded as r ON rd."eventId" = r."eventId" 
+	      left join donation as d ON rd."eventId" = d."eventId" 
+        ORDER BY rd.distance,random() ASC
         LIMIT ${params.limit <= 0 || isNaN(Number(params.limit))
             ? `CASE
                 WHEN (SELECT cnt FROM row_count) > 500 THEN (SELECT CEIL(0.1 * cnt) FROM row_count)
@@ -149,12 +182,13 @@ let DashboardService = class DashboardService {
       )
       SELECT *,(SELECT COUNT(*) FROM radius_data) AS total
       FROM sampled_data`;
-        const events = await this.eventsRepo
-            .query(query)
-            .then((res) => res.map((e) => {
+        const events = await this.eventsRepo.query(query).then((res) => res.map((e) => {
             return {
                 eventId: e["eventId"],
                 total: e["total"],
+                interested: e["interested"],
+                responded: e["responded"],
+                raisedDonation: e["raisedDonation"],
             };
         }));
         const result = await this.eventsRepo.find({
@@ -172,9 +206,15 @@ let DashboardService = class DashboardService {
         });
         return {
             results: result.map((x) => {
-                var _a;
+                var _a, _b, _c, _d;
                 (_a = x.user) === null || _a === void 0 ? true : delete _a.password;
-                return Object.assign({}, x);
+                return Object.assign(Object.assign({}, x), { interested: events.some((e) => e.eventId === x.eventId)
+                        ? Number((_b = events.find((e) => e.eventId === x.eventId)) === null || _b === void 0 ? void 0 : _b.interested)
+                        : 0, responded: events.some((e) => e.eventId === x.eventId)
+                        ? Number((_c = events.find((e) => e.eventId === x.eventId)) === null || _c === void 0 ? void 0 : _c.responded)
+                        : 0, raisedDonation: events.some((e) => e.eventId === x.eventId)
+                        ? Number((_d = events.find((e) => e.eventId === x.eventId)) === null || _d === void 0 ? void 0 : _d.raisedDonation)
+                        : 0 });
             }),
             total: (_b = (_a = events[0]) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0,
         };

@@ -128,6 +128,7 @@ export class DashboardService {
     const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
+        "DonationTargetAmount" as "donationTargetAmount",
               earth_distance(
                 ll_to_earth(${params.latitude}::float, ${
       params.longitude
@@ -151,10 +152,42 @@ export class DashboardService {
       row_count AS (
         SELECT COUNT(*) AS cnt FROM radius_data
       ),
+      interested AS (
+        SELECT
+        "EventId" as "eventId",
+        COALESCE(COUNT(*),0) AS total
+        FROM
+        dbo."Interested" group by "EventId"
+      ),
+      responded AS (
+        SELECT
+        "EventId" as "eventId",
+        COALESCE(COUNT(*),0) AS total
+        FROM
+        dbo."Responded" group by "EventId"
+
+      ),
+      donation AS (
+        SELECT 
+        "EventId" as "eventId",
+        COALESCE(SUM("Amount"),0) as total
+        FROM dbo."Transactions" 
+        WHERE "Status" = 'COMPLETED'
+        GROUP BY "EventId"
+
+      ),
       sampled_data AS (
-        SELECT *
-        FROM radius_data
-        ORDER BY distance,random() ASC
+        SELECT 
+        rd.*,
+        COALESCE(i.total,0) as interested,
+        COALESCE(r.total,0) as responded,
+        COALESCE(d.total,0) as "raisedDonation"
+        FROM
+        radius_data rd
+        left join interested as i ON rd."eventId" = i."eventId" 
+        left join responded as r ON rd."eventId" = r."eventId" 
+	      left join donation as d ON rd."eventId" = d."eventId" 
+        ORDER BY rd.distance,random() ASC
         LIMIT ${
           params.limit <= 0 || isNaN(Number(params.limit))
             ? `CASE
@@ -167,16 +200,23 @@ export class DashboardService {
       SELECT *,(SELECT COUNT(*) FROM radius_data) AS total
       FROM sampled_data`;
 
-    const events: { eventId: string; total: string }[] = await this.eventsRepo
-      .query(query)
-      .then((res) =>
-        res.map((e) => {
-          return {
-            eventId: e["eventId"],
-            total: e["total"],
-          };
-        })
-      );
+    const events: {
+      eventId: string;
+      total: string;
+      interested: string;
+      responded: string;
+      raisedDonation: string;
+    }[] = await this.eventsRepo.query(query).then((res) =>
+      res.map((e) => {
+        return {
+          eventId: e["eventId"],
+          total: e["total"],
+          interested: e["interested"],
+          responded: e["responded"],
+          raisedDonation: e["raisedDonation"],
+        };
+      })
+    );
     const result = await this.eventsRepo.find({
       where: {
         eventId: In(events.map((x) => x.eventId)),
@@ -196,6 +236,17 @@ export class DashboardService {
         delete x.user?.password;
         return {
           ...x,
+          interested: events.some((e) => e.eventId === x.eventId)
+            ? Number(events.find((e) => e.eventId === x.eventId)?.interested)
+            : 0,
+          responded: events.some((e) => e.eventId === x.eventId)
+            ? Number(events.find((e) => e.eventId === x.eventId)?.responded)
+            : 0,
+          raisedDonation: events.some((e) => e.eventId === x.eventId)
+            ? Number(
+                events.find((e) => e.eventId === x.eventId)?.raisedDonation
+              )
+            : 0,
         };
       }),
       total: events[0]?.total ?? 0,
