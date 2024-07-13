@@ -13,6 +13,7 @@ export declare class ClientEventFeedDto {
     eventType: string[];
     skip: number;
     limit: number;
+    userCode: string;
 }
 export declare class ClientHelpFeedDto {
     latitude: number;
@@ -21,6 +22,7 @@ export declare class ClientHelpFeedDto {
     helpType: string[];
     skip: number;
     limit: number;
+    userCode: string;
 }
 export declare class DashboardController {
     private readonly dashboardService;

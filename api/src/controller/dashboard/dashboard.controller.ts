@@ -70,6 +70,10 @@ export class ClientEventFeedDto {
   @ApiProperty({ type: Number })
   @IsNotEmpty()
   limit = 10;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  userCode: string;
 }
 
 export class ClientHelpFeedDto {
@@ -102,6 +106,10 @@ export class ClientHelpFeedDto {
   @ApiProperty({ type: Number })
   @IsNotEmpty()
   limit = 10;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  userCode: string;
 }
 @Controller("dashboard")
 @ApiTags("dashboard")

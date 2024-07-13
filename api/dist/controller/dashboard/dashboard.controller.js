@@ -86,6 +86,11 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Object)
 ], ClientEventFeedDto.prototype, "limit", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ClientEventFeedDto.prototype, "userCode", void 0);
 exports.ClientEventFeedDto = ClientEventFeedDto;
 class ClientHelpFeedDto {
     constructor() {
@@ -132,6 +137,11 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Object)
 ], ClientHelpFeedDto.prototype, "limit", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ClientHelpFeedDto.prototype, "userCode", void 0);
 exports.ClientHelpFeedDto = ClientHelpFeedDto;
 let DashboardController = class DashboardController {
     constructor(dashboardService) {

@@ -12,6 +12,7 @@ import { SupportTicket } from "src/db/entities/SupportTicket";
 import { Transactions } from "src/db/entities/Transactions";
 import { Users } from "src/db/entities/Users";
 import { In, Repository } from "typeorm";
+import { USER_ERROR_USER_NOT_FOUND } from "../common/constant/user-error.constant";
 
 @Injectable()
 export class DashboardService {
@@ -125,6 +126,10 @@ export class DashboardService {
   }
 
   async getClientEventFeed(params: ClientEventFeedDto) {
+    const user = await this.usersRepo.findOneBy({ userCode: params?.userCode });
+    if (!user) {
+      throw new Error(USER_ERROR_USER_NOT_FOUND);
+    }
     const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
@@ -136,11 +141,11 @@ export class DashboardService {
                 ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
               ) AS distance
         FROM dbo."Events"
-        WHERE "EventType" IN(${
-          params.eventType.length > 1
-            ? `'` + params.eventType.join(`','`) + `'`
-            : `'` + params.eventType + `'`
-        }) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${
+        WHERE "UserId" <> '${user.userId}' AND "EventType" IN(${
+      params.eventType.length > 1
+        ? `'` + params.eventType.join(`','`) + `'`
+        : `'` + params.eventType + `'`
+    }) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${
       params.latitude
     }::float, ${params.longitude}::float), ${
       params.radius
@@ -254,6 +259,10 @@ export class DashboardService {
   }
 
   async getClientHelpFeed(params: ClientHelpFeedDto) {
+    const user = await this.usersRepo.findOneBy({ userCode: params?.userCode });
+    if (!user) {
+      throw new Error(USER_ERROR_USER_NOT_FOUND);
+    }
     const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
@@ -264,11 +273,13 @@ export class DashboardService {
                 ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
               ) AS distance
         FROM dbo."Events"
-        WHERE "EventType" = 'ASSISTANCE' AND ("EventAssistanceItems" && ARRAY[${
-          params.helpType.length > 1
-            ? `'` + params.helpType.join(`','`) + `'`
-            : `'` + params.helpType + `'`
-        }]::varchar[]) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${
+        WHERE "UserId" <> '${
+          user.userId
+        }' AND "EventType" = 'ASSISTANCE' AND ("EventAssistanceItems" && ARRAY[${
+      params.helpType.length > 1
+        ? `'` + params.helpType.join(`','`) + `'`
+        : `'` + params.helpType + `'`
+    }]::varchar[]) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${
       params.latitude
     }::float, ${params.longitude}::float), ${
       params.radius

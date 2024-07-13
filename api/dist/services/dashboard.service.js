@@ -22,6 +22,7 @@ const SupportTicket_1 = require("../db/entities/SupportTicket");
 const Transactions_1 = require("../db/entities/Transactions");
 const Users_1 = require("../db/entities/Users");
 const typeorm_2 = require("typeorm");
+const user_error_constant_1 = require("../common/constant/user-error.constant");
 let DashboardService = class DashboardService {
     constructor(usersRepo, eventsRepo, supportTicketRepo, transactionsRepo) {
         this.usersRepo = usersRepo;
@@ -120,6 +121,10 @@ let DashboardService = class DashboardService {
     }
     async getClientEventFeed(params) {
         var _a, _b;
+        const user = await this.usersRepo.findOneBy({ userCode: params === null || params === void 0 ? void 0 : params.userCode });
+        if (!user) {
+            throw new Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
+        }
         const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
@@ -129,7 +134,7 @@ let DashboardService = class DashboardService {
                 ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
               ) AS distance
         FROM dbo."Events"
-        WHERE "EventType" IN(${params.eventType.length > 1
+        WHERE "UserId" <> '${user.userId}' AND "EventType" IN(${params.eventType.length > 1
             ? `'` + params.eventType.join(`','`) + `'`
             : `'` + params.eventType + `'`}) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${params.latitude}::float, ${params.longitude}::float), ${params.radius}::float) @> ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
           AND earth_distance(ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float), ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)) <= ${params.radius}::float
@@ -221,6 +226,10 @@ let DashboardService = class DashboardService {
     }
     async getClientHelpFeed(params) {
         var _a, _b;
+        const user = await this.usersRepo.findOneBy({ userCode: params === null || params === void 0 ? void 0 : params.userCode });
+        if (!user) {
+            throw new Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
+        }
         const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",
@@ -229,7 +238,7 @@ let DashboardService = class DashboardService {
                 ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
               ) AS distance
         FROM dbo."Events"
-        WHERE "EventType" = 'ASSISTANCE' AND ("EventAssistanceItems" && ARRAY[${params.helpType.length > 1
+        WHERE "UserId" <> '${user.userId}' AND "EventType" = 'ASSISTANCE' AND ("EventAssistanceItems" && ARRAY[${params.helpType.length > 1
             ? `'` + params.helpType.join(`','`) + `'`
             : `'` + params.helpType + `'`}]::varchar[]) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${params.latitude}::float, ${params.longitude}::float), ${params.radius}::float) @> ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
           AND earth_distance(ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float), ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)) <= ${params.radius}::float
