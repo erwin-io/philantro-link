@@ -18,6 +18,9 @@ export declare class EventsService {
         columnDef: any;
     }): Promise<{
         results: {
+            interested: number;
+            responded: number;
+            raisedDonation: number;
             eventId: string;
             eventCode: string;
             dateTime: Date;

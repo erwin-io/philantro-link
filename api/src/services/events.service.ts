@@ -57,7 +57,7 @@ export class EventsService {
     const take = Number(pageSize);
 
     const condition = columnDefToTypeORMCondition(columnDef);
-    const [results, total] = await Promise.all([
+    const [results, total, others] = await Promise.all([
       this.eventRepo.find({
         where: {
           ...condition,
@@ -81,12 +81,93 @@ export class EventsService {
           ...condition,
         },
       }),
+      this.eventRepo
+        .find({
+          where: {
+            ...condition,
+          },
+          skip,
+          take,
+          order,
+          relations: {
+            user: {
+              userProfilePic: {
+                file: true,
+              },
+            },
+            eventImages: {
+              file: true,
+            },
+          },
+        })
+        .then(async (res) => {
+          const otherQuery = `
+          WITH records AS (select "EventId" as "eventId" from dbo."Events" WHERE "EventId" IN(${
+            res.length > 0 ? res.map((x) => x.eventId).join(",") : 0
+          })
+            ),
+      interested AS (
+        SELECT
+        "EventId" as "eventId",
+        COALESCE(COUNT(*),0) AS total
+        FROM
+        dbo."Interested"
+         group by "EventId"
+      ),
+      responded AS (
+        SELECT
+        "EventId" as "eventId",
+        COALESCE(COUNT(*),0) AS total
+        FROM
+        dbo."Responded" 
+        group by "EventId"
+      ),
+      donation AS (
+        SELECT 
+        "EventId" as "eventId",
+        COALESCE(SUM("Amount"),0) as total
+        FROM dbo."Transactions" 
+        WHERE "Status" = 'COMPLETED'
+        GROUP BY "EventId"
+
+      ) select rec."eventId", 
+       COALESCE(i.total, 0) as interested, 
+       COALESCE(r.total, 0) as responded, 
+       COALESCE(d.total, 0) as "raisedDonation" 
+       from records rec 
+       LEFT JOIn interested i ON rec."eventId" = i."eventId"
+       LEFT JOIn responded r ON rec."eventId" = r."eventId"
+       LEFT JOIn donation d ON rec."eventId" = d."eventId"
+       `;
+          return await this.eventRepo.query(otherQuery).then((_) => {
+            _.map((e) => {
+              return {
+                eventId: e["eventId"],
+                interested: e["interested"],
+                responded: e["responded"],
+                raisedDonation: e["raisedDonation"],
+              };
+            });
+            return _;
+          });
+        }),
     ]);
     return {
       results: results.map((res) => {
         delete res.user?.password;
         return {
           ...res,
+          interested: others.some((e) => e.eventId === res.eventId)
+            ? Number(others.find((e) => e.eventId === res.eventId)?.interested)
+            : 0,
+          responded: others.some((e) => e.eventId === res.eventId)
+            ? Number(others.find((e) => e.eventId === res.eventId)?.responded)
+            : 0,
+          raisedDonation: others.some((e) => e.eventId === res.eventId)
+            ? Number(
+                others.find((e) => e.eventId === res.eventId)?.raisedDonation
+              )
+            : 0,
         };
       }),
       total,
@@ -797,31 +878,38 @@ export class EventsService {
         .then((res) => {
           return res[0] ? res[0]["count"] ?? 0 : 0;
         });
-      
-      if(
+
+      if (
         user.userCode !== event.user?.userCode &&
-        user.userType === USER_TYPE.CLIENT) {
-          if ( !interested ) {
-            interested = new Interested();
-            interested.event = event;
-            interested.user = user;
-            interested = await entityManager.save(Interested, interested);
-            interestedCount = interestedCount && !isNaN(Number(interestedCount)) ? Number(interestedCount) + 1 : 1;
-          } else {
-            interested = await entityManager.findOne(Interested, {
-              where: {
-                user: {
-                  userCode: dto.userCode,
-                },
-                event: {
-                  eventCode: eventCode,
-                },
+        user.userType === USER_TYPE.CLIENT
+      ) {
+        if (!interested) {
+          interested = new Interested();
+          interested.event = event;
+          interested.user = user;
+          interested = await entityManager.save(Interested, interested);
+          interestedCount =
+            interestedCount && !isNaN(Number(interestedCount))
+              ? Number(interestedCount) + 1
+              : 1;
+        } else {
+          interested = await entityManager.findOne(Interested, {
+            where: {
+              user: {
+                userCode: dto.userCode,
               },
-              relations: {},
-            });
-            await entityManager.delete(Interested, interested);
-            interestedCount = interestedCount && !isNaN(Number(interestedCount)) ? Number(interestedCount) - 1 : 0;
-          }
+              event: {
+                eventCode: eventCode,
+              },
+            },
+            relations: {},
+          });
+          await entityManager.delete(Interested, interested);
+          interestedCount =
+            interestedCount && !isNaN(Number(interestedCount))
+              ? Number(interestedCount) - 1
+              : 0;
+        }
       }
       delete event.user?.password;
       delete event.user?.password;
@@ -879,30 +967,37 @@ export class EventsService {
         .then((res) => {
           return res[0] ? res[0]["count"] ?? 0 : 0;
         });
-      if(
+      if (
         user.userCode !== event.user?.userCode &&
-        user.userType === USER_TYPE.CLIENT) {
-          if ( !responded ) {
-            responded = new Responded();
-            responded.event = event;
-            responded.user = user;
-            responded = await entityManager.save(Responded, responded);
-            respondedCount = respondedCount && !isNaN(Number(respondedCount)) ? Number(respondedCount) + 1 : 1;
-          } else {
-            responded = await entityManager.findOne(Responded, {
-              where: {
-                user: {
-                  userCode: dto.userCode,
-                },
-                event: {
-                  eventCode: eventCode,
-                },
+        user.userType === USER_TYPE.CLIENT
+      ) {
+        if (!responded) {
+          responded = new Responded();
+          responded.event = event;
+          responded.user = user;
+          responded = await entityManager.save(Responded, responded);
+          respondedCount =
+            respondedCount && !isNaN(Number(respondedCount))
+              ? Number(respondedCount) + 1
+              : 1;
+        } else {
+          responded = await entityManager.findOne(Responded, {
+            where: {
+              user: {
+                userCode: dto.userCode,
               },
-              relations: {},
-            });
-            await entityManager.delete(Responded, responded);
-            respondedCount = respondedCount && !isNaN(Number(respondedCount)) ? Number(respondedCount) - 1 : 0;
-          }
+              event: {
+                eventCode: eventCode,
+              },
+            },
+            relations: {},
+          });
+          await entityManager.delete(Responded, responded);
+          respondedCount =
+            respondedCount && !isNaN(Number(respondedCount))
+              ? Number(respondedCount) - 1
+              : 0;
+        }
       }
       delete event.user?.password;
       delete event.user?.password;
