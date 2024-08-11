@@ -6,6 +6,7 @@ export declare class RequestPaymentDto {
     amount: number;
     userId: string;
     eventId: string;
+    accountNumber: string;
 }
 export declare class TransactionsController {
     private readonly transactionsService;

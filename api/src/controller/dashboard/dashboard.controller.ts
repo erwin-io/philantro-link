@@ -41,6 +41,10 @@ export class EventsByGeoDto {
 }
 
 export class ClientEventFeedDto {
+  @ApiProperty({ type: String })
+  @IsOptional()
+  keyword: string;
+
   @ApiProperty({ type: Number })
   @IsNotEmpty()
   latitude = 0;

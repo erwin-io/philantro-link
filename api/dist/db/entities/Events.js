@@ -49,7 +49,7 @@ __decorate([
     __metadata("design:type", String)
 ], Events.prototype, "eventLocName", void 0);
 __decorate([
-    (0, typeorm_1.Column)("json", { name: "EventLocMap", default: {} }),
+    (0, typeorm_1.Column)("jsonb", { name: "EventLocMap", default: {} }),
     __metadata("design:type", Object)
 ], Events.prototype, "eventLocMap", void 0);
 __decorate([

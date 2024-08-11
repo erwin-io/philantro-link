@@ -49,14 +49,24 @@ export class Users {
   @Column("character varying", { name: "Name", default: () => "''" })
   name: string;
 
-  @Column("character varying", { name: "MobileNumber" })
-  mobileNumber: string;
+  @Column("character varying", { name: "Email" })
+  email: string;
 
   @Column("json", { name: "CurrentLocation", nullable: true })
   currentLocation: object | null;
 
-  @Column("varchar", { name: "AssistanceType", nullable: true, array: true })
-  assistanceType: string[] | null;
+  @Column("varchar", {
+    name: "HelpNotifPreferences",
+    nullable: true,
+    array: true,
+  })
+  helpNotifPreferences: string[] | null;
+
+  @Column("character varying", { name: "CurrentOTP", default: () => "0" })
+  currentOtp: string;
+
+  @Column("boolean", { name: "IsVerifiedUser", default: () => "false" })
+  isVerifiedUser: boolean;
 
   @OneToMany(() => EventImage, (eventImage) => eventImage.user)
   eventImages: EventImage[];

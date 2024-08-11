@@ -19,9 +19,11 @@ export declare class Users {
     userCode: string | null;
     userType: string;
     name: string;
-    mobileNumber: string;
+    email: string;
     currentLocation: object | null;
-    assistanceType: string[] | null;
+    helpNotifPreferences: string[] | null;
+    currentOtp: string;
+    isVerifiedUser: boolean;
     eventImages: EventImage[];
     eventMessages: EventMessage[];
     eventMessages2: EventMessage[];

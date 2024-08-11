@@ -130,6 +130,16 @@ export class DashboardService {
     if (!user) {
       throw new Error(USER_ERROR_USER_NOT_FOUND);
     }
+    let queryWildCard;
+    if (params.keyword && params.keyword !== "") {
+      queryWildCard = ` AND (
+      "EventType" like '%${params.keyword}%' OR 
+      "EventName" like '%${params.keyword}%' OR 
+      "EventType" like '%${params.keyword}%' OR 
+      "EventLocName" like '%${params.keyword}%' OR 
+      "EventAssistanceItems" like '%${params.keyword}%'
+      ) `;
+    }
     const query = `
       WITH radius_data AS (
         SELECT "EventId" as "eventId",

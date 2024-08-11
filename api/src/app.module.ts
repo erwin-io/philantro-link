@@ -17,6 +17,9 @@ import { EventsModule } from "./controller/events/events.module";
 import { TransactionsModule } from "./controller/transactions/transactions.module";
 import { PaymentDoneModule } from "./controller/payment-done/payment-done.module";
 import { SupportTicketModule } from "./controller/support-ticket/support-ticket.module";
+import { MessageService } from "./services/message.service";
+import { EmailService } from "./services/email.service";
+import { VerifyModule } from "./controller/verify/verify.module";
 const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 @Module({
@@ -41,8 +44,9 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
     TransactionsModule,
     PaymentDoneModule,
     SupportTicketModule,
+    VerifyModule,
   ],
-  providers: [AppService],
+  providers: [AppService, MessageService, EmailService],
   controllers: [],
 })
 export class AppModule {}

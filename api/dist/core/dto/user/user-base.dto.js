@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProfilePictureDto = exports.DefaultUserDto = exports.UserDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
-const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class UserDto {
 }
@@ -32,13 +31,14 @@ __decorate([
 ], DefaultUserDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsNumberString)(),
-    (0, class_transformer_1.Transform)(({ obj, key }) => {
-        return obj[key].toString();
+    (0, class_validator_1.IsEmail)({
+        message: "Not allowed, invalid email format",
+    }),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, email is required!"
     }),
     __metadata("design:type", String)
-], DefaultUserDto.prototype, "mobileNumber", void 0);
+], DefaultUserDto.prototype, "email", void 0);
 exports.DefaultUserDto = DefaultUserDto;
 class UpdateProfilePictureDto {
 }

@@ -17,9 +17,10 @@ import { ApiResponseModel } from "src/core/models/api-response.model";
 import { LogInDto } from "src/core/dto/auth/login.dto";
 import { ApiParam, ApiTags } from "@nestjs/swagger";
 import { IsIn } from "class-validator";
-import { REGISTER_SUCCESS } from "src/common/constant/api-response.constant";
+import { REGISTER_SUCCESS, VERIFICATION_SUCCESS } from "src/common/constant/api-response.constant";
 import { Users } from "src/db/entities/Users";
 import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
+import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -33,6 +34,21 @@ export class AuthController {
       res.data = await this.authService.registerClient(createUserDto);
       res.success = true;
       res.message = `${REGISTER_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Post("verifyClient/client")
+  public async verifyClient(@Body() dto: VerifyClientUserDto) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.authService.verifyClient(dto);
+      res.success = true;
+      res.message = `${VERIFICATION_SUCCESS}`;
       return res;
     } catch (e) {
       res.success = false;

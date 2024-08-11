@@ -39,6 +39,12 @@ export class RequestPaymentDto {
   })
   @IsNotEmpty()
   eventId: string;
+
+  @ApiProperty({
+    type: String,
+  })
+  @IsNotEmpty()
+  accountNumber: string;
 }
 
 @ApiTags("transactions")

@@ -26,13 +26,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBill = exports.daysDiff = exports.weeksDiff = exports.monthDiff = exports.generateIndentityCode = exports.columnDefToTypeORMCondition = exports.getFullName = exports.convertColumnNotationToObject = exports.formatId = exports.ToBoolean = exports.getEnvPath = exports.round = exports.addHours = exports.getAge = exports.compare = exports.hash = exports.runDbMigrations = exports.getDbConnection = exports.getDbConnectionOptions = exports.toPromise = void 0;
+exports.generateOTP = exports.getBill = exports.daysDiff = exports.weeksDiff = exports.monthDiff = exports.generateIndentityCode = exports.columnDefToTypeORMCondition = exports.getFullName = exports.convertColumnNotationToObject = exports.formatId = exports.ToBoolean = exports.getEnvPath = exports.round = exports.addHours = exports.getAge = exports.compare = exports.hash = exports.runDbMigrations = exports.getDbConnection = exports.getDbConnectionOptions = exports.toPromise = void 0;
 const typeorm_1 = require("typeorm");
 const bcrypt = __importStar(require("bcrypt"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const class_transformer_1 = require("class-transformer");
 const moment_1 = __importDefault(require("moment"));
+const crypto_1 = require("crypto");
 const toPromise = (data) => {
     return new Promise((resolve) => {
         resolve(data);
@@ -238,4 +239,17 @@ const getBill = (dueAmount, dueDate) => {
     };
 };
 exports.getBill = getBill;
+const generateOTP = () => {
+    let otp;
+    const uniqueOTPs = new Set();
+    do {
+        otp = (0, crypto_1.randomInt)(100000, 1000000).toString();
+    } while (uniqueOTPs.has(otp));
+    uniqueOTPs.add(otp);
+    if (uniqueOTPs.size > 1000) {
+        uniqueOTPs.clear();
+    }
+    return otp;
+};
+exports.generateOTP = generateOTP;
 //# sourceMappingURL=utils.js.map

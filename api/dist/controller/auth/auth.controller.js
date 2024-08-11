@@ -19,6 +19,7 @@ const login_dto_1 = require("../../core/dto/auth/login.dto");
 const swagger_1 = require("@nestjs/swagger");
 const api_response_constant_1 = require("../../common/constant/api-response.constant");
 const register_dto_1 = require("../../core/dto/auth/register.dto");
+const verify_dto_1 = require("../../core/dto/auth/verify.dto");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -29,6 +30,20 @@ let AuthController = class AuthController {
             res.data = await this.authService.registerClient(createUserDto);
             res.success = true;
             res.message = `${api_response_constant_1.REGISTER_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async verifyClient(dto) {
+        const res = {};
+        try {
+            res.data = await this.authService.verifyClient(dto);
+            res.success = true;
+            res.message = `${api_response_constant_1.VERIFICATION_SUCCESS}`;
             return res;
         }
         catch (e) {
@@ -69,6 +84,13 @@ __decorate([
     __metadata("design:paramtypes", [register_dto_1.RegisterClientUserDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerClient", null);
+__decorate([
+    (0, common_1.Post)("verifyClient/client"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [verify_dto_1.VerifyClientUserDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyClient", null);
 __decorate([
     (0, common_1.Post)("login/admin"),
     __param(0, (0, common_1.Body)()),

@@ -158,7 +158,7 @@ let TransactionsService = class TransactionsService {
             throw ex;
         }
     }
-    async requestPaymentLink({ amount, userId, eventId }) {
+    async requestPaymentLink({ amount, userId, eventId, accountNumber }) {
         return await this.transactionsRepo.manager.transaction(async (entityManager) => {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
             try {
@@ -206,7 +206,7 @@ let TransactionsService = class TransactionsService {
                 }
                 transactions.user = user;
                 transactions.paymentType = payment_constant_1.PAYMENT_METHOD.WALLET;
-                transactions.fromAccountNumber = user.mobileNumber;
+                transactions.fromAccountNumber = accountNumber;
                 transactions.fromAccountName = user.name;
                 transactions.toAccountNumber = event.transferAccountNumber;
                 transactions.toAccountName = event.transferAccountName;

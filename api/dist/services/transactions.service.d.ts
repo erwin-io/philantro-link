@@ -70,10 +70,11 @@ export declare class TransactionsService {
         event: Events;
         user: Users;
     }>;
-    requestPaymentLink({ amount, userId, eventId }: {
+    requestPaymentLink({ amount, userId, eventId, accountNumber }: {
         amount: any;
         userId: any;
         eventId: any;
+        accountNumber: any;
     }): Promise<{
         transactions: Transactions;
         id: any;

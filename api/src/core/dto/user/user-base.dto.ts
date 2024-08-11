@@ -28,12 +28,13 @@ export class DefaultUserDto {
   name: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsNumberString()
-  @Transform(({ obj, key }) => {
-    return obj[key].toString();
+  @IsEmail({
+    message: "Not allowed, invalid email format",
   })
-  mobileNumber: string;
+  @IsNotEmpty({
+    message: "Not allowed, email is required!"
+  })
+  email: string;
 }
 
 export class UpdateProfilePictureDto {

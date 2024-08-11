@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateUserProfileDto = exports.UpdateUserDto = void 0;
+exports.UpdateClientUserProfileDto = exports.UpdateUserProfileDto = exports.UpdateUserDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
@@ -33,4 +33,32 @@ __decorate([
     __metadata("design:type", Object)
 ], UpdateUserProfileDto.prototype, "userProfilePic", void 0);
 exports.UpdateUserProfileDto = UpdateUserProfileDto;
+class UpdateClientUserProfileDto extends user_base_dto_1.DefaultUserDto {
+    constructor() {
+        super(...arguments);
+        this.helpNotifPreferences = [];
+    }
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], UpdateClientUserProfileDto.prototype, "userProfilePic", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: "Help/Assistance types",
+        example: [],
+        isArray: true,
+        enum: ["WATER", "FOOD", "CLOTHING", "SERVICES"],
+        default: []
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayNotEmpty)(),
+    (0, class_validator_1.IsIn)(["WATER", "FOOD", "CLOTHING", "SERVICES"], { each: true }),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, Help Notif Preferences is required!",
+    }),
+    __metadata("design:type", Array)
+], UpdateClientUserProfileDto.prototype, "helpNotifPreferences", void 0);
+exports.UpdateClientUserProfileDto = UpdateClientUserProfileDto;
 //# sourceMappingURL=users.update.dto.js.map

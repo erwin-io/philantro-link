@@ -1,7 +1,7 @@
 import { UpdateUserResetPasswordDto } from "src/core/dto/auth/reset-password.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
 import { CreateUserDto } from "src/core/dto/user/users.create.dto";
-import { UpdateUserDto, UpdateUserProfileDto } from "src/core/dto/user/users.update.dto";
+import { UpdateClientUserProfileDto, UpdateUserDto, UpdateUserProfileDto } from "src/core/dto/user/users.update.dto";
 import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
 import { Users } from "src/db/entities/Users";
 import { Repository } from "typeorm";
@@ -21,7 +21,8 @@ export declare class UsersService {
     getUserById(userId: any): Promise<Users>;
     getUserByCode(userCode: any): Promise<Users>;
     create(dto: CreateUserDto): Promise<Users>;
-    updateProfile(userCode: any, dto: UpdateUserProfileDto): Promise<Users>;
+    updateAdminProfile(userCode: any, dto: UpdateUserProfileDto): Promise<Users>;
+    updateClientProfile(userCode: any, dto: UpdateClientUserProfileDto): Promise<Users>;
     updateProfilePicture(userCode: any, dto: UpdateProfilePictureDto): Promise<Users>;
     update(userCode: any, dto: UpdateUserDto): Promise<Users>;
     resetPassword(userCode: any, dto: UpdateUserResetPasswordDto): Promise<Users>;

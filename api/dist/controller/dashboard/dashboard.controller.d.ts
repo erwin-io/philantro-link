@@ -7,6 +7,7 @@ export declare class EventsByGeoDto {
     radius: string;
 }
 export declare class ClientEventFeedDto {
+    keyword: string;
     latitude: number;
     longitude: number;
     radius: number;

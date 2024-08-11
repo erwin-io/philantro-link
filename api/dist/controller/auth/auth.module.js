@@ -19,6 +19,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const Users_1 = require("../../db/entities/Users");
 const notifications_module_1 = require("../notifications/notifications.module");
 const firebase_provider_module_1 = require("../../core/provider/firebase/firebase-provider.module");
+const email_service_1 = require("../../services/email.service");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
@@ -32,8 +33,8 @@ AuthModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([Users_1.Users]),
         ],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy],
-        exports: [auth_service_1.AuthService],
+        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy, email_service_1.EmailService],
+        exports: [auth_service_1.AuthService, email_service_1.EmailService],
     })
 ], AuthModule);
 exports.AuthModule = AuthModule;

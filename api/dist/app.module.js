@@ -49,6 +49,9 @@ const events_module_1 = require("./controller/events/events.module");
 const transactions_module_1 = require("./controller/transactions/transactions.module");
 const payment_done_module_1 = require("./controller/payment-done/payment-done.module");
 const support_ticket_module_1 = require("./controller/support-ticket/support-ticket.module");
+const message_service_1 = require("./services/message.service");
+const email_service_1 = require("./services/email.service");
+const verify_module_1 = require("./controller/verify/verify.module");
 const envFilePath = (0, utils_1.getEnvPath)(`${__dirname}/common/envs`);
 let AppModule = class AppModule {
 };
@@ -75,8 +78,9 @@ AppModule = __decorate([
             transactions_module_1.TransactionsModule,
             payment_done_module_1.PaymentDoneModule,
             support_ticket_module_1.SupportTicketModule,
+            verify_module_1.VerifyModule,
         ],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService, message_service_1.MessageService, email_service_1.EmailService],
         controllers: [],
     })
 ], AppModule);

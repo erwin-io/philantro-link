@@ -5,3 +5,7 @@ export declare class UpdateUserDto extends DefaultUserDto {
 export declare class UpdateUserProfileDto extends DefaultUserDto {
     userProfilePic: any;
 }
+export declare class UpdateClientUserProfileDto extends DefaultUserDto {
+    userProfilePic: any;
+    helpNotifPreferences: string[];
+}

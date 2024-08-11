@@ -66,10 +66,24 @@ let UsersController = class UsersController {
             return res;
         }
     }
-    async updateProfile(userCode, updateUserProfileDto) {
+    async updateAdminProfile(userCode, dto) {
         const res = {};
         try {
-            res.data = await this.userService.updateProfile(userCode, updateUserProfileDto);
+            res.data = await this.userService.updateAdminProfile(userCode, dto);
+            res.success = true;
+            res.message = `User ${api_response_constant_1.UPDATE_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async updateClientProfile(userCode, dto) {
+        const res = {};
+        try {
+            res.data = await this.userService.updateClientProfile(userCode, dto);
             res.success = true;
             res.message = `User ${api_response_constant_1.UPDATE_SUCCESS}`;
             return res;
@@ -172,13 +186,21 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([
-    (0, common_1.Put)("/updateProfile/:userCode"),
+    (0, common_1.Put)("/updateAdminProfile/:userCode"),
     __param(0, (0, common_1.Param)("userCode")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, users_update_dto_1.UpdateUserProfileDto]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "updateProfile", null);
+], UsersController.prototype, "updateAdminProfile", null);
+__decorate([
+    (0, common_1.Put)("/updateClientProfile/:userCode"),
+    __param(0, (0, common_1.Param)("userCode")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, users_update_dto_1.UpdateClientUserProfileDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateClientProfile", null);
 __decorate([
     (0, common_1.Put)("/:userCode"),
     __param(0, (0, common_1.Param)("userCode")),

@@ -18,6 +18,7 @@ import { PaginationParamsDto } from "src/core/dto/pagination-params.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
 import { CreateUserDto } from "src/core/dto/user/users.create.dto";
 import {
+  UpdateClientUserProfileDto,
   UpdateUserDto,
   UpdateUserProfileDto,
 } from "src/core/dto/user/users.update.dto";
@@ -78,18 +79,34 @@ export class UsersController {
     }
   }
 
-  @Put("/updateProfile/:userCode")
+  @Put("/updateAdminProfile/:userCode")
   //   @UseGuards(JwtAuthGuard)
-  async updateProfile(
+  async updateAdminProfile(
     @Param("userCode") userCode: string,
-    @Body() updateUserProfileDto: UpdateUserProfileDto
+    @Body() dto: UpdateUserProfileDto
   ) {
     const res: ApiResponseModel<Users> = {} as any;
     try {
-      res.data = await this.userService.updateProfile(
-        userCode,
-        updateUserProfileDto
-      );
+      res.data = await this.userService.updateAdminProfile(userCode, dto);
+      res.success = true;
+      res.message = `User ${UPDATE_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Put("/updateClientProfile/:userCode")
+  //   @UseGuards(JwtAuthGuard)
+  async updateClientProfile(
+    @Param("userCode") userCode: string,
+    @Body() dto: UpdateClientUserProfileDto
+  ) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.userService.updateClientProfile(userCode, dto);
       res.success = true;
       res.message = `User ${UPDATE_SUCCESS}`;
       return res;

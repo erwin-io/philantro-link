@@ -13,6 +13,7 @@ import * as path from "path";
 import {
   compare,
   generateIndentityCode,
+  generateOTP,
   getFullName,
   hash,
 } from "src/common/utils/utils";
@@ -24,6 +25,9 @@ import { LOGIN_ERROR_PASSWORD_INCORRECT, LOGIN_ERROR_PENDING_ACCESS_REQUEST, LOG
 import { USER_TYPE } from "src/common/constant/user-type.constant";
 import { NotificationsService } from "./notifications.service";
 import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
+import { ConfigService } from "@nestjs/config";
+import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
+import { EmailService } from "./email.service";
 
 @Injectable()
 export class AuthService {
@@ -31,21 +35,36 @@ export class AuthService {
     @InjectRepository(Users) private readonly userRepo: Repository<Users>,
     private readonly jwtService: JwtService,
     private notificationService: NotificationsService,
+    private emailService: EmailService
   ) {}
 
   async registerClient(dto: RegisterClientUserDto) {
     try {
       return await this.userRepo.manager.transaction(
         async (transactionalEntityManager) => {
-          let user = new Users();
-          user.userName = dto.mobileNumber;
+          let user = await transactionalEntityManager.findOneBy(Users, {
+            email: dto.email
+          });
+
+          if(!user) {
+            user = new Users();
+          }
+          else if(user && user.isVerifiedUser) {
+            throw Error("Email already used!");
+          }
+          user.userName = dto.email;
           user.password = await hash(dto.password);
           user.accessGranted = true;
-
           user.name = dto.name;
-          user.mobileNumber = dto.mobileNumber;
+          user.email = dto.email;
           user.userType = USER_TYPE.CLIENT.toUpperCase();
+          user.currentOtp = generateOTP();
           user = await transactionalEntityManager.save(user);
+          const sendEmailResult = await this.emailService.sendEmailVerification(dto.email, user.userCode, user.currentOtp);
+          if(!sendEmailResult) {
+            throw new Error("Error sending email verification!");
+          }
+
           user.userCode = generateIndentityCode(user.userId);
           user = await transactionalEntityManager.save(Users, user);
           delete user.password;
@@ -57,19 +76,39 @@ export class AuthService {
         ex["message"] &&
         (ex["message"].includes("duplicate key") ||
           ex["message"].includes("violates unique constraint")) &&
-        ex["message"].includes("u_user_number")
-      ) {
-        throw Error("Number already used!");
-      } else if (
-        ex["message"] &&
-        (ex["message"].includes("duplicate key") ||
-          ex["message"].includes("violates unique constraint")) &&
         ex["message"].includes("u_username")
       ) {
-        throw Error("Username already used!");
+        throw Error("Email already used!");
       } else {
         throw ex;
       }
+    }
+  }
+
+  async verifyClient(dto: VerifyClientUserDto) {
+    try {
+      return await this.userRepo.manager.transaction(
+        async (transactionalEntityManager) => {
+          let user = await transactionalEntityManager.findOneBy(Users, {
+            email: dto.email,
+          });
+
+          if(!user) {
+            throw Error("Email not found!");
+          }
+          else if(user && user.isVerifiedUser) {
+            throw Error("Email already verified!");
+          } else if(user && user.currentOtp.toString().trim() !== dto.otp.toString().trim()) {
+            throw Error("Invalid code!");
+          }
+          user.isVerifiedUser = true;
+          user = await transactionalEntityManager.save(Users, user);
+          delete user.password;
+          return user;
+        }
+      );
+    } catch (ex) {
+      throw ex;
     }
   }
 
@@ -174,6 +213,34 @@ export class AuthService {
         ...user,
         totalUnreadNotif 
       };
+    } catch(ex) {
+      throw ex;
+    }
+  }
+
+  async verifyUser(userCode, hash) {
+    try {
+      return await this.userRepo.manager.transaction(async (entityManager) => {
+        let user = await entityManager.findOne(Users, {
+          where: {
+            userCode
+          }
+        });
+        if(!user) {
+          throw Error("Invalid user code");
+        }
+        if(user.isVerifiedUser) {
+          throw Error("User was already verified!");
+        }
+        const match = await compare(hash, user.currentOtp);
+        if (!match) {
+          throw Error("Invalid code");
+        }
+        user.isVerifiedUser = true;
+        user = await entityManager.save(Users, user);
+        delete user.password;
+        return true;
+      });
     } catch(ex) {
       throw ex;
     }

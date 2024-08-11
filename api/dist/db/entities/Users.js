@@ -58,17 +58,29 @@ __decorate([
     __metadata("design:type", String)
 ], Users.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "MobileNumber" }),
+    (0, typeorm_1.Column)("character varying", { name: "Email" }),
     __metadata("design:type", String)
-], Users.prototype, "mobileNumber", void 0);
+], Users.prototype, "email", void 0);
 __decorate([
     (0, typeorm_1.Column)("json", { name: "CurrentLocation", nullable: true }),
     __metadata("design:type", Object)
 ], Users.prototype, "currentLocation", void 0);
 __decorate([
-    (0, typeorm_1.Column)("varchar", { name: "AssistanceType", nullable: true, array: true }),
+    (0, typeorm_1.Column)("varchar", {
+        name: "HelpNotifPreferences",
+        nullable: true,
+        array: true,
+    }),
     __metadata("design:type", Array)
-], Users.prototype, "assistanceType", void 0);
+], Users.prototype, "helpNotifPreferences", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", { name: "CurrentOTP", default: () => "0" }),
+    __metadata("design:type", String)
+], Users.prototype, "currentOtp", void 0);
+__decorate([
+    (0, typeorm_1.Column)("boolean", { name: "IsVerifiedUser", default: () => "false" }),
+    __metadata("design:type", Boolean)
+], Users.prototype, "isVerifiedUser", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => EventImage_1.EventImage, (eventImage) => eventImage.user),
     __metadata("design:type", Array)

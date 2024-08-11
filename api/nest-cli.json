@@ -5,6 +5,7 @@
   "compilerOptions": {
     "watchAssets": true,
     "assets": [
+      "assets/*",
       "common/envs/*",
       "**/*.hbs",
       "public/css/*",

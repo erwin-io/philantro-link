@@ -3,12 +3,16 @@ import { Repository } from "typeorm";
 import { Users } from "src/db/entities/Users";
 import { NotificationsService } from "./notifications.service";
 import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
+import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
+import { EmailService } from "./email.service";
 export declare class AuthService {
     private readonly userRepo;
     private readonly jwtService;
     private notificationService;
-    constructor(userRepo: Repository<Users>, jwtService: JwtService, notificationService: NotificationsService);
+    private emailService;
+    constructor(userRepo: Repository<Users>, jwtService: JwtService, notificationService: NotificationsService, emailService: EmailService);
     registerClient(dto: RegisterClientUserDto): Promise<Users>;
+    verifyClient(dto: VerifyClientUserDto): Promise<Users>;
     getByCredentials({ userName, password }: {
         userName: any;
         password: any;
@@ -26,9 +30,11 @@ export declare class AuthService {
         userCode: string;
         userType: string;
         name: string;
-        mobileNumber: string;
+        email: string;
         currentLocation: object;
-        assistanceType: string[];
+        helpNotifPreferences: string[];
+        currentOtp: string;
+        isVerifiedUser: boolean;
         eventImages: import("../db/entities/EventImage").EventImage[];
         eventMessages: import("../db/entities/EventMessage").EventMessage[];
         eventMessages2: import("../db/entities/EventMessage").EventMessage[];
@@ -57,9 +63,11 @@ export declare class AuthService {
         userCode: string;
         userType: string;
         name: string;
-        mobileNumber: string;
+        email: string;
         currentLocation: object;
-        assistanceType: string[];
+        helpNotifPreferences: string[];
+        currentOtp: string;
+        isVerifiedUser: boolean;
         eventImages: import("../db/entities/EventImage").EventImage[];
         eventMessages: import("../db/entities/EventMessage").EventMessage[];
         eventMessages2: import("../db/entities/EventMessage").EventMessage[];
@@ -75,4 +83,5 @@ export declare class AuthService {
         userProfilePic: import("../db/entities/UserProfilePic").UserProfilePic;
         access: import("../db/entities/Access").Access;
     }>;
+    verifyUser(userCode: any, hash: any): Promise<boolean>;
 }

@@ -3,7 +3,7 @@ export declare class UserDto {
 }
 export declare class DefaultUserDto {
     name: string;
-    mobileNumber: string;
+    email: string;
 }
 export declare class UpdateProfilePictureDto {
     userProfilePic: any;

@@ -51,6 +51,11 @@ class ClientEventFeedDto {
     }
 }
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ClientEventFeedDto.prototype, "keyword", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Number }),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Object)

@@ -11,6 +11,7 @@ import { Users } from "src/db/entities/Users";
 import { NotificationsService } from "src/services/notifications.service";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { FirebaseProviderModule } from "src/core/provider/firebase/firebase-provider.module";
+import { EmailService } from "src/services/email.service";
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { FirebaseProviderModule } from "src/core/provider/firebase/firebase-prov
     TypeOrmModule.forFeature([Users]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, EmailService],
+  exports: [AuthService, EmailService],
 })
 export class AuthModule {}

@@ -50,6 +50,7 @@
     "nestjs-pusher": "^0.0.12",
     "nestjs-typeorm-paginate": "^4.0.2",
     "node-base64-to-file": "^1.0.4",
+    "nodemailer": "^6.9.14",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

@@ -43,6 +43,13 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RequestPaymentDto.prototype, "eventId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: String,
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], RequestPaymentDto.prototype, "accountNumber", void 0);
 exports.RequestPaymentDto = RequestPaymentDto;
 let TransactionsController = class TransactionsController {
     constructor(transactionsService) {

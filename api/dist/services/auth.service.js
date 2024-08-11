@@ -22,23 +22,38 @@ const Users_1 = require("../db/entities/Users");
 const auth_error_constant_1 = require("../common/constant/auth-error.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
 const notifications_service_1 = require("./notifications.service");
+const email_service_1 = require("./email.service");
 let AuthService = class AuthService {
-    constructor(userRepo, jwtService, notificationService) {
+    constructor(userRepo, jwtService, notificationService, emailService) {
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.notificationService = notificationService;
+        this.emailService = emailService;
     }
     async registerClient(dto) {
         try {
             return await this.userRepo.manager.transaction(async (transactionalEntityManager) => {
-                let user = new Users_1.Users();
-                user.userName = dto.mobileNumber;
+                let user = await transactionalEntityManager.findOneBy(Users_1.Users, {
+                    email: dto.email
+                });
+                if (!user) {
+                    user = new Users_1.Users();
+                }
+                else if (user && user.isVerifiedUser) {
+                    throw Error("Email already used!");
+                }
+                user.userName = dto.email;
                 user.password = await (0, utils_1.hash)(dto.password);
                 user.accessGranted = true;
                 user.name = dto.name;
-                user.mobileNumber = dto.mobileNumber;
+                user.email = dto.email;
                 user.userType = user_type_constant_1.USER_TYPE.CLIENT.toUpperCase();
+                user.currentOtp = (0, utils_1.generateOTP)();
                 user = await transactionalEntityManager.save(user);
+                const sendEmailResult = await this.emailService.sendEmailVerification(dto.email, user.userCode, user.currentOtp);
+                if (!sendEmailResult) {
+                    throw new Error("Error sending email verification!");
+                }
                 user.userCode = (0, utils_1.generateIndentityCode)(user.userId);
                 user = await transactionalEntityManager.save(Users_1.Users, user);
                 delete user.password;
@@ -49,18 +64,37 @@ let AuthService = class AuthService {
             if (ex["message"] &&
                 (ex["message"].includes("duplicate key") ||
                     ex["message"].includes("violates unique constraint")) &&
-                ex["message"].includes("u_user_number")) {
-                throw Error("Number already used!");
-            }
-            else if (ex["message"] &&
-                (ex["message"].includes("duplicate key") ||
-                    ex["message"].includes("violates unique constraint")) &&
                 ex["message"].includes("u_username")) {
-                throw Error("Username already used!");
+                throw Error("Email already used!");
             }
             else {
                 throw ex;
             }
+        }
+    }
+    async verifyClient(dto) {
+        try {
+            return await this.userRepo.manager.transaction(async (transactionalEntityManager) => {
+                let user = await transactionalEntityManager.findOneBy(Users_1.Users, {
+                    email: dto.email,
+                });
+                if (!user) {
+                    throw Error("Email not found!");
+                }
+                else if (user && user.isVerifiedUser) {
+                    throw Error("Email already verified!");
+                }
+                else if (user && user.currentOtp.toString().trim() !== dto.otp.toString().trim()) {
+                    throw Error("Invalid code!");
+                }
+                user.isVerifiedUser = true;
+                user = await transactionalEntityManager.save(Users_1.Users, user);
+                delete user.password;
+                return user;
+            });
+        }
+        catch (ex) {
+            throw ex;
         }
     }
     async getByCredentials({ userName, password }) {
@@ -159,13 +193,42 @@ let AuthService = class AuthService {
             throw ex;
         }
     }
+    async verifyUser(userCode, hash) {
+        try {
+            return await this.userRepo.manager.transaction(async (entityManager) => {
+                let user = await entityManager.findOne(Users_1.Users, {
+                    where: {
+                        userCode
+                    }
+                });
+                if (!user) {
+                    throw Error("Invalid user code");
+                }
+                if (user.isVerifiedUser) {
+                    throw Error("User was already verified!");
+                }
+                const match = await (0, utils_1.compare)(hash, user.currentOtp);
+                if (!match) {
+                    throw Error("Invalid code");
+                }
+                user.isVerifiedUser = true;
+                user = await entityManager.save(Users_1.Users, user);
+                delete user.password;
+                return true;
+            });
+        }
+        catch (ex) {
+            throw ex;
+        }
+    }
 };
 AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(Users_1.Users)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         jwt_1.JwtService,
-        notifications_service_1.NotificationsService])
+        notifications_service_1.NotificationsService,
+        email_service_1.EmailService])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

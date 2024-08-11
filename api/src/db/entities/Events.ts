@@ -39,7 +39,7 @@ export class Events {
   @Column("character varying", { name: "EventLocName" })
   eventLocName: string;
 
-  @Column("json", { name: "EventLocMap", default: {} })
+  @Column("jsonb", { name: "EventLocMap", default: {} })
   eventLocMap: object;
 
   @Column("varchar", {
