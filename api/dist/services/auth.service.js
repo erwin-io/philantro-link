@@ -221,6 +221,87 @@ let AuthService = class AuthService {
             throw ex;
         }
     }
+    async resetPasswordSubmit(dto) {
+        try {
+            return await this.userRepo.manager.transaction(async (entityManager) => {
+                let user = await entityManager.findOne(Users_1.Users, {
+                    where: {
+                        email: dto.email
+                    }
+                });
+                if (!user) {
+                    throw Error("Email not found!");
+                }
+                if (!user.isVerifiedUser) {
+                    throw Error("User was not yet verified!");
+                }
+                user.currentOtp = (0, utils_1.generateOTP)();
+                user = await entityManager.save(Users_1.Users, user);
+                const sendEmailResult = await this.emailService.sendResetPasswordOtp(dto.email, user.userCode, user.currentOtp);
+                if (!sendEmailResult) {
+                    throw new Error("Error sending email verification!");
+                }
+                delete user.password;
+                return true;
+            });
+        }
+        catch (ex) {
+            throw ex;
+        }
+    }
+    async resetPasswordVerify(dto) {
+        try {
+            return await this.userRepo.manager.transaction(async (entityManager) => {
+                let user = await entityManager.findOne(Users_1.Users, {
+                    where: {
+                        email: dto.email
+                    }
+                });
+                if (!user) {
+                    throw Error("Email not found!");
+                }
+                if (!user.isVerifiedUser) {
+                    throw Error("User was not yet verified!");
+                }
+                const match = user.currentOtp === dto.otp;
+                if (!match) {
+                    throw Error("Invalid code");
+                }
+                return true;
+            });
+        }
+        catch (ex) {
+            throw ex;
+        }
+    }
+    async resetPassword(dto) {
+        try {
+            return await this.userRepo.manager.transaction(async (entityManager) => {
+                let user = await entityManager.findOne(Users_1.Users, {
+                    where: {
+                        email: dto.email
+                    }
+                });
+                if (!user) {
+                    throw Error("Email not found!");
+                }
+                if (!user.isVerifiedUser) {
+                    throw Error("User was not yet verified!");
+                }
+                const match = user.currentOtp === dto.otp;
+                if (!match) {
+                    throw Error("Invalid code");
+                }
+                user.password = await (0, utils_1.hash)(dto.password);
+                user = await entityManager.save(Users_1.Users, user);
+                delete user.password;
+                return user;
+            });
+        }
+        catch (ex) {
+            throw ex;
+        }
+    }
 };
 AuthService = __decorate([
     (0, common_1.Injectable)(),

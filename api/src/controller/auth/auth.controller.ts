@@ -17,10 +17,18 @@ import { ApiResponseModel } from "src/core/models/api-response.model";
 import { LogInDto } from "src/core/dto/auth/login.dto";
 import { ApiParam, ApiTags } from "@nestjs/swagger";
 import { IsIn } from "class-validator";
-import { REGISTER_SUCCESS, VERIFICATION_SUCCESS } from "src/common/constant/api-response.constant";
+import {
+  REGISTER_SUCCESS,
+  VERIFICATION_SUCCESS,
+} from "src/common/constant/api-response.constant";
 import { Users } from "src/db/entities/Users";
 import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
 import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
+import {
+  ResetPasswordDto,
+  ResetPasswordSubmitDto,
+  ResetVerifyDto,
+} from "src/core/dto/auth/reset-password.dto";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -81,7 +89,53 @@ export class AuthController {
     } catch (e) {
       throw new HttpException(
         e.message !== undefined ? e.message : e,
-        HttpStatus.BAD_REQUEST);
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  @Post("reset")
+  public async resetPassword(@Body() dto: ResetPasswordDto) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.authService.resetPassword(dto);
+      res.success = true;
+      res.message = `${VERIFICATION_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Post("reset/submit")
+  public async resetSubmit(@Body() dto: ResetPasswordSubmitDto) {
+    const res: ApiResponseModel<boolean> = {} as any;
+    try {
+      res.data = await this.authService.resetPasswordSubmit(dto);
+      res.success = true;
+      res.message = `Reset password email verification sent!`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Post("reset/verify")
+  public async resetVerify(@Body() dto: ResetVerifyDto) {
+    const res: ApiResponseModel<boolean> = {} as any;
+    try {
+      res.data = await this.authService.resetPasswordVerify(dto);
+      res.success = true;
+      res.message = `${VERIFICATION_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
     }
   }
 }

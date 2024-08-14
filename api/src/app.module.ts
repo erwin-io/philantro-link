@@ -20,6 +20,7 @@ import { SupportTicketModule } from "./controller/support-ticket/support-ticket.
 import { MessageService } from "./services/message.service";
 import { EmailService } from "./services/email.service";
 import { VerifyModule } from "./controller/verify/verify.module";
+import { DeepLinkModule } from './controller/deep-link/deep-link.module';
 const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 @Module({
@@ -45,6 +46,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
     PaymentDoneModule,
     SupportTicketModule,
     VerifyModule,
+    DeepLinkModule,
   ],
   providers: [AppService, MessageService, EmailService],
   controllers: [],

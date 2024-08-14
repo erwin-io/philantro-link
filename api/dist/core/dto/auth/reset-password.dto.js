@@ -9,10 +9,38 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResetPasswordDto = exports.UpdateUserResetPasswordDto = void 0;
+exports.ResetPasswordDto = exports.UpdateUserResetPasswordDto = exports.ResetVerifyDto = exports.ResetPasswordSubmitDto = void 0;
 const class_validator_1 = require("class-validator");
 const match_decorator_dto_1 = require("../match.decorator.dto");
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
+class ResetPasswordSubmitDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsEmail)({
+        message: "Not allowed, invalid email format",
+    }),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, email is required!"
+    }),
+    __metadata("design:type", String)
+], ResetPasswordSubmitDto.prototype, "email", void 0);
+exports.ResetPasswordSubmitDto = ResetPasswordSubmitDto;
+class ResetVerifyDto extends ResetPasswordSubmitDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Transform)(({ obj, key }) => {
+        return obj[key].toString();
+    }),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, otp is required!"
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ResetVerifyDto.prototype, "otp", void 0);
+exports.ResetVerifyDto = ResetVerifyDto;
 class UpdateUserResetPasswordDto {
 }
 __decorate([
@@ -32,7 +60,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateUserResetPasswordDto.prototype, "confirmPassword", void 0);
 exports.UpdateUserResetPasswordDto = UpdateUserResetPasswordDto;
-class ResetPasswordDto {
+class ResetPasswordDto extends ResetVerifyDto {
 }
 __decorate([
     (0, swagger_1.ApiProperty)(),

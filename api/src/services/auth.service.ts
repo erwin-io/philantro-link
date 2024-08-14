@@ -28,6 +28,7 @@ import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
 import { ConfigService } from "@nestjs/config";
 import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
 import { EmailService } from "./email.service";
+import { ResetPasswordDto, ResetPasswordSubmitDto, ResetVerifyDto } from "src/core/dto/auth/reset-password.dto";
 
 @Injectable()
 export class AuthService {
@@ -240,6 +241,87 @@ export class AuthService {
         user = await entityManager.save(Users, user);
         delete user.password;
         return true;
+      });
+    } catch(ex) {
+      throw ex;
+    }
+  }
+
+  async resetPasswordSubmit(dto: ResetPasswordSubmitDto) {
+    try {
+      return await this.userRepo.manager.transaction(async (entityManager) => {
+        let user = await entityManager.findOne(Users, {
+          where: {
+            email: dto.email
+          }
+        });
+        if(!user) {
+          throw Error("Email not found!");
+        }
+        if(!user.isVerifiedUser) {
+          throw Error("User was not yet verified!");
+        }
+        user.currentOtp = generateOTP();
+        user = await entityManager.save(Users, user);
+        const sendEmailResult = await this.emailService.sendResetPasswordOtp(dto.email, user.userCode, user.currentOtp);
+        if(!sendEmailResult) {
+          throw new Error("Error sending email verification!");
+        }
+        delete user.password;
+        return true;
+      });
+    } catch(ex) {
+      throw ex;
+    }
+  }
+
+  async resetPasswordVerify(dto: ResetVerifyDto) {
+    try {
+      return await this.userRepo.manager.transaction(async (entityManager) => {
+        let user = await entityManager.findOne(Users, {
+          where: {
+            email: dto.email
+          }
+        });
+        if(!user) {
+          throw Error("Email not found!");
+        }
+        if(!user.isVerifiedUser) {
+          throw Error("User was not yet verified!");
+        }
+        const match = user.currentOtp === dto.otp;
+        if (!match) {
+          throw Error("Invalid code");
+        }
+        return true;
+      });
+    } catch(ex) {
+      throw ex;
+    }
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    try {
+      return await this.userRepo.manager.transaction(async (entityManager) => {
+        let user = await entityManager.findOne(Users, {
+          where: {
+            email: dto.email
+          }
+        });
+        if(!user) {
+          throw Error("Email not found!");
+        }
+        if(!user.isVerifiedUser) {
+          throw Error("User was not yet verified!");
+        }
+        const match = user.currentOtp === dto.otp;
+        if (!match) {
+          throw Error("Invalid code");
+        }
+        user.password = await hash(dto.password);
+        user = await entityManager.save(Users, user);
+        delete user.password;
+        return user;
       });
     } catch(ex) {
       throw ex;

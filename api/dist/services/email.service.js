@@ -59,6 +59,42 @@ let EmailService = class EmailService {
             throw ex;
         }
     }
+    async sendResetPasswordOtp(recipient, userCode, otp) {
+        try {
+            const evEmail = this.config.get("EV_EMAIL");
+            const evPass = this.config.get("EV_PASS");
+            const evAddress = this.config.get("EV_ADDRESS");
+            const evSubject = this.config.get("EV_RESET_SUBJECT");
+            const evTempPath = this.config.get("EV_RESET_TEMPLATE_PATH");
+            const evCompany = this.config.get("EV_COMPANY");
+            const evVerifyURL = this.config.get("EV_URL");
+            const transporter = nodemailer_1.default.createTransport({
+                service: "gmail",
+                auth: {
+                    user: evEmail,
+                    pass: evPass.toString().trim(),
+                },
+            });
+            let emailTemplate = await (0, promises_1.readFile)(path_1.default.join(__dirname, evTempPath), "utf-8");
+            emailTemplate = emailTemplate.replace("{{_OTP_}}", otp);
+            const hastOTP = await (0, utils_1.hash)(otp);
+            emailTemplate = emailTemplate.replace("{{_URL_}}", `${evVerifyURL}?user=${userCode}&code=${hastOTP}`);
+            emailTemplate = emailTemplate.replace("{{_YEAR_}}", new Date().getFullYear().toString());
+            emailTemplate = emailTemplate.replace("{{_COMPANY_}}", evCompany);
+            const info = await transporter.sendMail({
+                from: evAddress,
+                to: recipient,
+                subject: evSubject,
+                html: emailTemplate,
+            });
+            console.log("Message sent: %s", info.messageId);
+            console.log("Preview URL: %s", nodemailer_1.default.getTestMessageUrl(info));
+            return true;
+        }
+        catch (ex) {
+            throw ex;
+        }
+    }
 };
 EmailService = __decorate([
     (0, common_1.Injectable)(),

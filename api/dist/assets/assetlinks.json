@@ -1,0 +1,5 @@
+[{
+"relation": ["delegate_permission/common.handle_all_urls"],
+"target" : { "namespace": "android_app", "package_name": "com.philantrolink.app",
+"sha256_cert_fingerprints": ["93:67:9D:C9:81:75:F4:5C:2C:2A:40:DC:7F:F7:33:85:01:9B:58:ED:83:CB:AE:CC:F0:93:A6:B1:26:47:72:69"] }
+}]

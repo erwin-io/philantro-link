@@ -37,7 +37,7 @@ export class VerifyController {
           isVerified,
           company: this.config.get<string>("EV_COMPANY"),
           year: new Date().getFullYear().toString(),
-          deepLink: "philantrolink://landing-page",
+          deepLink: "philantrolink://home",
           title: "Verificaton",
           cssFile: "/css/verify.css",
           jsFile: "/js/verify.js",

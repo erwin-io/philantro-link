@@ -20,6 +20,7 @@ const swagger_1 = require("@nestjs/swagger");
 const api_response_constant_1 = require("../../common/constant/api-response.constant");
 const register_dto_1 = require("../../core/dto/auth/register.dto");
 const verify_dto_1 = require("../../core/dto/auth/verify.dto");
+const reset_password_dto_1 = require("../../core/dto/auth/reset-password.dto");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -76,6 +77,48 @@ let AuthController = class AuthController {
             throw new common_1.HttpException(e.message !== undefined ? e.message : e, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async resetPassword(dto) {
+        const res = {};
+        try {
+            res.data = await this.authService.resetPassword(dto);
+            res.success = true;
+            res.message = `${api_response_constant_1.VERIFICATION_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async resetSubmit(dto) {
+        const res = {};
+        try {
+            res.data = await this.authService.resetPasswordSubmit(dto);
+            res.success = true;
+            res.message = `Reset password email verification sent!`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async resetVerify(dto) {
+        const res = {};
+        try {
+            res.data = await this.authService.resetPasswordVerify(dto);
+            res.success = true;
+            res.message = `${api_response_constant_1.VERIFICATION_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
 };
 __decorate([
     (0, common_1.Post)("register/client"),
@@ -105,6 +148,27 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LogInDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginClient", null);
+__decorate([
+    (0, common_1.Post)("reset"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
+__decorate([
+    (0, common_1.Post)("reset/submit"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordSubmitDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetSubmit", null);
+__decorate([
+    (0, common_1.Post)("reset/verify"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reset_password_dto_1.ResetVerifyDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetVerify", null);
 AuthController = __decorate([
     (0, swagger_1.ApiTags)("auth"),
     (0, common_1.Controller)("auth"),

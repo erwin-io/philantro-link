@@ -5,6 +5,7 @@ import { NotificationsService } from "./notifications.service";
 import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
 import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
 import { EmailService } from "./email.service";
+import { ResetPasswordDto, ResetPasswordSubmitDto, ResetVerifyDto } from "src/core/dto/auth/reset-password.dto";
 export declare class AuthService {
     private readonly userRepo;
     private readonly jwtService;
@@ -84,4 +85,7 @@ export declare class AuthService {
         access: import("../db/entities/Access").Access;
     }>;
     verifyUser(userCode: any, hash: any): Promise<boolean>;
+    resetPasswordSubmit(dto: ResetPasswordSubmitDto): Promise<boolean>;
+    resetPasswordVerify(dto: ResetVerifyDto): Promise<boolean>;
+    resetPassword(dto: ResetPasswordDto): Promise<Users>;
 }

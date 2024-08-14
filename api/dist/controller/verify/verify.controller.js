@@ -36,7 +36,7 @@ let VerifyController = class VerifyController {
                     isVerified,
                     company: this.config.get("EV_COMPANY"),
                     year: new Date().getFullYear().toString(),
-                    deepLink: "philantrolink://landing-page",
+                    deepLink: "philantrolink://home",
                     title: "Verificaton",
                     cssFile: "/css/verify.css",
                     jsFile: "/js/verify.js",

@@ -28,7 +28,12 @@ async function bootstrap() {
   registerHelper(hbs);
 
   app.setGlobalPrefix("api/v1", {
-    exclude: ["payment-done", "payment-done/:transactionCode", "verify"], // Exclude view routes
+    exclude: [
+      "payment-done",
+      "payment-done/:transactionCode",
+      "verify",
+      ".well-known/assetlinks.json"
+    ], // Exclude view routes
   });
   // the next two lines did the trick
   app.use(bodyParser.json({ limit: "50mb" }));

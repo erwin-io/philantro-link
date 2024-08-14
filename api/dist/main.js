@@ -44,7 +44,12 @@ async function bootstrap() {
     app.useStaticAssets(path_1.default.join(__dirname, "public"));
     registerHelper(hbs_1.default);
     app.setGlobalPrefix("api/v1", {
-        exclude: ["payment-done", "payment-done/:transactionCode", "verify"],
+        exclude: [
+            "payment-done",
+            "payment-done/:transactionCode",
+            "verify",
+            ".well-known/assetlinks.json"
+        ],
     });
     app.use(bodyParser.json({ limit: "50mb" }));
     app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
