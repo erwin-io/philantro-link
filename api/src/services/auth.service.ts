@@ -86,7 +86,7 @@ export class AuthService {
     }
   }
 
-  async verifyClient(dto: VerifyClientUserDto) {
+  async registerVerify(dto: VerifyClientUserDto) {
     try {
       return await this.userRepo.manager.transaction(
         async (transactionalEntityManager) => {

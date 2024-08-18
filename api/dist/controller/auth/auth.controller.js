@@ -39,10 +39,10 @@ let AuthController = class AuthController {
             return res;
         }
     }
-    async verifyClient(dto) {
+    async registerVerify(dto) {
         const res = {};
         try {
-            res.data = await this.authService.verifyClient(dto);
+            res.data = await this.authService.registerVerify(dto);
             res.success = true;
             res.message = `${api_response_constant_1.VERIFICATION_SUCCESS}`;
             return res;
@@ -128,12 +128,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerClient", null);
 __decorate([
-    (0, common_1.Post)("verifyClient/client"),
+    (0, common_1.Post)("register/verify"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [verify_dto_1.VerifyClientUserDto]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "verifyClient", null);
+], AuthController.prototype, "registerVerify", null);
 __decorate([
     (0, common_1.Post)("login/admin"),
     __param(0, (0, common_1.Body)()),

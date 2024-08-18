@@ -13,7 +13,7 @@ export declare class AuthService {
     private emailService;
     constructor(userRepo: Repository<Users>, jwtService: JwtService, notificationService: NotificationsService, emailService: EmailService);
     registerClient(dto: RegisterClientUserDto): Promise<Users>;
-    verifyClient(dto: VerifyClientUserDto): Promise<Users>;
+    registerVerify(dto: VerifyClientUserDto): Promise<Users>;
     getByCredentials({ userName, password }: {
         userName: any;
         password: any;

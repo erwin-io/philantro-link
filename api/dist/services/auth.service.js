@@ -72,7 +72,7 @@ let AuthService = class AuthService {
             }
         }
     }
-    async verifyClient(dto) {
+    async registerVerify(dto) {
         try {
             return await this.userRepo.manager.transaction(async (transactionalEntityManager) => {
                 let user = await transactionalEntityManager.findOneBy(Users_1.Users, {

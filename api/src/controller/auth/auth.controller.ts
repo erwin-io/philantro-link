@@ -50,11 +50,11 @@ export class AuthController {
     }
   }
 
-  @Post("verifyClient/client")
-  public async verifyClient(@Body() dto: VerifyClientUserDto) {
+  @Post("register/verify")
+  public async registerVerify(@Body() dto: VerifyClientUserDto) {
     const res: ApiResponseModel<Users> = {} as any;
     try {
-      res.data = await this.authService.verifyClient(dto);
+      res.data = await this.authService.registerVerify(dto);
       res.success = true;
       res.message = `${VERIFICATION_SUCCESS}`;
       return res;

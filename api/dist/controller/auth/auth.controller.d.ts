@@ -9,7 +9,7 @@ export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
     registerClient(createUserDto: RegisterClientUserDto): Promise<ApiResponseModel<Users>>;
-    verifyClient(dto: VerifyClientUserDto): Promise<ApiResponseModel<Users>>;
+    registerVerify(dto: VerifyClientUserDto): Promise<ApiResponseModel<Users>>;
     loginAdmin(loginUserDto: LogInDto): Promise<ApiResponseModel<Users>>;
     loginClient(loginUserDto: LogInDto): Promise<ApiResponseModel<Users>>;
     resetPassword(dto: ResetPasswordDto): Promise<ApiResponseModel<Users>>;
