@@ -22,6 +22,7 @@ export declare class Events {
     transferAccountName: string | null;
     donationTargetAmount: string | null;
     inProgress: boolean | null;
+    dateTimeUpdate: Date | null;
     eventImages: EventImage[];
     eventMessages: EventMessage[];
     thumbnailFile: Files;

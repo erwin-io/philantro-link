@@ -6,12 +6,14 @@ import { FirebaseProviderModule } from "src/core/provider/firebase/firebase-prov
 import { OneSignalNotificationService } from "src/services/one-signal-notification.service";
 import { Events } from "src/db/entities/Events";
 import { EventsService } from "src/services/events.service";
+import { UserConversation } from "src/db/entities/UserConversation";
+import { Notifications } from "src/db/entities/Notifications";
 
 @Module({
   imports: [
     FirebaseProviderModule,
     HttpModule,
-    TypeOrmModule.forFeature([Events]),
+    TypeOrmModule.forFeature([Events, UserConversation, Notifications]),
   ],
   controllers: [EventsController],
   providers: [EventsService, OneSignalNotificationService],

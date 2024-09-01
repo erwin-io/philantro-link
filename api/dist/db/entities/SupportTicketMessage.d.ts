@@ -5,6 +5,7 @@ export declare class SupportTicketMessage {
     message: string;
     dateTimeSent: Date;
     active: boolean;
+    status: string;
     fromUser: Users;
     supportTicket: SupportTicket;
 }

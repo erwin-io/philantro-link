@@ -23,11 +23,13 @@ const auth_error_constant_1 = require("../common/constant/auth-error.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
 const notifications_service_1 = require("./notifications.service");
 const email_service_1 = require("./email.service");
+const user_conversation_service_1 = require("./user-conversation.service");
 let AuthService = class AuthService {
-    constructor(userRepo, jwtService, notificationService, emailService) {
+    constructor(userRepo, jwtService, notificationService, userConversationService, emailService) {
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.notificationService = notificationService;
+        this.userConversationService = userConversationService;
         this.emailService = emailService;
     }
     async registerClient(dto) {
@@ -47,6 +49,7 @@ let AuthService = class AuthService {
                 user.accessGranted = true;
                 user.name = dto.name;
                 user.email = dto.email;
+                user.helpNotifPreferences = dto.helpNotifPreferences;
                 user.userType = user_type_constant_1.USER_TYPE.CLIENT.toUpperCase();
                 user.currentOtp = (0, utils_1.generateOTP)();
                 user = await transactionalEntityManager.save(user);
@@ -154,7 +157,9 @@ let AuthService = class AuthService {
                 throw Error(auth_error_constant_1.LOGIN_ERROR_PENDING_ACCESS_REQUEST);
             }
             delete user.password;
-            const totalUnreadNotif = await this.notificationService.getUnreadByUser(user.userId);
+            const unReadNotif = await this.notificationService.getUnreadByUser(user.userId);
+            const unReadMessage = await this.userConversationService.getUnreadByUser(user.userId);
+            const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
             return Object.assign(Object.assign({}, user), { totalUnreadNotif });
         }
         catch (ex) {
@@ -186,7 +191,9 @@ let AuthService = class AuthService {
                 throw Error(auth_error_constant_1.LOGIN_ERROR_PENDING_ACCESS_REQUEST);
             }
             delete user.password;
-            const totalUnreadNotif = await this.notificationService.getUnreadByUser(user.userId);
+            const unReadNotif = await this.notificationService.getUnreadByUser(user.userId);
+            const unReadMessage = await this.userConversationService.getUnreadByUser(user.userId);
+            const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
             return Object.assign(Object.assign({}, user), { totalUnreadNotif });
         }
         catch (ex) {
@@ -309,6 +316,7 @@ AuthService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         jwt_1.JwtService,
         notifications_service_1.NotificationsService,
+        user_conversation_service_1.UserConversationService,
         email_service_1.EmailService])
 ], AuthService);
 exports.AuthService = AuthService;

@@ -21,9 +21,11 @@ import {
 import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
 import { Access } from "src/db/entities/Access";
 import { Files } from "src/db/entities/Files";
+import { Notifications } from "src/db/entities/Notifications";
+import { UserConversation } from "src/db/entities/UserConversation";
 import { UserProfilePic } from "src/db/entities/UserProfilePic";
 import { Users } from "src/db/entities/Users";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { v4 as uuid } from "uuid";
 
 @Injectable()
@@ -408,8 +410,31 @@ export class UsersService {
           },
         },
       });
+      const unReadNotif = await entityManager.count(Notifications, {
+        where: {
+          user: {
+            userId: user.userId,
+            active: true,
+          },
+          isRead: false,
+        },
+      });
+      const unReadMessage = await entityManager.count(UserConversation, {
+        where: {
+          fromUser: {
+            userId: user.userId,
+            active: true,
+          },
+          active: true,
+          status: In(["SENT", "DELIVERED"]),
+        },
+      });
+      const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
       delete user.password;
-      return user;
+      return {
+        ...user,
+        totalUnreadNotif
+      };
     });
   }
 

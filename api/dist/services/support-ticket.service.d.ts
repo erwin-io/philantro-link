@@ -7,11 +7,13 @@ import { UpdateSupportTicketDto, UpdateSupportTicketStatusDto } from "src/core/d
 import { SupportTicketMessageDto } from "src/core/dto/support-ticket/support-ticket-base.dto";
 import { SupportTicketMessage } from "src/db/entities/SupportTicketMessage";
 import { Notifications } from "src/db/entities/Notifications";
+import { UserConversation } from "src/db/entities/UserConversation";
 export declare class SupportTicketService {
     private readonly supportTicketRepo;
     private readonly supportTicketMessageRepo;
+    private readonly userConversationRepo;
     private oneSignalNotificationService;
-    constructor(supportTicketRepo: Repository<SupportTicket>, supportTicketMessageRepo: Repository<SupportTicketMessage>, oneSignalNotificationService: OneSignalNotificationService);
+    constructor(supportTicketRepo: Repository<SupportTicket>, supportTicketMessageRepo: Repository<SupportTicketMessage>, userConversationRepo: Repository<UserConversation>, oneSignalNotificationService: OneSignalNotificationService);
     getPagination({ pageSize, pageIndex, order, columnDef }: {
         pageSize: any;
         pageIndex: any;
@@ -34,7 +36,21 @@ export declare class SupportTicketService {
         }[];
         total: number;
     }>;
-    getByCode(supportTicketCode?: string): Promise<SupportTicket>;
+    getByCode(supportTicketCode?: string, currentUserCode?: string): Promise<{
+        userConversation: any;
+        supportTicketId: string;
+        supportTicketCode: string;
+        title: string;
+        description: string;
+        dateTimeSent: Date;
+        status: string;
+        lastUpdated: Date;
+        type: string;
+        active: boolean;
+        assignedAdminUser: Users;
+        user: Users;
+        supportTicketMessages: SupportTicketMessage[];
+    }>;
     createSupportTicket(dto: CreateSupportTicketDto): Promise<SupportTicket>;
     updateSupportTicket(supportTicketCode: any, dto: UpdateSupportTicketDto): Promise<SupportTicket>;
     updateStatus(supportTicketCode: any, dto: UpdateSupportTicketStatusDto): Promise<SupportTicket>;
@@ -49,6 +65,7 @@ export declare class SupportTicketService {
             message: string;
             dateTimeSent: Date;
             active: boolean;
+            status: string;
             fromUser: Users;
             supportTicket: SupportTicket;
         }[];

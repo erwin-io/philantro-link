@@ -29,6 +29,9 @@ export class SupportTicketMessage {
   @Column("boolean", { name: "Active", default: () => "true" })
   active: boolean;
 
+  @Column("character varying", { name: "Status", default: () => "'SENT'" })
+  status: string;
+
   @ManyToOne(() => Users, (users) => users.supportTicketMessages)
   @JoinColumn([{ name: "FromUserId", referencedColumnName: "userId" }])
   fromUser: Users;

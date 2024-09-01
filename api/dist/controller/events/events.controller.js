@@ -20,6 +20,7 @@ const events_create_dto_1 = require("../../core/dto/events/events.create.dto");
 const events_update_dto_1 = require("../../core/dto/events/events.update.dto");
 const pagination_params_dto_1 = require("../../core/dto/pagination-params.dto");
 const events_service_1 = require("../../services/events.service");
+const path_1 = require("path");
 let EventsController = class EventsController {
     constructor(eventService) {
         this.eventService = eventService;
@@ -35,6 +36,22 @@ let EventsController = class EventsController {
             res.success = false;
             res.message = e.message !== undefined ? e.message : e;
             return res;
+        }
+    }
+    async getEventThumbnail(eventCode, res) {
+        const file = await this.eventService.getEventThumbnailFile(eventCode);
+        if (file) {
+            const extName = (0, path_1.extname)(file.fileName);
+            const filePath = `events/${eventCode}/${file.guid}${extName}`;
+            const fileContent = await this.eventService.getEventThumbnailContent(filePath);
+            res.set({
+                "Content-Type": `img/${extName.split(".")[1]}`,
+                "Content-Disposition": `attachment; filename="${file.fileName}"`,
+            });
+            res.send(fileContent);
+        }
+        else {
+            res.send(null);
         }
     }
     async getPaginated(params) {
@@ -190,6 +207,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getDetails", null);
+__decorate([
+    (0, common_1.Get)("thumbnail/:eventCode"),
+    __param(0, (0, common_1.Param)("eventCode")),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getEventThumbnail", null);
 __decorate([
     (0, common_1.Post)("/page"),
     __param(0, (0, common_1.Body)()),

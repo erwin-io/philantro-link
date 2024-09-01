@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsNumberString,
+  IsOptional,
   Matches,
   ValidateNested,
 } from "class-validator";
@@ -40,4 +41,9 @@ export class DefaultEventDto {
   @ValidateNested()
   eventLocMap: MapDto;
   
+  @ApiProperty({
+    isArray: true,
+  })
+  @IsOptional()
+  eventImages: any[] = [];
 }

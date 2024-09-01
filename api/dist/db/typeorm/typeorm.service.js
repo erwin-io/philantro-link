@@ -27,6 +27,7 @@ const Interested_1 = require("../entities/Interested");
 const Responded_1 = require("../entities/Responded");
 const SupportTicket_1 = require("../entities/SupportTicket");
 const SupportTicketMessage_1 = require("../entities/SupportTicketMessage");
+const UserConversation_1 = require("../entities/UserConversation");
 let TypeOrmConfigService = class TypeOrmConfigService {
     createTypeOrmOptions() {
         const ssl = this.config.get("SSL");
@@ -52,7 +53,8 @@ let TypeOrmConfigService = class TypeOrmConfigService {
                 Interested_1.Interested,
                 Responded_1.Responded,
                 SupportTicket_1.SupportTicket,
-                SupportTicketMessage_1.SupportTicketMessage
+                SupportTicketMessage_1.SupportTicketMessage,
+                UserConversation_1.UserConversation
             ],
             synchronize: false,
             ssl: ssl.toLocaleLowerCase().includes("true"),

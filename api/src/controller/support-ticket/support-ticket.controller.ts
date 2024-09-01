@@ -33,10 +33,21 @@ export class SupportTicketController {
 
   @Get("/:supportTicketCode")
   //   @UseGuards(JwtAuthGuard)
-  async getDetails(@Param("supportTicketCode") supportTicketCode: string) {
+  @ApiQuery({
+    name: "currentUserCode",
+    required: false,
+    description: "Current User code",
+  })
+  async getDetails(
+    @Param("supportTicketCode") supportTicketCode: string,
+    @Query("currentUserCode") currentUserCode
+  ) {
     const res = {} as ApiResponseModel<SupportTicket>;
     try {
-      res.data = await this.supportTicketService.getByCode(supportTicketCode);
+      res.data = await this.supportTicketService.getByCode(
+        supportTicketCode,
+        currentUserCode
+      );
       res.success = true;
       return res;
     } catch (e) {

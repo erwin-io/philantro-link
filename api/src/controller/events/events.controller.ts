@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
 } from "@nestjs/common";
 import { ApiBody, ApiQuery, ApiTags } from "@nestjs/swagger";
 import {
@@ -31,6 +32,9 @@ import { PaginationParamsDto } from "src/core/dto/pagination-params.dto";
 import { ApiResponseModel } from "src/core/models/api-response.model";
 import { Events } from "src/db/entities/Events";
 import { EventsService } from "src/services/events.service";
+import { createReadStream } from "fs";
+import { Response } from "express";
+import { extname } from "path";
 
 @ApiTags("events")
 @Controller("events")
@@ -57,6 +61,29 @@ export class EventsController {
       res.success = false;
       res.message = e.message !== undefined ? e.message : e;
       return res;
+    }
+  }
+
+  @Get("thumbnail/:eventCode")
+  //   @UseGuards(JwtAuthGuard)
+  async getEventThumbnail(
+    @Param("eventCode") eventCode: string,
+    @Res() res: Response
+  ) {
+    const file = await this.eventService.getEventThumbnailFile(eventCode);
+    if (file) {
+      const extName = extname(file.fileName);
+      const filePath = `events/${eventCode}/${file.guid}${extName}`;
+      const fileContent = await this.eventService.getEventThumbnailContent(
+        filePath
+      );
+      res.set({
+        "Content-Type": `img/${extName.split(".")[1]}`,
+        "Content-Disposition": `attachment; filename="${file.fileName}"`,
+      });
+      res.send(fileContent);
+    } else {
+      res.send(null);
     }
   }
 

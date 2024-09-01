@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const firebaseConfig = __importStar(require("./philantrolinkapp-a7823-firebase-adminsdk-y1ggy-a6f268ec97.json"));
+const firebaseConfig = __importStar(require("./philantrolinkapp-a7823-firebase-adminsdk-y1ggy-a6d9328e1a.json"));
 exports.default = {
     type: firebaseConfig.type,
     projectId: firebaseConfig.project_id,

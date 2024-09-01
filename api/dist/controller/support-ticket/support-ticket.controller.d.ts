@@ -9,7 +9,7 @@ import { SupportTicketService } from "src/services/support-ticket.service";
 export declare class SupportTicketController {
     private readonly supportTicketService;
     constructor(supportTicketService: SupportTicketService);
-    getDetails(supportTicketCode: string): Promise<ApiResponseModel<SupportTicket>>;
+    getDetails(supportTicketCode: string, currentUserCode: any): Promise<ApiResponseModel<SupportTicket>>;
     getPaginated(params: PaginationParamsDto): Promise<ApiResponseModel<{
         results: SupportTicket[];
         total: number;

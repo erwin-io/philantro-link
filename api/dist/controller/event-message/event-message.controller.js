@@ -19,13 +19,13 @@ const event_message_create_dto_1 = require("../../core/dto/event-message/event-m
 const pagination_params_dto_1 = require("../../core/dto/pagination-params.dto");
 const event_message_service_1 = require("../../services/event-message.service");
 let EventMessageController = class EventMessageController {
-    constructor(bookingConversationService) {
-        this.bookingConversationService = bookingConversationService;
+    constructor(eventMessageService) {
+        this.eventMessageService = eventMessageService;
     }
     async getPaginated(params) {
         const res = {};
         try {
-            res.data = await this.bookingConversationService.getPagination(params);
+            res.data = await this.eventMessageService.getPagination(params);
             res.success = true;
             return res;
         }
@@ -38,7 +38,7 @@ let EventMessageController = class EventMessageController {
     async create(params) {
         const res = {};
         try {
-            res.data = await this.bookingConversationService.create(params);
+            res.data = await this.eventMessageService.create(params);
             res.success = true;
             return res;
         }

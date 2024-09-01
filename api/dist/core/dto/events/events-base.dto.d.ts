@@ -4,4 +4,5 @@ export declare class DefaultEventDto {
     eventDesc: string;
     eventLocName: string;
     eventLocMap: MapDto;
+    eventImages: any[];
 }

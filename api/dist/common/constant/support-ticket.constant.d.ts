@@ -3,6 +3,7 @@ export declare const SUPPORT_TICKET_MESSAGE_ERROR_NOT_FOUND = "Support ticket me
 export declare const SUPPORT_TICKET_TYPE: {
     EVENTS: string;
     DONATIONS: string;
+    OTHERS: string;
 };
 export declare const SUPPORT_TICKET_STATUS: {
     OPEN: string;

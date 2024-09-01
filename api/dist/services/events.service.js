@@ -34,9 +34,19 @@ const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const Interested_1 = require("../db/entities/Interested");
 const Responded_1 = require("../db/entities/Responded");
 const payment_constant_1 = require("../common/constant/payment.constant");
+const uuid_1 = require("uuid");
+const firebase_provider_1 = require("../core/provider/firebase/firebase-provider");
+const Files_1 = require("../db/entities/Files");
+const EventImage_1 = require("../db/entities/EventImage");
+const path_1 = require("path");
+const EventMessage_1 = require("../db/entities/EventMessage");
+const UserConversation_1 = require("../db/entities/UserConversation");
 let EventsService = class EventsService {
-    constructor(eventRepo, oneSignalNotificationService) {
+    constructor(eventRepo, userConversationRepo, notificationsRepo, firebaseProvoder, oneSignalNotificationService) {
         this.eventRepo = eventRepo;
+        this.userConversationRepo = userConversationRepo;
+        this.notificationsRepo = notificationsRepo;
+        this.firebaseProvoder = firebaseProvoder;
         this.oneSignalNotificationService = oneSignalNotificationService;
     }
     async getPagination({ pageSize, pageIndex, order, columnDef }) {
@@ -55,6 +65,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -134,7 +145,7 @@ let EventsService = class EventsService {
             results: results.map((res) => {
                 var _a, _b, _c, _d;
                 (_a = res.user) === null || _a === void 0 ? true : delete _a.password;
-                return Object.assign(Object.assign({}, res), { interested: others.some((e) => e.eventId === res.eventId)
+                return Object.assign(Object.assign({}, res), { eventImages: res.eventImages.filter((x) => x.active), interested: others.some((e) => e.eventId === res.eventId)
                         ? Number((_b = others.find((e) => e.eventId === res.eventId)) === null || _b === void 0 ? void 0 : _b.interested)
                         : 0, responded: others.some((e) => e.eventId === res.eventId)
                         ? Number((_c = others.find((e) => e.eventId === res.eventId)) === null || _c === void 0 ? void 0 : _c.responded)
@@ -146,7 +157,7 @@ let EventsService = class EventsService {
         };
     }
     async getByCode(eventCode = "", currentUserCode = "") {
-        var _a, _b;
+        var _a, _b, _c, _d;
         const result = await this.eventRepo.findOne({
             where: {
                 eventCode: (_a = eventCode === null || eventCode === void 0 ? void 0 : eventCode.toString()) === null || _a === void 0 ? void 0 : _a.toLowerCase(),
@@ -157,6 +168,7 @@ let EventsService = class EventsService {
                         file: true,
                     },
                 },
+                thumbnailFile: true,
                 eventImages: {
                     file: true,
                 },
@@ -165,57 +177,148 @@ let EventsService = class EventsService {
         if (!result) {
             throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
         }
-        const interested = await this.eventRepo
-            .query(`SELECT COUNT("EventId") FROM dbo."Interested" WHERE "EventId" = ${result.eventId}`)
-            .then((res) => {
-            var _a;
-            return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
-        });
-        const responded = await this.eventRepo
-            .query(`SELECT COUNT("EventId") FROM dbo."Responded" WHERE "EventId" = ${result.eventId}`)
-            .then((res) => {
-            var _a;
-            return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
-        });
-        let raisedDonation = 0;
-        raisedDonation = await this.eventRepo
-            .query(`SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "EventId" = ${result.eventId}`)
-            .then((res) => {
-            var _a;
-            return res[0] ? (_a = res[0]["sum"]) !== null && _a !== void 0 ? _a : 0 : 0;
-        });
+        const [interested, responded, raisedDonation, ownerUnReadMessage, ownerUnReadNotif,] = await Promise.all([
+            this.eventRepo
+                .query(`SELECT COUNT("EventId") FROM dbo."Interested" WHERE "EventId" = ${result.eventId}`)
+                .then((res) => {
+                var _a;
+                return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
+            }),
+            this.eventRepo
+                .query(`SELECT COUNT("EventId") FROM dbo."Responded" WHERE "EventId" = ${result.eventId}`)
+                .then((res) => {
+                var _a;
+                return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
+            }),
+            this.eventRepo
+                .query(`SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "EventId" = ${result.eventId}`)
+                .then((res) => {
+                var _a;
+                return res[0] ? (_a = res[0]["sum"]) !== null && _a !== void 0 ? _a : 0 : 0;
+            }),
+            this.userConversationRepo.count({
+                where: {
+                    referenceId: eventCode,
+                    fromUser: {
+                        userId: (_b = result === null || result === void 0 ? void 0 : result.user) === null || _b === void 0 ? void 0 : _b.userId,
+                    },
+                    status: (0, typeorm_2.In)(["SENT", "DELIVERED"]),
+                },
+            }),
+            this.notificationsRepo.count({
+                where: {
+                    referenceId: eventCode,
+                    user: {
+                        userId: (_c = result === null || result === void 0 ? void 0 : result.user) === null || _c === void 0 ? void 0 : _c.userId,
+                    },
+                    isRead: false,
+                },
+            }),
+        ]);
         let isCurrentUserInterested = false;
         let isCurrentUserResponded = false;
+        let visitorUserConversation;
+        let visitorUnReadMessage = 0;
         if (currentUserCode && currentUserCode !== "") {
-            const interestedCount = await this.eventRepo.manager.count(Interested_1.Interested, {
-                where: {
-                    user: {
-                        userCode: currentUserCode,
+            const [interestedCount, respondedCount, _visitorUnReadMessage, _visitorUserConversation,] = await Promise.all([
+                this.eventRepo.manager.count(Interested_1.Interested, {
+                    where: {
+                        user: {
+                            userCode: currentUserCode,
+                        },
+                        event: {
+                            eventCode: result.eventCode,
+                        },
                     },
-                    event: {
-                        eventCode: result.eventCode,
+                }),
+                this.eventRepo.manager.count(Responded_1.Responded, {
+                    where: {
+                        user: {
+                            userCode: currentUserCode,
+                        },
+                        event: {
+                            eventCode: result.eventCode,
+                        },
                     },
-                },
-            });
+                }),
+                this.eventRepo.manager.count(EventMessage_1.EventMessage, {
+                    where: {
+                        toUser: {
+                            userCode: currentUserCode,
+                        },
+                        status: (0, typeorm_2.In)(["SENT", "DELIVERED"]),
+                        event: {
+                            eventCode: result.eventCode,
+                        },
+                    },
+                }),
+                this.userConversationRepo.findOne({
+                    where: {
+                        referenceId: eventCode,
+                        fromUser: {
+                            userCode: currentUserCode,
+                        },
+                    },
+                    relations: {
+                        fromUser: true,
+                        toUser: true,
+                    },
+                }),
+            ]);
             isCurrentUserInterested = interestedCount > 0;
-            const respondedCount = await this.eventRepo.manager.count(Responded_1.Responded, {
-                where: {
-                    user: {
-                        userCode: currentUserCode,
-                    },
-                    event: {
-                        eventCode: result.eventCode,
-                    },
-                },
-            });
             isCurrentUserResponded = respondedCount > 0;
+            visitorUnReadMessage = _visitorUnReadMessage;
+            visitorUserConversation = _visitorUserConversation;
         }
-        (_b = result.user) === null || _b === void 0 ? true : delete _b.password;
-        return Object.assign(Object.assign({}, result), { interested,
+        result.eventImages = result.eventImages.filter((x) => x.active);
+        (_d = result.user) === null || _d === void 0 ? true : delete _d.password;
+        return Object.assign(Object.assign({}, result), { visitorUnReadMessage: !isNaN(Number(visitorUnReadMessage))
+                ? Number(visitorUnReadMessage)
+                : 0, interested,
             responded,
             raisedDonation,
             isCurrentUserResponded,
-            isCurrentUserInterested });
+            isCurrentUserInterested,
+            visitorUserConversation, ownerUnReadNotifications: Number(ownerUnReadMessage) + Number(ownerUnReadNotif), ownerUnReadMessage,
+            ownerUnReadNotif });
+    }
+    async getEventThumbnailFile(eventCode = "") {
+        var _a;
+        const result = await this.eventRepo.findOne({
+            where: {
+                eventCode: (_a = eventCode === null || eventCode === void 0 ? void 0 : eventCode.toString()) === null || _a === void 0 ? void 0 : _a.toLowerCase(),
+            },
+            relations: {
+                thumbnailFile: true,
+            },
+        });
+        return result === null || result === void 0 ? void 0 : result.thumbnailFile;
+    }
+    async getEventThumbnailContent(path = "") {
+        if (path && path !== "") {
+            const bucket = this.firebaseProvoder.app.storage().bucket();
+            const file = bucket.file(path);
+            const [exists] = await file.exists();
+            if (!exists) {
+                throw new Error("File does not exist");
+            }
+            return new Promise((resolve, reject) => {
+                const fileStream = file.createReadStream();
+                const chunks = [];
+                fileStream.on("data", (chunk) => {
+                    chunks.push(chunk);
+                });
+                fileStream.on("end", () => {
+                    resolve(Buffer.concat(chunks));
+                });
+                fileStream.on("error", (err) => {
+                    reject(err);
+                });
+            });
+        }
+        else {
+            return null;
+        }
     }
     async createCharityVolunteerEvent(dto) {
         return await this.eventRepo.manager.transaction(async (entityManager) => {
@@ -253,6 +356,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -285,6 +389,7 @@ let EventsService = class EventsService {
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
+            await this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -333,6 +438,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -365,6 +471,7 @@ let EventsService = class EventsService {
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
+            await this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -409,6 +516,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -434,7 +542,7 @@ let EventsService = class EventsService {
           FROM dbo."Users"
           WHERE ARRAY[${dto.eventAssistanceItems
                 .map((x) => "'" + x + "'")
-                .join(",")}]::character varying[] && "AssistanceType" AND "Active" = true
+                .join(",")}]::character varying[] && "HelpNotifPreferences" AND "Active" = true
         )
         SELECT "userId" from nearby 
         UNION 
@@ -458,6 +566,7 @@ let EventsService = class EventsService {
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
+            await this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -475,15 +584,18 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
-                    eventImages: {
-                        file: true,
-                    },
                 },
             });
             event.eventName = dto.eventName;
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
+            const timestamp = await entityManager
+                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
+                .then((res) => {
+                return res[0]["timestamp"];
+            });
+            event.dateTimeUpdate = timestamp;
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -495,6 +607,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -503,6 +616,7 @@ let EventsService = class EventsService {
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
+            await this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -520,9 +634,6 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
-                    eventImages: {
-                        file: true,
-                    },
                 },
             });
             event.eventName = dto.eventName;
@@ -538,6 +649,12 @@ let EventsService = class EventsService {
             event.transferType = dto.transferType;
             event.transferAccountNumber = dto.transferAccountNumber;
             event.transferAccountName = dto.transferAccountName;
+            const timestamp = await entityManager
+                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
+                .then((res) => {
+                return res[0]["timestamp"];
+            });
+            event.dateTimeUpdate = timestamp;
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -549,6 +666,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -557,6 +675,7 @@ let EventsService = class EventsService {
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
+            await this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -574,15 +693,18 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
-                    eventImages: {
-                        file: true,
-                    },
                 },
             });
             event.eventName = dto.eventName;
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
+            const timestamp = await entityManager
+                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
+                .then((res) => {
+                return res[0]["timestamp"];
+            });
+            event.dateTimeUpdate = timestamp;
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -594,6 +716,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -602,6 +725,7 @@ let EventsService = class EventsService {
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
+            await this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -619,11 +743,11 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
-                    eventImages: {
-                        file: true,
-                    },
                 },
             });
+            if (!event) {
+                throw new Error("The event was not found!");
+            }
             if ((event.eventStatus !== events_constant_1.EVENT_STATUS.PENDING &&
                 event.eventStatus !== events_constant_1.EVENT_STATUS.APPROVED &&
                 !event.inProgress) ||
@@ -639,7 +763,28 @@ let EventsService = class EventsService {
             if (dto.status === events_constant_1.EVENT_STATUS.COMPLETED && !event.inProgress) {
                 throw new Error("The event was not yet started!");
             }
-            event.eventStatus = dto.status;
+            if ((event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE && dto.status === events_constant_1.EVENT_STATUS.APPROVED) {
+                event.inProgress = true;
+                event.eventStatus = dto.status;
+            }
+            else if ((event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE && dto.status === events_constant_1.EVENT_STATUS.COMPLETED) {
+                event.inProgress = false;
+                event.eventStatus = dto.status;
+            }
+            if (dto.status === events_constant_1.EVENT_STATUS.INPROGRESS && (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE) {
+                event.inProgress = true;
+                event.eventStatus = events_constant_1.EVENT_STATUS.APPROVED;
+            }
+            else if ((event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE) {
+                event.eventStatus = dto.status;
+                event.inProgress = false;
+            }
+            const timestamp = await entityManager
+                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
+                .then((res) => {
+                return res[0]["timestamp"];
+            });
+            event.dateTimeUpdate = timestamp;
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -651,6 +796,7 @@ let EventsService = class EventsService {
                             file: true,
                         },
                     },
+                    thumbnailFile: true,
                     eventImages: {
                         file: true,
                     },
@@ -716,6 +862,7 @@ let EventsService = class EventsService {
                         userCode: dto.userCode,
                     },
                     event: {
+                        thumbnailFile: true,
                         eventCode: eventCode,
                     },
                 },
@@ -746,6 +893,7 @@ let EventsService = class EventsService {
                                 userCode: dto.userCode,
                             },
                             event: {
+                                thumbnailFile: true,
                                 eventCode: eventCode,
                             },
                         },
@@ -846,6 +994,158 @@ let EventsService = class EventsService {
             return Object.assign(Object.assign({}, event), { responded: respondedCount });
         });
     }
+    async saveEventImages(entityManager, event, eventImages = []) {
+        const bucket = this.firebaseProvoder.app.storage().bucket();
+        let currentBucketFilePath = null;
+        const files = [];
+        try {
+            if (eventImages && eventImages.length > 0) {
+                for (const image of eventImages) {
+                    const newGUID = (0, uuid_1.v4)();
+                    if (image && image.new && !image.delete) {
+                        currentBucketFilePath = `events/${event.eventCode}/${newGUID}${(0, path_1.extname)(image.fileName)}`;
+                        const bucketFile = bucket.file(currentBucketFilePath);
+                        const img = Buffer.from(image.data, "base64");
+                        await bucketFile.save(img).then(async (res) => {
+                            console.log("res");
+                            console.log(res);
+                            const url = await bucketFile.getSignedUrl({
+                                action: "read",
+                                expires: "03-09-2500",
+                            });
+                            let file = new Files_1.Files();
+                            file.url = url[0];
+                            file.fileName = image.fileName;
+                            file.guid = newGUID;
+                            file = await entityManager.save(Files_1.Files, file);
+                            let eventImage = new EventImage_1.EventImage();
+                            eventImage.event = event;
+                            eventImage.file = file;
+                            eventImage.user = event.user;
+                            eventImage = await entityManager.save(EventImage_1.EventImage, eventImage);
+                            files.push(file);
+                        });
+                    }
+                    else if (!image.delete) {
+                        const eventImage = await entityManager.findOne(EventImage_1.EventImage, {
+                            where: { fileId: image.fileId },
+                            relations: {
+                                file: true,
+                            },
+                        });
+                        if (eventImage) {
+                            currentBucketFilePath = null;
+                            try {
+                                const deleteFile = bucket.file(`events/${event.eventCode}/${eventImage.file.guid}${(0, path_1.extname)(eventImage.file.fileName)}`);
+                                const exists = await deleteFile.exists();
+                                if (exists[0]) {
+                                    deleteFile.delete();
+                                }
+                            }
+                            catch (ex) {
+                                console.log(ex);
+                            }
+                        }
+                        else {
+                            eventImage.file = new Files_1.Files();
+                            eventImage.file.guid = newGUID;
+                        }
+                        let file = eventImage.file;
+                        currentBucketFilePath = `events/${event.eventCode}/${eventImage.file.guid}${(0, path_1.extname)(image.fileName)}`;
+                        const bucketFile = bucket.file(currentBucketFilePath);
+                        const img = Buffer.from(image.data, "base64");
+                        await bucketFile.save(img).then(async (res) => {
+                            console.log("res");
+                            console.log(res);
+                            const url = await bucketFile.getSignedUrl({
+                                action: "read",
+                                expires: "03-09-2500",
+                            });
+                            file.url = url[0];
+                            file.fileName = image.fileName;
+                            files.push(file);
+                            file = await entityManager.save(Files_1.Files, file);
+                        });
+                    }
+                    else {
+                        const eventImage = await entityManager.findOne(EventImage_1.EventImage, {
+                            where: { fileId: image.fileId },
+                            relations: {
+                                file: true,
+                            },
+                        });
+                        if (eventImage) {
+                            try {
+                                const deleteFile = bucket.file(`events/${event.eventCode}/${eventImage.file.guid}${(0, path_1.extname)(eventImage.file.fileName)}`);
+                                const exists = await deleteFile.exists();
+                                if (exists[0]) {
+                                    deleteFile.delete();
+                                }
+                            }
+                            catch (ex) {
+                                console.log(ex);
+                            }
+                            eventImage.active = false;
+                            await entityManager.save(EventImage_1.EventImage, eventImage);
+                        }
+                    }
+                }
+                const currentImages = await entityManager.find(EventImage_1.EventImage, {
+                    where: {
+                        eventId: event.eventId,
+                        active: true,
+                    },
+                    relations: {
+                        file: true,
+                    },
+                });
+                if (files.filter((x) => !x.delete).length > 0 &&
+                    currentImages.length > 0) {
+                    event = await entityManager.findOne(Events_1.Events, {
+                        where: {
+                            eventId: event.eventId,
+                        },
+                    });
+                    event.thumbnailFile = files[0];
+                    await entityManager.save(Events_1.Events, event);
+                }
+                else if (files.filter((x) => x.delete).length > 0 &&
+                    currentImages.length > 0) {
+                    event = await entityManager.findOne(Events_1.Events, {
+                        where: {
+                            eventId: event.eventId,
+                        },
+                    });
+                    event.thumbnailFile = currentImages[0].file;
+                    await entityManager.save(Events_1.Events, event);
+                }
+                else if (currentImages.length === 0) {
+                    event = await entityManager.findOne(Events_1.Events, {
+                        where: {
+                            eventId: event.eventId,
+                        },
+                    });
+                    event.thumbnailFile = null;
+                    await entityManager.save(Events_1.Events, event);
+                }
+            }
+        }
+        catch (ex) {
+            try {
+                if (currentBucketFilePath && currentBucketFilePath !== "") {
+                    const deleteFile = bucket.file(currentBucketFilePath);
+                    const exists = await deleteFile.exists();
+                    if (exists[0]) {
+                        deleteFile.delete();
+                    }
+                }
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+            throw ex;
+        }
+    }
     async logNotification(userIds, data, entityManager, title, description) {
         const notifications = [];
         const users = await entityManager.find(Users_1.Users, {
@@ -880,7 +1180,12 @@ let EventsService = class EventsService {
 EventsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(Events_1.Events)),
+    __param(1, (0, typeorm_1.InjectRepository)(UserConversation_1.UserConversation)),
+    __param(2, (0, typeorm_1.InjectRepository)(Notifications_1.Notifications)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        firebase_provider_1.FirebaseProvider,
         one_signal_notification_service_1.OneSignalNotificationService])
 ], EventsService);
 exports.EventsService = EventsService;

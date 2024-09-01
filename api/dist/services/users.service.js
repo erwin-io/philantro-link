@@ -22,6 +22,8 @@ const user_error_constant_1 = require("../common/constant/user-error.constant");
 const firebase_provider_1 = require("../core/provider/firebase/firebase-provider");
 const Access_1 = require("../db/entities/Access");
 const Files_1 = require("../db/entities/Files");
+const Notifications_1 = require("../db/entities/Notifications");
+const UserConversation_1 = require("../db/entities/UserConversation");
 const UserProfilePic_1 = require("../db/entities/UserProfilePic");
 const Users_1 = require("../db/entities/Users");
 const typeorm_2 = require("typeorm");
@@ -338,8 +340,28 @@ let UsersService = class UsersService {
                     },
                 },
             });
+            const unReadNotif = await entityManager.count(Notifications_1.Notifications, {
+                where: {
+                    user: {
+                        userId: user.userId,
+                        active: true,
+                    },
+                    isRead: false,
+                },
+            });
+            const unReadMessage = await entityManager.count(UserConversation_1.UserConversation, {
+                where: {
+                    fromUser: {
+                        userId: user.userId,
+                        active: true,
+                    },
+                    active: true,
+                    status: (0, typeorm_2.In)(["SENT", "DELIVERED"]),
+                },
+            });
+            const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
             delete user.password;
-            return user;
+            return Object.assign(Object.assign({}, user), { totalUnreadNotif });
         });
     }
     async updateProfilePicture(userCode, dto) {

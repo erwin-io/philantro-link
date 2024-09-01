@@ -17,6 +17,7 @@ import { Responded } from "./Responded";
 import { SupportTicket } from "./SupportTicket";
 import { SupportTicketMessage } from "./SupportTicketMessage";
 import { Transactions } from "./Transactions";
+import { UserConversation } from "./UserConversation";
 import { UserOneSignalSubscription } from "./UserOneSignalSubscription";
 import { UserProfilePic } from "./UserProfilePic";
 import { Access } from "./Access";
@@ -106,6 +107,18 @@ export class Users {
 
   @OneToMany(() => Transactions, (transactions) => transactions.user)
   transactions: Transactions[];
+
+  @OneToMany(
+    () => UserConversation,
+    (userConversation) => userConversation.fromUser
+  )
+  userConversations: UserConversation[];
+
+  @OneToMany(
+    () => UserConversation,
+    (userConversation) => userConversation.toUser
+  )
+  userConversations2: UserConversation[];
 
   @OneToMany(
     () => UserOneSignalSubscription,

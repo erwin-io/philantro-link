@@ -2,10 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { columnDefToTypeORMCondition } from "src/common/utils/utils";
 import { Notifications } from "src/db/entities/Notifications";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { PusherService } from "./pusher.service";
 import { OneSignalNotificationService } from "./one-signal-notification.service";
 import { Users } from "src/db/entities/Users";
+import { UserConversation } from "src/db/entities/UserConversation";
 
 @Injectable()
 export class NotificationsService {
@@ -55,7 +56,7 @@ export class NotificationsService {
         });
         notification.isRead = true;
         notification = await entityManager.save(Notifications, notification);
-        const totalUnreadNotif = await entityManager.count(Notifications, {
+        const unReadNotif = await entityManager.count(Notifications, {
           where: {
             user: {
               userId: notification.user.userId,
@@ -64,6 +65,17 @@ export class NotificationsService {
             isRead: false,
           },
         });
+        const unReadMessage = await entityManager.count(UserConversation, {
+          where: {
+            fromUser: {
+              userId: notification.user.userId,
+              active: true,
+            },
+            active: true,
+            status: In(["SENT", "DELIVERED"]),
+          },
+        });
+        const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
         return {
           ...notification,
           totalUnreadNotif,

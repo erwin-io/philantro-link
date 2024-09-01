@@ -33,6 +33,7 @@ export declare class DashboardService {
         transferAccountName: string;
         donationTargetAmount: string;
         inProgress: boolean;
+        dateTimeUpdate: Date;
         eventImages: import("../db/entities/EventImage").EventImage[];
         eventMessages: import("../db/entities/EventMessage").EventMessage[];
         thumbnailFile: import("../db/entities/Files").Files;
@@ -62,6 +63,7 @@ export declare class DashboardService {
             transferAccountName: string;
             donationTargetAmount: string;
             inProgress: boolean;
+            dateTimeUpdate: Date;
             eventImages: import("../db/entities/EventImage").EventImage[];
             eventMessages: import("../db/entities/EventMessage").EventMessage[];
             thumbnailFile: import("../db/entities/Files").Files;
@@ -90,6 +92,7 @@ export declare class DashboardService {
             transferAccountName: string;
             donationTargetAmount: string;
             inProgress: boolean;
+            dateTimeUpdate: Date;
             eventImages: import("../db/entities/EventImage").EventImage[];
             eventMessages: import("../db/entities/EventMessage").EventMessage[];
             thumbnailFile: import("../db/entities/Files").Files;

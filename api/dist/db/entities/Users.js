@@ -20,6 +20,7 @@ const Responded_1 = require("./Responded");
 const SupportTicket_1 = require("./SupportTicket");
 const SupportTicketMessage_1 = require("./SupportTicketMessage");
 const Transactions_1 = require("./Transactions");
+const UserConversation_1 = require("./UserConversation");
 const UserOneSignalSubscription_1 = require("./UserOneSignalSubscription");
 const UserProfilePic_1 = require("./UserProfilePic");
 const Access_1 = require("./Access");
@@ -125,6 +126,14 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => Transactions_1.Transactions, (transactions) => transactions.user),
     __metadata("design:type", Array)
 ], Users.prototype, "transactions", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => UserConversation_1.UserConversation, (userConversation) => userConversation.fromUser),
+    __metadata("design:type", Array)
+], Users.prototype, "userConversations", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => UserConversation_1.UserConversation, (userConversation) => userConversation.toUser),
+    __metadata("design:type", Array)
+], Users.prototype, "userConversations2", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => UserOneSignalSubscription_1.UserOneSignalSubscription, (userOneSignalSubscription) => userOneSignalSubscription.user),
     __metadata("design:type", Array)

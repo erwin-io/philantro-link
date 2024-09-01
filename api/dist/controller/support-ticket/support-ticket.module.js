@@ -16,6 +16,7 @@ const one_signal_notification_service_1 = require("../../services/one-signal-not
 const SupportTicket_1 = require("../../db/entities/SupportTicket");
 const support_ticket_service_1 = require("../../services/support-ticket.service");
 const SupportTicketMessage_1 = require("../../db/entities/SupportTicketMessage");
+const UserConversation_1 = require("../../db/entities/UserConversation");
 let SupportTicketModule = class SupportTicketModule {
 };
 SupportTicketModule = __decorate([
@@ -23,7 +24,11 @@ SupportTicketModule = __decorate([
         imports: [
             firebase_provider_module_1.FirebaseProviderModule,
             axios_1.HttpModule,
-            typeorm_1.TypeOrmModule.forFeature([SupportTicket_1.SupportTicket, SupportTicketMessage_1.SupportTicketMessage]),
+            typeorm_1.TypeOrmModule.forFeature([
+                SupportTicket_1.SupportTicket,
+                SupportTicketMessage_1.SupportTicketMessage,
+                UserConversation_1.UserConversation,
+            ]),
         ],
         controllers: [support_ticket_controller_1.SupportTicketController],
         providers: [support_ticket_service_1.SupportTicketService, one_signal_notification_service_1.OneSignalNotificationService],

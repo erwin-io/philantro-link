@@ -15,6 +15,9 @@ const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const map_dto_1 = require("../map/map.dto");
 class DefaultEventDto {
+    constructor() {
+        this.eventImages = [];
+    }
 }
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -48,5 +51,12 @@ __decorate([
     (0, class_validator_1.ValidateNested)(),
     __metadata("design:type", map_dto_1.MapDto)
 ], DefaultEventDto.prototype, "eventLocMap", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        isArray: true,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], DefaultEventDto.prototype, "eventImages", void 0);
 exports.DefaultEventDto = DefaultEventDto;
 //# sourceMappingURL=events-base.dto.js.map

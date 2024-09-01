@@ -16,6 +16,7 @@ import { Interested } from "../entities/Interested";
 import { Responded } from "../entities/Responded";
 import { SupportTicket } from "../entities/SupportTicket";
 import { SupportTicketMessage } from "../entities/SupportTicketMessage";
+import { UserConversation } from "../entities/UserConversation";
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -46,7 +47,8 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         Interested,
         Responded,
         SupportTicket,
-        SupportTicketMessage
+        SupportTicketMessage,
+        UserConversation
       ],
       synchronize: false, // never use TRUE in production!
       ssl: ssl.toLocaleLowerCase().includes("true"),

@@ -35,6 +35,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], SupportTicketMessage.prototype, "active", void 0);
 __decorate([
+    (0, typeorm_1.Column)("character varying", { name: "Status", default: () => "'SENT'" }),
+    __metadata("design:type", String)
+], SupportTicketMessage.prototype, "status", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => Users_1.Users, (users) => users.supportTicketMessages),
     (0, typeorm_1.JoinColumn)([{ name: "FromUserId", referencedColumnName: "userId" }]),
     __metadata("design:type", Users_1.Users)

@@ -4,8 +4,8 @@ import { ApiResponseModel } from "src/core/models/api-response.model";
 import { EventMessage } from "src/db/entities/EventMessage";
 import { EventMessageService } from "src/services/event-message.service";
 export declare class EventMessageController {
-    private readonly bookingConversationService;
-    constructor(bookingConversationService: EventMessageService);
+    private readonly eventMessageService;
+    constructor(eventMessageService: EventMessageService);
     getPaginated(params: PaginationParamsDto): Promise<ApiResponseModel<{
         results: EventMessage[];
         total: number;

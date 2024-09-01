@@ -20,6 +20,7 @@ const Users_1 = require("../../db/entities/Users");
 const notifications_module_1 = require("../notifications/notifications.module");
 const firebase_provider_module_1 = require("../../core/provider/firebase/firebase-provider.module");
 const email_service_1 = require("../../services/email.service");
+const user_conversation_module_1 = require("../user-conversation/user-conversation.module");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
@@ -28,6 +29,7 @@ AuthModule = __decorate([
             firebase_provider_module_1.FirebaseProviderModule,
             users_module_1.UsersModule,
             notifications_module_1.NotificationsModule,
+            user_conversation_module_1.UserConversationModule,
             passport_1.PassportModule.register({}),
             jwt_1.JwtModule.register({}),
             typeorm_1.TypeOrmModule.forFeature([Users_1.Users]),

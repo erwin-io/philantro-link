@@ -86,6 +86,12 @@ export class Events {
   })
   inProgress: boolean | null;
 
+  @Column("timestamp with time zone", {
+    name: "DateTimeUpdate",
+    nullable: true,
+  })
+  dateTimeUpdate: Date | null;
+
   @OneToMany(() => EventImage, (eventImage) => eventImage.event)
   eventImages: EventImage[];
 

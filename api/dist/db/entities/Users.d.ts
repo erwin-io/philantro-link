@@ -7,6 +7,7 @@ import { Responded } from "./Responded";
 import { SupportTicket } from "./SupportTicket";
 import { SupportTicketMessage } from "./SupportTicketMessage";
 import { Transactions } from "./Transactions";
+import { UserConversation } from "./UserConversation";
 import { UserOneSignalSubscription } from "./UserOneSignalSubscription";
 import { UserProfilePic } from "./UserProfilePic";
 import { Access } from "./Access";
@@ -35,6 +36,8 @@ export declare class Users {
     supportTickets2: SupportTicket[];
     supportTicketMessages: SupportTicketMessage[];
     transactions: Transactions[];
+    userConversations: UserConversation[];
+    userConversations2: UserConversation[];
     userOneSignalSubscriptions: UserOneSignalSubscription[];
     userProfilePic: UserProfilePic;
     access: Access;

@@ -19,6 +19,8 @@ import {
 } from "src/common/constant/notifications.constant";
 import { Notifications } from "src/db/entities/Notifications";
 import { Users } from "src/db/entities/Users";
+import { UserConversation } from "src/db/entities/UserConversation";
+import { USER_CONVERSATION_TYPE } from "src/common/constant/user-conversation.constant";
 
 @Injectable()
 export class EventMessageService {
@@ -205,14 +207,76 @@ export class EventMessageService {
           const title = fromUser.name;
           const desc = eventMessage.message;
 
+          let userConversation = await entityManager.findOne(UserConversation, {
+            where: {
+              fromUser: {
+                userCode: eventMessage.fromUser.userCode,
+              },
+              toUser: {
+                userCode: eventMessage.toUser.userCode,
+              },
+              referenceId: event.eventCode,
+              active: true,
+              type: USER_CONVERSATION_TYPE.EVENTS,
+            },
+          });
+          if (!userConversation) {
+            userConversation = new UserConversation();
+            userConversation.fromUser = eventMessage.fromUser;
+            userConversation.toUser = eventMessage.toUser;
+            userConversation.referenceId = event.eventCode;
+            userConversation.type = USER_CONVERSATION_TYPE.EVENTS;
+          }
+          userConversation.title =
+            event.user?.userCode === eventMessage.fromUser?.userCode
+              ? `${eventMessage.toUser?.name}: ${event.eventName}`
+              : event.eventName;
+          userConversation.description = `You: ${desc}`;
+          userConversation.type = USER_CONVERSATION_TYPE.EVENTS;
+          userConversation = await entityManager.save(
+            UserConversation,
+            userConversation
+          );
+
+          userConversation = await entityManager.findOne(UserConversation, {
+            where: {
+              fromUser: {
+                userCode: eventMessage.toUser.userCode,
+              },
+              toUser: {
+                userCode: eventMessage.fromUser.userCode,
+              },
+              referenceId: event.eventCode,
+              active: true,
+              type: USER_CONVERSATION_TYPE.EVENTS,
+            },
+          });
+          if (!userConversation) {
+            userConversation = new UserConversation();
+            userConversation.fromUser = eventMessage.toUser;
+            userConversation.toUser = eventMessage.fromUser;
+            userConversation.referenceId = event.eventCode;
+            userConversation.type = USER_CONVERSATION_TYPE.EVENTS;
+          }
+
+          userConversation.title =
+            event.user?.userCode === eventMessage.toUser?.userCode
+              ? `${eventMessage.fromUser?.name}: ${event.eventName}`
+              : event.eventName;
+          userConversation.description = `${eventMessage.fromUser.name}: ${desc}`;
+          userConversation = await entityManager.save(
+            UserConversation,
+            userConversation
+          );
+
           const pushNotifResults: { userId: string; success: boolean }[] =
             await Promise.all([
               this.oneSignalNotificationService.sendToExternalUser(
-                eventMessage?.toUser?.userCode,
+                userConversation?.toUser?.userCode,
                 NOTIF_TYPE.EVENTS,
-                desc,
+                userConversation?.userConversationId,
                 [],
-                title,
+                userConversation.title,
                 eventMessage.message
               ),
             ]);
@@ -234,6 +298,7 @@ export class EventMessageService {
       throw ex;
     }
   }
+
   async logNotification(
     users: Users[],
     data: EventMessage,

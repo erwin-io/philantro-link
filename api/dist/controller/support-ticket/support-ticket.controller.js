@@ -25,10 +25,10 @@ let SupportTicketController = class SupportTicketController {
     constructor(supportTicketService) {
         this.supportTicketService = supportTicketService;
     }
-    async getDetails(supportTicketCode) {
+    async getDetails(supportTicketCode, currentUserCode) {
         const res = {};
         try {
-            res.data = await this.supportTicketService.getByCode(supportTicketCode);
+            res.data = await this.supportTicketService.getByCode(supportTicketCode, currentUserCode);
             res.success = true;
             return res;
         }
@@ -123,9 +123,15 @@ let SupportTicketController = class SupportTicketController {
 };
 __decorate([
     (0, common_1.Get)("/:supportTicketCode"),
+    (0, swagger_1.ApiQuery)({
+        name: "currentUserCode",
+        required: false,
+        description: "Current User code",
+    }),
     __param(0, (0, common_1.Param)("supportTicketCode")),
+    __param(1, (0, common_1.Query)("currentUserCode")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], SupportTicketController.prototype, "getDetails", null);
 __decorate([

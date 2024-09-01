@@ -105,6 +105,13 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Events.prototype, "inProgress", void 0);
 __decorate([
+    (0, typeorm_1.Column)("timestamp with time zone", {
+        name: "DateTimeUpdate",
+        nullable: true,
+    }),
+    __metadata("design:type", Date)
+], Events.prototype, "dateTimeUpdate", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => EventImage_1.EventImage, (eventImage) => eventImage.event),
     __metadata("design:type", Array)
 ], Events.prototype, "eventImages", void 0);

@@ -6,12 +6,14 @@ import { RegisterClientUserDto } from "src/core/dto/auth/register.dto";
 import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
 import { EmailService } from "./email.service";
 import { ResetPasswordDto, ResetPasswordSubmitDto, ResetVerifyDto } from "src/core/dto/auth/reset-password.dto";
+import { UserConversationService } from "./user-conversation.service";
 export declare class AuthService {
     private readonly userRepo;
     private readonly jwtService;
     private notificationService;
+    private userConversationService;
     private emailService;
-    constructor(userRepo: Repository<Users>, jwtService: JwtService, notificationService: NotificationsService, emailService: EmailService);
+    constructor(userRepo: Repository<Users>, jwtService: JwtService, notificationService: NotificationsService, userConversationService: UserConversationService, emailService: EmailService);
     registerClient(dto: RegisterClientUserDto): Promise<Users>;
     registerVerify(dto: VerifyClientUserDto): Promise<Users>;
     getByCredentials({ userName, password }: {
@@ -47,6 +49,8 @@ export declare class AuthService {
         supportTickets2: import("../db/entities/SupportTicket").SupportTicket[];
         supportTicketMessages: import("../db/entities/SupportTicketMessage").SupportTicketMessage[];
         transactions: import("../db/entities/Transactions").Transactions[];
+        userConversations: import("../db/entities/UserConversation").UserConversation[];
+        userConversations2: import("../db/entities/UserConversation").UserConversation[];
         userOneSignalSubscriptions: import("../db/entities/UserOneSignalSubscription").UserOneSignalSubscription[];
         userProfilePic: import("../db/entities/UserProfilePic").UserProfilePic;
         access: import("../db/entities/Access").Access;
@@ -80,6 +84,8 @@ export declare class AuthService {
         supportTickets2: import("../db/entities/SupportTicket").SupportTicket[];
         supportTicketMessages: import("../db/entities/SupportTicketMessage").SupportTicketMessage[];
         transactions: import("../db/entities/Transactions").Transactions[];
+        userConversations: import("../db/entities/UserConversation").UserConversation[];
+        userConversations2: import("../db/entities/UserConversation").UserConversation[];
         userOneSignalSubscriptions: import("../db/entities/UserOneSignalSubscription").UserOneSignalSubscription[];
         userProfilePic: import("../db/entities/UserProfilePic").UserProfilePic;
         access: import("../db/entities/Access").Access;

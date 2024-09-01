@@ -9,9 +9,7 @@ import { EventMessageService } from "src/services/event-message.service";
 @ApiTags("event-message")
 @Controller("event-message")
 export class EventMessageController {
-  constructor(
-    private readonly bookingConversationService: EventMessageService
-  ) {}
+  constructor(private readonly eventMessageService: EventMessageService) {}
 
   @Post("/page")
   //   @UseGuards(JwtAuthGuard)
@@ -21,7 +19,7 @@ export class EventMessageController {
       total: number;
     }> = {} as any;
     try {
-      res.data = await this.bookingConversationService.getPagination(params);
+      res.data = await this.eventMessageService.getPagination(params);
       res.success = true;
       return res;
     } catch (e) {
@@ -36,7 +34,7 @@ export class EventMessageController {
   async create(@Body() params: CreateEventMessageDto) {
     const res: ApiResponseModel<EventMessage> = {} as any;
     try {
-      res.data = await this.bookingConversationService.create(params);
+      res.data = await this.eventMessageService.create(params);
       res.success = true;
       return res;
     } catch (e) {

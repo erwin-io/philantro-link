@@ -6,6 +6,7 @@ exports.SUPPORT_TICKET_MESSAGE_ERROR_NOT_FOUND = "Support ticket message not fou
 exports.SUPPORT_TICKET_TYPE = {
     EVENTS: "EVENTS",
     DONATIONS: "TRANSACTIONS",
+    OTHERS: "OTHERS",
 };
 exports.SUPPORT_TICKET_STATUS = {
     OPEN: "OPEN",

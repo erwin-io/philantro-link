@@ -15,6 +15,8 @@ const firebase_provider_module_1 = require("../../core/provider/firebase/firebas
 const one_signal_notification_service_1 = require("../../services/one-signal-notification.service");
 const Events_1 = require("../../db/entities/Events");
 const events_service_1 = require("../../services/events.service");
+const UserConversation_1 = require("../../db/entities/UserConversation");
+const Notifications_1 = require("../../db/entities/Notifications");
 let EventsModule = class EventsModule {
 };
 EventsModule = __decorate([
@@ -22,7 +24,7 @@ EventsModule = __decorate([
         imports: [
             firebase_provider_module_1.FirebaseProviderModule,
             axios_1.HttpModule,
-            typeorm_1.TypeOrmModule.forFeature([Events_1.Events]),
+            typeorm_1.TypeOrmModule.forFeature([Events_1.Events, UserConversation_1.UserConversation, Notifications_1.Notifications]),
         ],
         controllers: [events_controller_1.EventsController],
         providers: [events_service_1.EventsService, one_signal_notification_service_1.OneSignalNotificationService],

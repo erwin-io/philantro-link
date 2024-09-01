@@ -29,6 +29,7 @@ import { ConfigService } from "@nestjs/config";
 import { VerifyClientUserDto } from "src/core/dto/auth/verify.dto";
 import { EmailService } from "./email.service";
 import { ResetPasswordDto, ResetPasswordSubmitDto, ResetVerifyDto } from "src/core/dto/auth/reset-password.dto";
+import { UserConversationService } from "./user-conversation.service";
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,7 @@ export class AuthService {
     @InjectRepository(Users) private readonly userRepo: Repository<Users>,
     private readonly jwtService: JwtService,
     private notificationService: NotificationsService,
+    private userConversationService: UserConversationService,
     private emailService: EmailService
   ) {}
 
@@ -58,6 +60,7 @@ export class AuthService {
           user.accessGranted = true;
           user.name = dto.name;
           user.email = dto.email;
+          user.helpNotifPreferences = dto.helpNotifPreferences;
           user.userType = USER_TYPE.CLIENT.toUpperCase();
           user.currentOtp = generateOTP();
           user = await transactionalEntityManager.save(user);
@@ -173,7 +176,9 @@ export class AuthService {
         throw Error(LOGIN_ERROR_PENDING_ACCESS_REQUEST);
       }
       delete user.password;
-      const totalUnreadNotif = await this.notificationService.getUnreadByUser(user.userId)
+      const unReadNotif = await this.notificationService.getUnreadByUser(user.userId);
+      const unReadMessage = await this.userConversationService.getUnreadByUser(user.userId);
+      const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
       return {
         ...user,
         totalUnreadNotif 
@@ -209,7 +214,9 @@ export class AuthService {
         throw Error(LOGIN_ERROR_PENDING_ACCESS_REQUEST);
       }
       delete user.password;
-      const totalUnreadNotif = await this.notificationService.getUnreadByUser(user.userId)
+      const unReadNotif = await this.notificationService.getUnreadByUser(user.userId);
+      const unReadMessage = await this.userConversationService.getUnreadByUser(user.userId);
+      const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
       return {
         ...user,
         totalUnreadNotif 

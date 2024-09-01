@@ -42,12 +42,24 @@ import { Interested } from "src/db/entities/Interested";
 import { Responded } from "src/db/entities/Responded";
 import { PAYMENT_METHOD } from "src/common/constant/payment.constant";
 import { Access } from "src/db/entities/Access";
+import { v4 as uuid } from "uuid";
+import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
+import { Files } from "src/db/entities/Files";
+import { EventImage } from "src/db/entities/EventImage";
+import { extname } from "path";
+import { EventMessage } from "src/db/entities/EventMessage";
+import { UserConversation } from "src/db/entities/UserConversation";
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Events)
     private readonly eventRepo: Repository<Events>,
+    @InjectRepository(UserConversation)
+    private readonly userConversationRepo: Repository<UserConversation>,
+    @InjectRepository(Notifications)
+    private readonly notificationsRepo: Repository<Notifications>,
+    private firebaseProvoder: FirebaseProvider,
     private oneSignalNotificationService: OneSignalNotificationService
   ) {}
 
@@ -71,6 +83,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -157,6 +170,7 @@ export class EventsService {
         delete res.user?.password;
         return {
           ...res,
+          eventImages: res.eventImages.filter((x) => x.active),
           interested: others.some((e) => e.eventId === res.eventId)
             ? Number(others.find((e) => e.eventId === res.eventId)?.interested)
             : 0,
@@ -185,6 +199,7 @@ export class EventsService {
             file: true,
           },
         },
+        thumbnailFile: true,
         eventImages: {
           file: true,
         },
@@ -193,66 +208,177 @@ export class EventsService {
     if (!result) {
       throw Error(EVENT_ERROR_NOT_FOUND);
     }
-    const interested = await this.eventRepo
-      .query(
-        `SELECT COUNT("EventId") FROM dbo."Interested" WHERE "EventId" = ${result.eventId}`
-      )
-      .then((res) => {
-        return res[0] ? res[0]["count"] ?? 0 : 0;
-      });
-    const responded = await this.eventRepo
-      .query(
-        `SELECT COUNT("EventId") FROM dbo."Responded" WHERE "EventId" = ${result.eventId}`
-      )
-      .then((res) => {
-        return res[0] ? res[0]["count"] ?? 0 : 0;
-      });
 
-    let raisedDonation = 0;
-
-    raisedDonation = await this.eventRepo
-      .query(
-        `SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "EventId" = ${result.eventId}`
-      )
-      .then((res) => {
-        return res[0] ? res[0]["sum"] ?? 0 : 0;
-      });
+    const [
+      interested,
+      responded,
+      raisedDonation,
+      ownerUnReadMessage,
+      ownerUnReadNotif,
+    ] = await Promise.all([
+      this.eventRepo
+        .query(
+          `SELECT COUNT("EventId") FROM dbo."Interested" WHERE "EventId" = ${result.eventId}`
+        )
+        .then((res) => {
+          return res[0] ? res[0]["count"] ?? 0 : 0;
+        }),
+      this.eventRepo
+        .query(
+          `SELECT COUNT("EventId") FROM dbo."Responded" WHERE "EventId" = ${result.eventId}`
+        )
+        .then((res) => {
+          return res[0] ? res[0]["count"] ?? 0 : 0;
+        }),
+      this.eventRepo
+        .query(
+          `SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "EventId" = ${result.eventId}`
+        )
+        .then((res) => {
+          return res[0] ? res[0]["sum"] ?? 0 : 0;
+        }),
+      this.userConversationRepo.count({
+        where: {
+          referenceId: eventCode,
+          fromUser: {
+            userId: result?.user?.userId,
+          },
+          status: In(["SENT", "DELIVERED"]),
+        },
+      }),
+      this.notificationsRepo.count({
+        where: {
+          referenceId: eventCode,
+          user: {
+            userId: result?.user?.userId,
+          },
+          isRead: false,
+        },
+      }),
+    ]);
 
     let isCurrentUserInterested = false;
     let isCurrentUserResponded = false;
+    let visitorUserConversation;
+
+    let visitorUnReadMessage = 0;
     if (currentUserCode && currentUserCode !== "") {
-      const interestedCount = await this.eventRepo.manager.count(Interested, {
-        where: {
-          user: {
-            userCode: currentUserCode,
+      const [
+        interestedCount,
+        respondedCount,
+        _visitorUnReadMessage,
+        _visitorUserConversation,
+      ] = await Promise.all([
+        this.eventRepo.manager.count(Interested, {
+          where: {
+            user: {
+              userCode: currentUserCode,
+            },
+            event: {
+              eventCode: result.eventCode,
+            },
           },
-          event: {
-            eventCode: result.eventCode,
+        }),
+        this.eventRepo.manager.count(Responded, {
+          where: {
+            user: {
+              userCode: currentUserCode,
+            },
+            event: {
+              eventCode: result.eventCode,
+            },
           },
-        },
-      });
+        }),
+        this.eventRepo.manager.count(EventMessage, {
+          where: {
+            toUser: {
+              userCode: currentUserCode,
+            },
+            status: In(["SENT", "DELIVERED"]),
+            event: {
+              eventCode: result.eventCode,
+            },
+          },
+        }),
+        this.userConversationRepo.findOne({
+          where: {
+            referenceId: eventCode,
+            fromUser: {
+              userCode: currentUserCode,
+            },
+          },
+          relations: {
+            fromUser: true,
+            toUser: true,
+          },
+        }),
+      ]);
       isCurrentUserInterested = interestedCount > 0;
-      const respondedCount = await this.eventRepo.manager.count(Responded, {
-        where: {
-          user: {
-            userCode: currentUserCode,
-          },
-          event: {
-            eventCode: result.eventCode,
-          },
-        },
-      });
       isCurrentUserResponded = respondedCount > 0;
+      visitorUnReadMessage = _visitorUnReadMessage;
+      visitorUserConversation = _visitorUserConversation;
     }
+    result.eventImages = result.eventImages.filter((x) => x.active);
     delete result.user?.password;
     return {
       ...result,
+      visitorUnReadMessage: !isNaN(Number(visitorUnReadMessage))
+        ? Number(visitorUnReadMessage)
+        : 0,
       interested,
       responded,
       raisedDonation,
       isCurrentUserResponded,
       isCurrentUserInterested,
+      visitorUserConversation,
+      ownerUnReadNotifications:
+        Number(ownerUnReadMessage) + Number(ownerUnReadNotif),
+      ownerUnReadMessage,
+      ownerUnReadNotif,
     };
+  }
+
+  async getEventThumbnailFile(eventCode = "") {
+    const result = await this.eventRepo.findOne({
+      where: {
+        eventCode: eventCode?.toString()?.toLowerCase(),
+      },
+      relations: {
+        thumbnailFile: true,
+      },
+    });
+    return result?.thumbnailFile;
+  }
+
+  async getEventThumbnailContent(path = "") {
+    if (path && path !== "") {
+      const bucket = this.firebaseProvoder.app.storage().bucket();
+      const file = bucket.file(path);
+
+      const [exists] = await file.exists();
+      if (!exists) {
+        throw new Error("File does not exist");
+      }
+
+      return new Promise<Buffer>((resolve, reject) => {
+        const fileStream = file.createReadStream();
+        const chunks: Buffer[] = [];
+
+        fileStream.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+
+        fileStream.on("end", () => {
+          resolve(Buffer.concat(chunks));
+        });
+
+        fileStream.on("error", (err) => {
+          reject(err);
+        });
+      });
+    } else {
+      return null;
+    }
   }
 
   async createCharityVolunteerEvent(dto: CreateCharityVolunteerEventDto) {
@@ -293,6 +419,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -349,6 +476,7 @@ export class EventsService {
       if (!event) {
         throw Error(EVENT_ERROR_NOT_FOUND);
       }
+      await this.saveEventImages(entityManager, event, dto.eventImages);
       delete event.user?.password;
       return event;
     });
@@ -397,6 +525,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -453,6 +582,7 @@ export class EventsService {
       if (!event) {
         throw Error(EVENT_ERROR_NOT_FOUND);
       }
+      await this.saveEventImages(entityManager, event, dto.eventImages);
       delete event.user?.password;
       return event;
     });
@@ -497,6 +627,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -526,7 +657,7 @@ export class EventsService {
             .map((x) => "'" + x + "'")
             .join(
               ","
-            )}]::character varying[] && "AssistanceType" AND "Active" = true
+            )}]::character varying[] && "HelpNotifPreferences" AND "Active" = true
         )
         SELECT "userId" from nearby 
         UNION 
@@ -573,6 +704,7 @@ export class EventsService {
       if (!event) {
         throw Error(EVENT_ERROR_NOT_FOUND);
       }
+      await this.saveEventImages(entityManager, event, dto.eventImages);
       delete event.user?.password;
       return event;
     });
@@ -593,15 +725,18 @@ export class EventsService {
               file: true,
             },
           },
-          eventImages: {
-            file: true,
-          },
         },
       });
       event.eventName = dto.eventName;
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
+      const timestamp = await entityManager
+        .query(CONST_QUERYCURRENT_TIMESTAMP)
+        .then((res) => {
+          return res[0]["timestamp"];
+        });
+      event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -613,6 +748,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -622,6 +758,7 @@ export class EventsService {
       if (!event) {
         throw Error(EVENT_ERROR_NOT_FOUND);
       }
+      await this.saveEventImages(entityManager, event, dto.eventImages);
       delete event.user?.password;
       return event;
     });
@@ -638,9 +775,6 @@ export class EventsService {
             userProfilePic: {
               file: true,
             },
-          },
-          eventImages: {
-            file: true,
           },
         },
       });
@@ -661,6 +795,12 @@ export class EventsService {
       event.transferType = dto.transferType;
       event.transferAccountNumber = dto.transferAccountNumber;
       event.transferAccountName = dto.transferAccountName;
+      const timestamp = await entityManager
+        .query(CONST_QUERYCURRENT_TIMESTAMP)
+        .then((res) => {
+          return res[0]["timestamp"];
+        });
+      event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -672,6 +812,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -680,6 +821,7 @@ export class EventsService {
       if (!event) {
         throw Error(EVENT_ERROR_NOT_FOUND);
       }
+      await this.saveEventImages(entityManager, event, dto.eventImages);
       delete event.user?.password;
       return event;
     });
@@ -697,15 +839,18 @@ export class EventsService {
               file: true,
             },
           },
-          eventImages: {
-            file: true,
-          },
         },
       });
       event.eventName = dto.eventName;
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
+      const timestamp = await entityManager
+        .query(CONST_QUERYCURRENT_TIMESTAMP)
+        .then((res) => {
+          return res[0]["timestamp"];
+        });
+      event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -717,6 +862,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -725,6 +871,7 @@ export class EventsService {
       if (!event) {
         throw Error(EVENT_ERROR_NOT_FOUND);
       }
+      await this.saveEventImages(entityManager, event, dto.eventImages);
       delete event.user?.password;
       return event;
     });
@@ -742,11 +889,11 @@ export class EventsService {
               file: true,
             },
           },
-          eventImages: {
-            file: true,
-          },
         },
       });
+      if(!event) {
+        throw new Error("The event was not found!");
+      }
       if (
         (event.eventStatus !== EVENT_STATUS.PENDING &&
           event.eventStatus !== EVENT_STATUS.APPROVED &&
@@ -768,7 +915,27 @@ export class EventsService {
       if (dto.status === EVENT_STATUS.COMPLETED && !event.inProgress) {
         throw new Error("The event was not yet started!");
       }
-      event.eventStatus = dto.status;
+
+      if(event?.eventType === EVENT_TYPE.ASSISTANCE && dto.status === EVENT_STATUS.APPROVED) {
+        event.inProgress = true;
+        event.eventStatus = dto.status;
+      } else if(event?.eventType === EVENT_TYPE.ASSISTANCE && dto.status === EVENT_STATUS.COMPLETED) {
+        event.inProgress = false;
+        event.eventStatus = dto.status;
+      }
+      if (dto.status === EVENT_STATUS.INPROGRESS && event?.eventType !== EVENT_TYPE.ASSISTANCE) {
+        event.inProgress = true;
+        event.eventStatus = EVENT_STATUS.APPROVED;
+      } else if(event?.eventType !== EVENT_TYPE.ASSISTANCE) {
+        event.eventStatus = dto.status;
+        event.inProgress = false;
+      }
+      const timestamp = await entityManager
+        .query(CONST_QUERYCURRENT_TIMESTAMP)
+        .then((res) => {
+          return res[0]["timestamp"];
+        });
+      event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -780,6 +947,7 @@ export class EventsService {
               file: true,
             },
           },
+          thumbnailFile: true,
           eventImages: {
             file: true,
           },
@@ -866,6 +1034,7 @@ export class EventsService {
             userCode: dto.userCode,
           },
           event: {
+            thumbnailFile: true,
             eventCode: eventCode,
           },
         },
@@ -899,6 +1068,7 @@ export class EventsService {
                 userCode: dto.userCode,
               },
               event: {
+                thumbnailFile: true,
                 eventCode: eventCode,
               },
             },
@@ -1006,6 +1176,170 @@ export class EventsService {
         responded: respondedCount,
       };
     });
+  }
+
+  async saveEventImages(
+    entityManager: EntityManager,
+    event: Events,
+    eventImages: any[] = []
+  ) {
+    const bucket = this.firebaseProvoder.app.storage().bucket();
+    let currentBucketFilePath = null;
+    const files = [];
+    try {
+      if (eventImages && eventImages.length > 0) {
+        for (const image of eventImages) {
+          const newGUID: string = uuid();
+          if (image && image.new && !image.delete) {
+            currentBucketFilePath = `events/${
+              event.eventCode
+            }/${newGUID}${extname(image.fileName)}`;
+            const bucketFile = bucket.file(currentBucketFilePath);
+            const img = Buffer.from(image.data, "base64");
+            await bucketFile.save(img).then(async (res) => {
+              console.log("res");
+              console.log(res);
+              const url = await bucketFile.getSignedUrl({
+                action: "read",
+                expires: "03-09-2500",
+              });
+              let file = new Files();
+              file.url = url[0];
+              file.fileName = image.fileName;
+              file.guid = newGUID;
+              file = await entityManager.save(Files, file);
+              let eventImage = new EventImage();
+              eventImage.event = event;
+              eventImage.file = file;
+              eventImage.user = event.user;
+              eventImage = await entityManager.save(EventImage, eventImage);
+              files.push(file);
+            });
+          } else if (!image.delete) {
+            const eventImage = await entityManager.findOne(EventImage, {
+              where: { fileId: image.fileId },
+              relations: {
+                file: true,
+              },
+            });
+            if (eventImage) {
+              currentBucketFilePath = null;
+              try {
+                const deleteFile = bucket.file(
+                  `events/${event.eventCode}/${eventImage.file.guid}${extname(
+                    eventImage.file.fileName
+                  )}`
+                );
+                const exists = await deleteFile.exists();
+                if (exists[0]) {
+                  deleteFile.delete();
+                }
+              } catch (ex) {
+                console.log(ex);
+              }
+            } else {
+              eventImage.file = new Files();
+              eventImage.file.guid = newGUID;
+            }
+            let file = eventImage.file;
+            currentBucketFilePath = `events/${event.eventCode}/${
+              eventImage.file.guid
+            }${extname(image.fileName)}`;
+            const bucketFile = bucket.file(currentBucketFilePath);
+            const img = Buffer.from(image.data, "base64");
+            await bucketFile.save(img).then(async (res) => {
+              console.log("res");
+              console.log(res);
+              const url = await bucketFile.getSignedUrl({
+                action: "read",
+                expires: "03-09-2500",
+              });
+              file.url = url[0];
+              file.fileName = image.fileName;
+              files.push(file);
+              file = await entityManager.save(Files, file);
+            });
+          } else {
+            const eventImage = await entityManager.findOne(EventImage, {
+              where: { fileId: image.fileId },
+              relations: {
+                file: true,
+              },
+            });
+            if (eventImage) {
+              try {
+                const deleteFile = bucket.file(
+                  `events/${event.eventCode}/${eventImage.file.guid}${extname(
+                    eventImage.file.fileName
+                  )}`
+                );
+                const exists = await deleteFile.exists();
+                if (exists[0]) {
+                  deleteFile.delete();
+                }
+              } catch (ex) {
+                console.log(ex);
+              }
+              eventImage.active = false;
+              await entityManager.save(EventImage, eventImage);
+            }
+          }
+        }
+        const currentImages = await entityManager.find(EventImage, {
+          where: {
+            eventId: event.eventId,
+            active: true,
+          },
+          relations: {
+            file: true,
+          },
+        });
+        if (
+          files.filter((x) => !x.delete).length > 0 &&
+          currentImages.length > 0
+        ) {
+          event = await entityManager.findOne(Events, {
+            where: {
+              eventId: event.eventId,
+            },
+          });
+          event.thumbnailFile = files[0];
+          await entityManager.save(Events, event);
+        } else if (
+          files.filter((x) => x.delete).length > 0 &&
+          currentImages.length > 0
+        ) {
+          event = await entityManager.findOne(Events, {
+            where: {
+              eventId: event.eventId,
+            },
+          });
+          event.thumbnailFile = currentImages[0].file;
+          await entityManager.save(Events, event);
+        } else if (currentImages.length === 0) {
+          event = await entityManager.findOne(Events, {
+            where: {
+              eventId: event.eventId,
+            },
+          });
+          event.thumbnailFile = null;
+          await entityManager.save(Events, event);
+        }
+      }
+    } catch (ex) {
+      try {
+        if (currentBucketFilePath && currentBucketFilePath !== "") {
+          const deleteFile = bucket.file(currentBucketFilePath);
+          const exists = await deleteFile.exists();
+          if (exists[0]) {
+            deleteFile.delete();
+          }
+        }
+      } catch (ex) {
+        console.log(ex);
+      }
+      throw ex;
+    }
   }
 
   async logNotification(

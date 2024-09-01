@@ -8,12 +8,17 @@ import { PusherService } from "src/services/pusher.service";
 import { SupportTicket } from "src/db/entities/SupportTicket";
 import { SupportTicketService } from "src/services/support-ticket.service";
 import { SupportTicketMessage } from "src/db/entities/SupportTicketMessage";
+import { UserConversation } from "src/db/entities/UserConversation";
 
 @Module({
   imports: [
     FirebaseProviderModule,
     HttpModule,
-    TypeOrmModule.forFeature([SupportTicket, SupportTicketMessage]),
+    TypeOrmModule.forFeature([
+      SupportTicket,
+      SupportTicketMessage,
+      UserConversation,
+    ]),
   ],
   controllers: [SupportTicketController],
   providers: [SupportTicketService, OneSignalNotificationService],

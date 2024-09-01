@@ -20,6 +20,7 @@ const Notifications_1 = require("../db/entities/Notifications");
 const typeorm_2 = require("typeorm");
 const pusher_service_1 = require("./pusher.service");
 const one_signal_notification_service_1 = require("./one-signal-notification.service");
+const UserConversation_1 = require("../db/entities/UserConversation");
 let NotificationsService = class NotificationsService {
     constructor(notificationsRepo, pusherService, oneSignalNotificationService) {
         this.notificationsRepo = notificationsRepo;
@@ -61,7 +62,7 @@ let NotificationsService = class NotificationsService {
             });
             notification.isRead = true;
             notification = await entityManager.save(Notifications_1.Notifications, notification);
-            const totalUnreadNotif = await entityManager.count(Notifications_1.Notifications, {
+            const unReadNotif = await entityManager.count(Notifications_1.Notifications, {
                 where: {
                     user: {
                         userId: notification.user.userId,
@@ -70,6 +71,17 @@ let NotificationsService = class NotificationsService {
                     isRead: false,
                 },
             });
+            const unReadMessage = await entityManager.count(UserConversation_1.UserConversation, {
+                where: {
+                    fromUser: {
+                        userId: notification.user.userId,
+                        active: true,
+                    },
+                    active: true,
+                    status: (0, typeorm_2.In)(["SENT", "DELIVERED"]),
+                },
+            });
+            const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
             return Object.assign(Object.assign({}, notification), { totalUnreadNotif });
         });
     }

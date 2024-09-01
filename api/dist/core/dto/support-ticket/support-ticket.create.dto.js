@@ -22,7 +22,7 @@ class CreateSupportTicketDto extends support_ticket_base_dto_1.DefaultSupportTic
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsIn)(["EVENTS", "TRANSACTIONS"]),
+    (0, class_validator_1.IsIn)(["EVENTS", "TRANSACTIONS", "OTHERS"]),
     (0, class_validator_1.IsUppercase)(),
     __metadata("design:type", String)
 ], CreateSupportTicketDto.prototype, "type", void 0);

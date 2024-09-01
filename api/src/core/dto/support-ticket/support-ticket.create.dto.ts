@@ -15,9 +15,9 @@ import moment from "moment";
 export class CreateSupportTicketDto extends DefaultSupportTicketDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsIn(["EVENTS", "TRANSACTIONS"])
+  @IsIn(["EVENTS", "TRANSACTIONS", "OTHERS"])
   @IsUppercase()
-  type: "EVENTS" | "TRANSACTIONS";
+  type: "EVENTS" | "TRANSACTIONS" | "OTHERS";
 
   @ApiProperty({
     default: moment().format("YYYY-MM-DD HH:mm:ss"),

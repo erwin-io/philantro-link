@@ -32,10 +32,13 @@ const SupportTicketMessage_1 = require("../db/entities/SupportTicketMessage");
 const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const notifications_constant_1 = require("../common/constant/notifications.constant");
 const Notifications_1 = require("../db/entities/Notifications");
+const UserConversation_1 = require("../db/entities/UserConversation");
+const user_conversation_constant_1 = require("../common/constant/user-conversation.constant");
 let SupportTicketService = class SupportTicketService {
-    constructor(supportTicketRepo, supportTicketMessageRepo, oneSignalNotificationService) {
+    constructor(supportTicketRepo, supportTicketMessageRepo, userConversationRepo, oneSignalNotificationService) {
         this.supportTicketRepo = supportTicketRepo;
         this.supportTicketMessageRepo = supportTicketMessageRepo;
+        this.userConversationRepo = userConversationRepo;
         this.oneSignalNotificationService = oneSignalNotificationService;
     }
     async getPagination({ pageSize, pageIndex, order, columnDef }) {
@@ -75,31 +78,48 @@ let SupportTicketService = class SupportTicketService {
             total,
         };
     }
-    async getByCode(supportTicketCode = "") {
+    async getByCode(supportTicketCode = "", currentUserCode = "") {
         var _a, _b, _c;
-        const result = await this.supportTicketRepo.findOne({
-            where: {
-                supportTicketCode: (_a = supportTicketCode === null || supportTicketCode === void 0 ? void 0 : supportTicketCode.toString()) === null || _a === void 0 ? void 0 : _a.toLowerCase(),
-            },
-            relations: {
-                user: {
-                    userProfilePic: {
-                        file: true,
+        const [result, userConversation] = await Promise.all([
+            this.supportTicketRepo.findOne({
+                where: {
+                    supportTicketCode: (_a = supportTicketCode === null || supportTicketCode === void 0 ? void 0 : supportTicketCode.toString()) === null || _a === void 0 ? void 0 : _a.toLowerCase(),
+                },
+                relations: {
+                    user: {
+                        userProfilePic: {
+                            file: true,
+                        },
+                    },
+                    assignedAdminUser: {
+                        userProfilePic: {
+                            file: true,
+                        },
                     },
                 },
-                assignedAdminUser: {
-                    userProfilePic: {
-                        file: true,
+            }),
+            currentUserCode
+                ? this.userConversationRepo.findOne({
+                    where: {
+                        referenceId: supportTicketCode,
+                        fromUser: {
+                            userCode: currentUserCode,
+                        },
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET,
                     },
-                },
-            },
-        });
+                    relations: {
+                        fromUser: true,
+                        toUser: true,
+                    },
+                })
+                : Promise.resolve(null),
+        ]);
         if (!result) {
             throw Error(support_ticket_constant_1.SUPPORT_TICKET_ERROR_NOT_FOUND);
         }
         (_b = result.assignedAdminUser) === null || _b === void 0 ? true : delete _b.password;
         (_c = result.user) === null || _c === void 0 ? true : delete _c.password;
-        return result;
+        return Object.assign(Object.assign({}, result), { userConversation });
     }
     async createSupportTicket(dto) {
         return await this.supportTicketRepo.manager.transaction(async (entityManager) => {
@@ -200,7 +220,7 @@ let SupportTicketService = class SupportTicketService {
     }
     async updateStatus(supportTicketCode, dto) {
         return await this.supportTicketRepo.manager.transaction(async (entityManager) => {
-            var _a, _b;
+            var _a, _b, _c, _d;
             let supportTicket = await entityManager.findOne(SupportTicket_1.SupportTicket, {
                 where: {
                     supportTicketCode,
@@ -251,8 +271,29 @@ let SupportTicketService = class SupportTicketService {
             if (!supportTicket) {
                 throw Error(support_ticket_constant_1.SUPPORT_TICKET_ERROR_NOT_FOUND);
             }
-            (_a = supportTicket.user) === null || _a === void 0 ? true : delete _a.password;
-            (_b = supportTicket.assignedAdminUser) === null || _b === void 0 ? true : delete _b.password;
+            const title = (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+                ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} is now active.`
+                : "") ||
+                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.COMPLETED
+                    ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been completed.`
+                    : "") ||
+                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+                    ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been closed.`
+                    : "");
+            const desc = (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+                ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} is now active. Our support team is currently working on resolving your issue.`
+                : "") ||
+                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.COMPLETED
+                    ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been completed. Please review the resolution and let us know if you need further assistance.`
+                    : "") ||
+                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+                    ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been closed. Thank you for your feedback. We’re here if you need anything else.`
+                    : "");
+            const clientNotifications = await this.logNotification([(_a = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _a === void 0 ? void 0 : _a.userId], supportTicket, entityManager, title, desc);
+            const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_b = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _b === void 0 ? void 0 : _b.userName, notifications_constant_1.NOTIF_TYPE.SUPPORT_TICKET, supportTicket.supportTicketCode, clientNotifications, title, desc);
+            console.log(pushNotif);
+            (_c = supportTicket.user) === null || _c === void 0 ? true : delete _c.password;
+            (_d = supportTicket.assignedAdminUser) === null || _d === void 0 ? true : delete _d.password;
             return supportTicket;
         });
     }
@@ -290,7 +331,7 @@ let SupportTicketService = class SupportTicketService {
     }
     async postMessage(dto) {
         return await this.supportTicketMessageRepo.manager.transaction(async (entityManager) => {
-            var _a;
+            var _a, _b, _c, _d, _e, _f, _g;
             let supportTicketMessage = new SupportTicketMessage_1.SupportTicketMessage();
             supportTicketMessage.message = dto.message;
             const dateTimeSent = await entityManager
@@ -340,9 +381,95 @@ let SupportTicketService = class SupportTicketService {
             if (!supportTicketMessage) {
                 throw Error(support_ticket_constant_1.SUPPORT_TICKET_MESSAGE_ERROR_NOT_FOUND);
             }
+            const senderIsAdmin = (supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser.userCode) ===
+                supportTicketMessage.fromUser.userCode;
+            if (senderIsAdmin) {
+                let userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
+                    where: {
+                        fromUser: {
+                            userCode: (_a = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser) === null || _a === void 0 ? void 0 : _a.userCode,
+                        },
+                        referenceId: supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode,
+                        active: true,
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+                    },
+                });
+                if (!userConversation) {
+                    userConversation = new UserConversation_1.UserConversation();
+                    userConversation.fromUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser;
+                    userConversation.toUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user;
+                    userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
+                    userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+                }
+                userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
+                userConversation.description = `You: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
+                userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
+                userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
+                    where: {
+                        fromUser: {
+                            userCode: (_b = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _b === void 0 ? void 0 : _b.userCode,
+                        },
+                        referenceId: supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode,
+                        active: true,
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+                    },
+                });
+                if (!userConversation) {
+                    userConversation = new UserConversation_1.UserConversation();
+                    userConversation.fromUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user;
+                    userConversation.toUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser;
+                    userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
+                    userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+                }
+                userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
+                userConversation.description = `${(_c = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser) === null || _c === void 0 ? void 0 : _c.name}: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
+                userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
+            }
+            else {
+                let userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
+                    where: {
+                        fromUser: {
+                            userCode: (_d = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _d === void 0 ? void 0 : _d.userCode,
+                        },
+                        referenceId: supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode,
+                        active: true,
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+                    },
+                });
+                if (!userConversation) {
+                    userConversation = new UserConversation_1.UserConversation();
+                    userConversation.fromUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user;
+                    userConversation.toUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser;
+                    userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
+                    userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+                }
+                userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
+                userConversation.description = `You: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
+                userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
+                userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
+                    where: {
+                        fromUser: {
+                            userCode: (_e = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _e === void 0 ? void 0 : _e.userCode,
+                        },
+                        referenceId: supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode,
+                        active: true,
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+                    },
+                });
+                if (!userConversation) {
+                    userConversation = new UserConversation_1.UserConversation();
+                    userConversation.fromUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser;
+                    userConversation.toUser = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user;
+                    userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
+                    userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+                }
+                userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
+                userConversation.description = `${(_f = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _f === void 0 ? void 0 : _f.name}: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
+                userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
+            }
             const postMessage = await this.oneSignalNotificationService.sendToExternalUser(toUser === null || toUser === void 0 ? void 0 : toUser.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, supportTicketMessage.supportTicketMessageId, [], fromUser === null || fromUser === void 0 ? void 0 : fromUser.name, supportTicketMessage.message);
             console.log(postMessage);
-            (_a = supportTicketMessage.fromUser) === null || _a === void 0 ? true : delete _a.password;
+            (_g = supportTicketMessage.fromUser) === null || _g === void 0 ? true : delete _g.password;
             return supportTicketMessage;
         });
     }
@@ -357,7 +484,7 @@ let SupportTicketService = class SupportTicketService {
             notifications.push({
                 title,
                 description,
-                type: notifications_constant_1.NOTIF_TYPE.EVENTS.toString(),
+                type: notifications_constant_1.NOTIF_TYPE.SUPPORT_TICKET.toString(),
                 referenceId: data.supportTicketCode.toString(),
                 isRead: false,
                 user: user,
@@ -381,7 +508,9 @@ SupportTicketService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(SupportTicket_1.SupportTicket)),
     __param(1, (0, typeorm_1.InjectRepository)(SupportTicketMessage_1.SupportTicketMessage)),
+    __param(2, (0, typeorm_1.InjectRepository)(UserConversation_1.UserConversation)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         one_signal_notification_service_1.OneSignalNotificationService])
 ], SupportTicketService);

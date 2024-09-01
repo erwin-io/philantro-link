@@ -15,6 +15,10 @@ const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const user_base_dto_1 = require("../user/user-base.dto");
 class RegisterClientUserDto extends user_base_dto_1.DefaultUserDto {
+    constructor() {
+        super(...arguments);
+        this.helpNotifPreferences = [];
+    }
 }
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -24,5 +28,18 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterClientUserDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: "Help/Assistance types",
+        example: [],
+        isArray: true,
+        enum: ["WATER", "FOOD", "CLOTHING", "SERVICES"],
+        default: []
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsIn)(["WATER", "FOOD", "CLOTHING", "SERVICES"], { each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], RegisterClientUserDto.prototype, "helpNotifPreferences", void 0);
 exports.RegisterClientUserDto = RegisterClientUserDto;
 //# sourceMappingURL=register.dto.js.map

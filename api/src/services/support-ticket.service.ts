@@ -1,4 +1,4 @@
-import { type } from 'os';
+import { type } from "os";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import moment from "moment";
@@ -31,6 +31,9 @@ import { CONST_QUERYCURRENT_TIMESTAMP } from "src/common/constant/timestamp.cons
 import { NOTIF_TYPE } from "src/common/constant/notifications.constant";
 import { Events } from "src/db/entities/Events";
 import { Notifications } from "src/db/entities/Notifications";
+import { UserConversation } from "src/db/entities/UserConversation";
+import { USER_CONVERSATION_TYPE } from "src/common/constant/user-conversation.constant";
+import { toPromise } from "../common/utils/utils";
 
 @Injectable()
 export class SupportTicketService {
@@ -39,6 +42,8 @@ export class SupportTicketService {
     private readonly supportTicketRepo: Repository<SupportTicket>,
     @InjectRepository(SupportTicketMessage)
     private readonly supportTicketMessageRepo: Repository<SupportTicketMessage>,
+    @InjectRepository(UserConversation)
+    private readonly userConversationRepo: Repository<UserConversation>,
     private oneSignalNotificationService: OneSignalNotificationService
   ) {}
 
@@ -87,30 +92,50 @@ export class SupportTicketService {
     };
   }
 
-  async getByCode(supportTicketCode = "") {
-    const result = await this.supportTicketRepo.findOne({
-      where: {
-        supportTicketCode: supportTicketCode?.toString()?.toLowerCase(),
-      },
-      relations: {
-        user: {
-          userProfilePic: {
-            file: true,
+  async getByCode(supportTicketCode = "", currentUserCode = "") {
+    const [result, userConversation] = await Promise.all([
+      this.supportTicketRepo.findOne({
+        where: {
+          supportTicketCode: supportTicketCode?.toString()?.toLowerCase(),
+        },
+        relations: {
+          user: {
+            userProfilePic: {
+              file: true,
+            },
+          },
+          assignedAdminUser: {
+            userProfilePic: {
+              file: true,
+            },
           },
         },
-        assignedAdminUser: {
-          userProfilePic: {
-            file: true,
-          },
-        },
-      },
-    });
+      }),
+      currentUserCode
+        ? this.userConversationRepo.findOne({
+            where: {
+              referenceId: supportTicketCode,
+              fromUser: {
+                userCode: currentUserCode,
+              },
+              type: USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+            },
+            relations: {
+              fromUser: true,
+              toUser: true,
+            },
+          })
+        : Promise.resolve(null),
+    ]);
     if (!result) {
       throw Error(SUPPORT_TICKET_ERROR_NOT_FOUND);
     }
     delete result.assignedAdminUser?.password;
     delete result.user?.password;
-    return result;
+    return {
+      ...result,
+      userConversation,
+    };
   }
 
   async createSupportTicket(dto: CreateSupportTicketDto) {
@@ -272,6 +297,44 @@ export class SupportTicketService {
         if (!supportTicket) {
           throw Error(SUPPORT_TICKET_ERROR_NOT_FOUND);
         }
+        const title =
+          (SUPPORT_TICKET_STATUS.ACTIVE
+            ? `Your ticket #${supportTicket?.supportTicketCode} is now active.`
+            : "") ||
+          (SUPPORT_TICKET_STATUS.COMPLETED
+            ? `Your ticket #${supportTicket?.supportTicketCode} has been completed.`
+            : "") ||
+          (SUPPORT_TICKET_STATUS.ACTIVE
+            ? `Your ticket #${supportTicket?.supportTicketCode} has been closed.`
+            : "");
+        const desc =
+          (SUPPORT_TICKET_STATUS.ACTIVE
+            ? `Your ticket #${supportTicket?.supportTicketCode} is now active. Our support team is currently working on resolving your issue.`
+            : "") ||
+          (SUPPORT_TICKET_STATUS.COMPLETED
+            ? `Your ticket #${supportTicket?.supportTicketCode} has been completed. Please review the resolution and let us know if you need further assistance.`
+            : "") ||
+          (SUPPORT_TICKET_STATUS.ACTIVE
+            ? `Your ticket #${supportTicket?.supportTicketCode} has been closed. Thank you for your feedback. We’re here if you need anything else.`
+            : "");
+        const clientNotifications: Notifications[] = await this.logNotification(
+          [supportTicket?.user?.userId],
+          supportTicket,
+          entityManager,
+          title,
+          desc
+        );
+
+        const pushNotif =
+          await this.oneSignalNotificationService.sendToExternalUser(
+            supportTicket?.user?.userName,
+            NOTIF_TYPE.SUPPORT_TICKET,
+            supportTicket.supportTicketCode,
+            clientNotifications,
+            title,
+            desc
+          );
+        console.log(pushNotif);
         delete supportTicket.user?.password;
         delete supportTicket.assignedAdminUser?.password;
         return supportTicket;
@@ -378,6 +441,110 @@ export class SupportTicketService {
           throw Error(SUPPORT_TICKET_MESSAGE_ERROR_NOT_FOUND);
         }
 
+        const senderIsAdmin =
+          supportTicket?.assignedAdminUser.userCode ===
+          supportTicketMessage.fromUser.userCode;
+
+        if (senderIsAdmin) {
+          let userConversation = await entityManager.findOne(UserConversation, {
+            where: {
+              fromUser: {
+                userCode: supportTicket?.assignedAdminUser?.userCode,
+              },
+              referenceId: supportTicket?.supportTicketCode,
+              active: true,
+              type: USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+            },
+          });
+          if (!userConversation) {
+            userConversation = new UserConversation();
+            userConversation.fromUser = supportTicket?.assignedAdminUser;
+            userConversation.toUser = supportTicket?.user;
+            userConversation.referenceId = supportTicket?.supportTicketCode;
+            userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+          }
+          userConversation.title = supportTicket?.title;
+          userConversation.description = `You: ${supportTicketMessage?.message}`;
+          userConversation = await entityManager.save(
+            UserConversation,
+            userConversation
+          );
+
+          userConversation = await entityManager.findOne(UserConversation, {
+            where: {
+              fromUser: {
+                userCode: supportTicket?.user?.userCode,
+              },
+              referenceId: supportTicket?.supportTicketCode,
+              active: true,
+              type: USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+            },
+          });
+          if (!userConversation) {
+            userConversation = new UserConversation();
+            userConversation.fromUser = supportTicket?.user;
+            userConversation.toUser = supportTicket?.assignedAdminUser;
+            userConversation.referenceId = supportTicket?.supportTicketCode;
+            userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+          }
+
+          userConversation.title = supportTicket?.title;
+          userConversation.description = `${supportTicket?.assignedAdminUser?.name}: ${supportTicketMessage?.message}`;
+          userConversation = await entityManager.save(
+            UserConversation,
+            userConversation
+          );
+        } else {
+          let userConversation = await entityManager.findOne(UserConversation, {
+            where: {
+              fromUser: {
+                userCode: supportTicket?.user?.userCode,
+              },
+              referenceId: supportTicket?.supportTicketCode,
+              active: true,
+              type: USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+            },
+          });
+          if (!userConversation) {
+            userConversation = new UserConversation();
+            userConversation.fromUser = supportTicket?.user;
+            userConversation.toUser = supportTicket?.assignedAdminUser;
+            userConversation.referenceId = supportTicket?.supportTicketCode;
+            userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+          }
+          userConversation.title = supportTicket?.title;
+          userConversation.description = `You: ${supportTicketMessage?.message}`;
+          userConversation = await entityManager.save(
+            UserConversation,
+            userConversation
+          );
+
+          userConversation = await entityManager.findOne(UserConversation, {
+            where: {
+              fromUser: {
+                userCode: supportTicket?.user?.userCode,
+              },
+              referenceId: supportTicket?.supportTicketCode,
+              active: true,
+              type: USER_CONVERSATION_TYPE.SUPPORT_TICKET,
+            },
+          });
+          if (!userConversation) {
+            userConversation = new UserConversation();
+            userConversation.fromUser = supportTicket?.assignedAdminUser;
+            userConversation.toUser = supportTicket?.user;
+            userConversation.referenceId = supportTicket?.supportTicketCode;
+            userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
+          }
+
+          userConversation.title = supportTicket?.title;
+          userConversation.description = `${supportTicket?.user?.name}: ${supportTicketMessage?.message}`;
+          userConversation = await entityManager.save(
+            UserConversation,
+            userConversation
+          );
+        }
+
         const postMessage: {
           userId: string;
           success: boolean;
@@ -415,7 +582,7 @@ export class SupportTicketService {
       notifications.push({
         title,
         description,
-        type: NOTIF_TYPE.EVENTS.toString(),
+        type: NOTIF_TYPE.SUPPORT_TICKET.toString(),
         referenceId: data.supportTicketCode.toString(),
         isRead: false,
         user: user,

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Events } from "src/db/entities/Events";
 import { Notifications } from "src/db/entities/Notifications";
 import { Users } from "src/db/entities/Users";
@@ -7,10 +8,18 @@ import { CreateAssistanceEventDto, CreateCharityVolunteerEventDto, CreateDonatio
 import { UpdateCharityVolunteerEventDto, UpdateDonationEventDto, UpdateAssistanceEventDto, UpdateEventStatusDto, UpdateEventInterestedDto, UpdateEventRespondedDto } from "src/core/dto/events/events.update.dto";
 import { Interested } from "src/db/entities/Interested";
 import { Responded } from "src/db/entities/Responded";
+import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
+import { Files } from "src/db/entities/Files";
+import { EventImage } from "src/db/entities/EventImage";
+import { EventMessage } from "src/db/entities/EventMessage";
+import { UserConversation } from "src/db/entities/UserConversation";
 export declare class EventsService {
     private readonly eventRepo;
+    private readonly userConversationRepo;
+    private readonly notificationsRepo;
+    private firebaseProvoder;
     private oneSignalNotificationService;
-    constructor(eventRepo: Repository<Events>, oneSignalNotificationService: OneSignalNotificationService);
+    constructor(eventRepo: Repository<Events>, userConversationRepo: Repository<UserConversation>, notificationsRepo: Repository<Notifications>, firebaseProvoder: FirebaseProvider, oneSignalNotificationService: OneSignalNotificationService);
     getPagination({ pageSize, pageIndex, order, columnDef }: {
         pageSize: any;
         pageIndex: any;
@@ -18,6 +27,7 @@ export declare class EventsService {
         columnDef: any;
     }): Promise<{
         results: {
+            eventImages: EventImage[];
             interested: number;
             responded: number;
             raisedDonation: number;
@@ -37,9 +47,9 @@ export declare class EventsService {
             transferAccountName: string;
             donationTargetAmount: string;
             inProgress: boolean;
-            eventImages: import("../db/entities/EventImage").EventImage[];
-            eventMessages: import("../db/entities/EventMessage").EventMessage[];
-            thumbnailFile: import("../db/entities/Files").Files;
+            dateTimeUpdate: Date;
+            eventMessages: EventMessage[];
+            thumbnailFile: Files;
             user: Users;
             interesteds: Interested[];
             respondeds: Responded[];
@@ -48,11 +58,16 @@ export declare class EventsService {
         total: number;
     }>;
     getByCode(eventCode?: string, currentUserCode?: string): Promise<{
+        visitorUnReadMessage: number;
         interested: any;
         responded: any;
-        raisedDonation: number;
+        raisedDonation: any;
         isCurrentUserResponded: boolean;
         isCurrentUserInterested: boolean;
+        visitorUserConversation: any;
+        ownerUnReadNotifications: number;
+        ownerUnReadMessage: number;
+        ownerUnReadNotif: number;
         eventId: string;
         eventCode: string;
         dateTime: Date;
@@ -69,14 +84,17 @@ export declare class EventsService {
         transferAccountName: string;
         donationTargetAmount: string;
         inProgress: boolean;
-        eventImages: import("../db/entities/EventImage").EventImage[];
-        eventMessages: import("../db/entities/EventMessage").EventMessage[];
-        thumbnailFile: import("../db/entities/Files").Files;
+        dateTimeUpdate: Date;
+        eventImages: EventImage[];
+        eventMessages: EventMessage[];
+        thumbnailFile: Files;
         user: Users;
         interesteds: Interested[];
         respondeds: Responded[];
         transactions: import("../db/entities/Transactions").Transactions[];
     }>;
+    getEventThumbnailFile(eventCode?: string): Promise<Files>;
+    getEventThumbnailContent(path?: string): Promise<Buffer>;
     createCharityVolunteerEvent(dto: CreateCharityVolunteerEventDto): Promise<Events>;
     createDonationEvent(dto: CreateDonationEventDto): Promise<Events>;
     createAssistanceEvent(dto: CreateAssistanceEventDto): Promise<Events>;
@@ -102,9 +120,10 @@ export declare class EventsService {
         transferAccountName: string;
         donationTargetAmount: string;
         inProgress: boolean;
-        eventImages: import("../db/entities/EventImage").EventImage[];
-        eventMessages: import("../db/entities/EventMessage").EventMessage[];
-        thumbnailFile: import("../db/entities/Files").Files;
+        dateTimeUpdate: Date;
+        eventImages: EventImage[];
+        eventMessages: EventMessage[];
+        thumbnailFile: Files;
         user: Users;
         interesteds: Interested[];
         respondeds: Responded[];
@@ -128,13 +147,15 @@ export declare class EventsService {
         transferAccountName: string;
         donationTargetAmount: string;
         inProgress: boolean;
-        eventImages: import("../db/entities/EventImage").EventImage[];
-        eventMessages: import("../db/entities/EventMessage").EventMessage[];
-        thumbnailFile: import("../db/entities/Files").Files;
+        dateTimeUpdate: Date;
+        eventImages: EventImage[];
+        eventMessages: EventMessage[];
+        thumbnailFile: Files;
         user: Users;
         interesteds: Interested[];
         respondeds: Responded[];
         transactions: import("../db/entities/Transactions").Transactions[];
     }>;
+    saveEventImages(entityManager: EntityManager, event: Events, eventImages?: any[]): Promise<void>;
     logNotification(userIds: string[], data: Events, entityManager: EntityManager, title: string, description: string): Promise<Notifications[]>;
 }

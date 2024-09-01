@@ -26,6 +26,8 @@ const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const notifications_constant_1 = require("../common/constant/notifications.constant");
 const Notifications_1 = require("../db/entities/Notifications");
 const Users_1 = require("../db/entities/Users");
+const UserConversation_1 = require("../db/entities/UserConversation");
+const user_conversation_constant_1 = require("../common/constant/user-conversation.constant");
 let EventMessageService = class EventMessageService {
     constructor(eventMessageRepo, oneSignalNotificationService) {
         this.eventMessageRepo = eventMessageRepo;
@@ -120,7 +122,7 @@ let EventMessageService = class EventMessageService {
     async create(dto) {
         try {
             return await this.eventMessageRepo.manager.transaction(async (entityManager) => {
-                var _a, _b, _c, _d, _e, _f, _g;
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
                 let eventMessage = new EventMessage_1.EventMessage();
                 const event = await entityManager.findOne(Events_1.Events, {
                     where: {
@@ -202,16 +204,69 @@ let EventMessageService = class EventMessageService {
                 });
                 const title = fromUser.name;
                 const desc = eventMessage.message;
+                let userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
+                    where: {
+                        fromUser: {
+                            userCode: eventMessage.fromUser.userCode,
+                        },
+                        toUser: {
+                            userCode: eventMessage.toUser.userCode,
+                        },
+                        referenceId: event.eventCode,
+                        active: true,
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.EVENTS,
+                    },
+                });
+                if (!userConversation) {
+                    userConversation = new UserConversation_1.UserConversation();
+                    userConversation.fromUser = eventMessage.fromUser;
+                    userConversation.toUser = eventMessage.toUser;
+                    userConversation.referenceId = event.eventCode;
+                    userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.EVENTS;
+                }
+                userConversation.title =
+                    ((_a = event.user) === null || _a === void 0 ? void 0 : _a.userCode) === ((_b = eventMessage.fromUser) === null || _b === void 0 ? void 0 : _b.userCode)
+                        ? `${(_c = eventMessage.toUser) === null || _c === void 0 ? void 0 : _c.name}: ${event.eventName}`
+                        : event.eventName;
+                userConversation.description = `You: ${desc}`;
+                userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.EVENTS;
+                userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
+                userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
+                    where: {
+                        fromUser: {
+                            userCode: eventMessage.toUser.userCode,
+                        },
+                        toUser: {
+                            userCode: eventMessage.fromUser.userCode,
+                        },
+                        referenceId: event.eventCode,
+                        active: true,
+                        type: user_conversation_constant_1.USER_CONVERSATION_TYPE.EVENTS,
+                    },
+                });
+                if (!userConversation) {
+                    userConversation = new UserConversation_1.UserConversation();
+                    userConversation.fromUser = eventMessage.toUser;
+                    userConversation.toUser = eventMessage.fromUser;
+                    userConversation.referenceId = event.eventCode;
+                    userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.EVENTS;
+                }
+                userConversation.title =
+                    ((_d = event.user) === null || _d === void 0 ? void 0 : _d.userCode) === ((_e = eventMessage.toUser) === null || _e === void 0 ? void 0 : _e.userCode)
+                        ? `${(_f = eventMessage.fromUser) === null || _f === void 0 ? void 0 : _f.name}: ${event.eventName}`
+                        : event.eventName;
+                userConversation.description = `${eventMessage.fromUser.name}: ${desc}`;
+                userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
                 const pushNotifResults = await Promise.all([
-                    this.oneSignalNotificationService.sendToExternalUser((_a = eventMessage === null || eventMessage === void 0 ? void 0 : eventMessage.toUser) === null || _a === void 0 ? void 0 : _a.userCode, notifications_constant_1.NOTIF_TYPE.EVENTS, desc, [], title, eventMessage.message),
+                    this.oneSignalNotificationService.sendToExternalUser((_g = userConversation === null || userConversation === void 0 ? void 0 : userConversation.toUser) === null || _g === void 0 ? void 0 : _g.userCode, notifications_constant_1.NOTIF_TYPE.EVENTS, userConversation === null || userConversation === void 0 ? void 0 : userConversation.userConversationId, [], userConversation.title, eventMessage.message),
                 ]);
                 console.log(pushNotifResults);
-                (_b = eventMessage.toUser) === null || _b === void 0 ? true : delete _b.password;
-                (_c = eventMessage.fromUser) === null || _c === void 0 ? true : delete _c.password;
-                (_e = (_d = eventMessage.event) === null || _d === void 0 ? void 0 : _d.user) === null || _e === void 0 ? true : delete _e.password;
-                if ((_f = eventMessage.event) === null || _f === void 0 ? void 0 : _f.eventImages) {
+                (_h = eventMessage.toUser) === null || _h === void 0 ? true : delete _h.password;
+                (_j = eventMessage.fromUser) === null || _j === void 0 ? true : delete _j.password;
+                (_l = (_k = eventMessage.event) === null || _k === void 0 ? void 0 : _k.user) === null || _l === void 0 ? true : delete _l.password;
+                if ((_m = eventMessage.event) === null || _m === void 0 ? void 0 : _m.eventImages) {
                     eventMessage.event.eventImages =
-                        (_g = eventMessage.event) === null || _g === void 0 ? void 0 : _g.eventImages.map((i) => {
+                        (_o = eventMessage.event) === null || _o === void 0 ? void 0 : _o.eventImages.map((i) => {
                             var _a;
                             (_a = i.user) === null || _a === void 0 ? true : delete _a.password;
                             return i;
