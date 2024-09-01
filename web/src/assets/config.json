@@ -145,12 +145,22 @@
       },
       {
         "name": "eventType",
-        "label": "Event Type",
+        "label": "Type",
         "apiNotation": "eventType",
         "type": "string",
         "filterOptions": {
           "enable": true,
-          "placeholder": "Event Type"
+          "placeholder": "Type"
+        }
+      },
+      {
+        "name": "eventName",
+        "label": "Name",
+        "apiNotation": "Name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Name"
         }
       },
       {
@@ -198,12 +208,22 @@
       },
       {
         "name": "eventType",
-        "label": "Event Type",
+        "label": "Type",
         "apiNotation": "eventType",
         "type": "string",
         "filterOptions": {
           "enable": true,
-          "placeholder": "Event Type"
+          "placeholder": "Type"
+        }
+      },
+      {
+        "name": "eventName",
+        "label": "Name",
+        "apiNotation": "Name",
+        "type": "string",
+        "filterOptions": {
+          "enable": true,
+          "placeholder": "Name"
         }
       },
       {
