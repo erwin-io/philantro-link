@@ -272,7 +272,7 @@ export class EventMessageService {
           const pushNotifResults: { userId: string; success: boolean }[] =
             await Promise.all([
               this.oneSignalNotificationService.sendToExternalUser(
-                userConversation?.toUser?.userName,
+                eventMessage.toUser?.userName,
                 NOTIF_TYPE.EVENTS,
                 userConversation?.userConversationId,
                 [],
