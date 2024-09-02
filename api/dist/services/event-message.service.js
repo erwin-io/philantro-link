@@ -258,7 +258,7 @@ let EventMessageService = class EventMessageService {
                 userConversation.description = `${eventMessage.fromUser.name}: ${desc}`;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
                 const pushNotifResults = await Promise.all([
-                    this.oneSignalNotificationService.sendToExternalUser((_g = userConversation === null || userConversation === void 0 ? void 0 : userConversation.toUser) === null || _g === void 0 ? void 0 : _g.userCode, notifications_constant_1.NOTIF_TYPE.EVENTS, userConversation === null || userConversation === void 0 ? void 0 : userConversation.userConversationId, [], userConversation.title, eventMessage.message),
+                    this.oneSignalNotificationService.sendToExternalUser((_g = userConversation === null || userConversation === void 0 ? void 0 : userConversation.toUser) === null || _g === void 0 ? void 0 : _g.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, userConversation === null || userConversation === void 0 ? void 0 : userConversation.userConversationId, [], userConversation.title, eventMessage.message),
                 ]);
                 console.log(pushNotifResults);
                 (_h = eventMessage.toUser) === null || _h === void 0 ? true : delete _h.password;
