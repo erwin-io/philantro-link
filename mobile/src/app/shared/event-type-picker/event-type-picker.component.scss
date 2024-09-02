@@ -1,0 +1,51 @@
+::ng-deep {
+    .event-type-picker {
+        ion-content {
+            display: flex;
+            flex-direction: column;
+            .title {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                font-family: 'Poppins-Bold'!important;
+            }
+            .event-type {
+                gap: 15px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                &.selected {
+                    background-color: #591DD1;
+                    .event-type-icon {
+                        img {
+                            filter: brightness(0) invert(1);
+                            // filter: invert(19%) sepia(70%) saturate(3762%) hue-rotate(243deg) brightness(95%) contrast(89%)!important;
+                        }
+                    }
+                    .event-type-content {
+                        color: #fff;
+                        // color: var(--ion-color-primary);
+                    }
+                }
+                .event-type-icon {
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 50px;
+                    max-width: 50px;
+                }
+                .event-type-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    color: rgb(0 0 0 / 0.6);
+                    .event-type-name {
+                        font-family: 'Poppins-Bold'!important;
+                    }
+                    .event-type-desc {
+                        font-family: 'Poppins-Regular'!important;
+                    }
+                }
+            }
+        } 
+    }
+}

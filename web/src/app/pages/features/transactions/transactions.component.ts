@@ -16,6 +16,7 @@ import { Observable, Subject, catchError, of, takeUntil } from 'rxjs';
 import { AccessPages } from 'src/app/model/access.model';
 import { TransactionsTableColumn } from 'src/app/shared/utility/table';
 import { LoaderService } from 'src/app/services/loader.service';
+import { Transactions } from 'src/app/model/transactions.model';
 
 @Component({
   selector: 'app-transactions',
@@ -123,7 +124,7 @@ export class TransactionsComponent  {
         takeUntil(this.ngUnsubscribe),
         catchError(this.handleError('transaction', []))
       )
-      .subscribe(async res => {
+      .subscribe(async (res: { success: boolean; data: { results: Transactions[]; total: number; }; message: string}) => {
         if(res.success){
           let data = res.data.results.map((d)=>{
             return {
@@ -131,8 +132,8 @@ export class TransactionsComponent  {
               dateTime: d.dateTime.toString(),
               amount: d.amount,
               paymentType: d.paymentType,
-              accountNumber: d.accountNumber,
-              accountName: d.accountName,
+              from: d.user?.name,
+              fromEmail: d.user?.email,
               url: `/transactions/${d.transactionCode}/details`,
             } as TransactionsTableColumn
           });

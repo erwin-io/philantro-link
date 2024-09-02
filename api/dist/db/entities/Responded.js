@@ -16,21 +16,21 @@ const Users_1 = require("./Users");
 let Responded = class Responded {
 };
 __decorate([
-    (0, typeorm_1.Column)("bigint", { primary: true, name: "UserId" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "bigint", name: "Id" }),
     __metadata("design:type", String)
-], Responded.prototype, "userId", void 0);
+], Responded.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Events_1.Events, (events) => events.respondeds),
     (0, typeorm_1.JoinColumn)([{ name: "EventId", referencedColumnName: "eventId" }]),
     __metadata("design:type", Events_1.Events)
 ], Responded.prototype, "event", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => Users_1.Users, (users) => users.responded),
+    (0, typeorm_1.ManyToOne)(() => Users_1.Users, (users) => users.respondeds),
     (0, typeorm_1.JoinColumn)([{ name: "UserId", referencedColumnName: "userId" }]),
     __metadata("design:type", Users_1.Users)
 ], Responded.prototype, "user", void 0);
 Responded = __decorate([
-    (0, typeorm_1.Index)("Responded_pkey", ["userId"], { unique: true }),
+    (0, typeorm_1.Index)("Responded_pkey", ["id"], { unique: true }),
     (0, typeorm_1.Entity)("Responded", { schema: "dbo" })
 ], Responded);
 exports.Responded = Responded;

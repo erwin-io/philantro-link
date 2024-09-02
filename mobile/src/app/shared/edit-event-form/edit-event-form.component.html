@@ -1,0 +1,154 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="modal.dismiss()">
+        <ion-icon name="close" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center">Edit Event</ion-title>
+    <div slot="end" style="width: 48px"></div>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <app-event-thumbnail [canDelete]="true" *ngIf="event?.eventType === 'CHARITY' || event?.eventType === 'VOLUNTEER'" [eventThumbnails]="eventThumbnails" [type]="event.eventType" [openedPic]="eventThumbnails[0]"></app-event-thumbnail>
+  <app-event-thumbnail [canDelete]="true" *ngIf="event?.eventType === 'DONATION'" [eventThumbnails]="eventDonationThumbnails" [type]="event.eventType" [openedPic]="eventDonationThumbnails[0]"></app-event-thumbnail>
+  <app-event-thumbnail [canDelete]="true" *ngIf="event?.eventType === 'ASSISTANCE'" [eventThumbnails]="eventHelpThumbnails" [type]="event.eventType" [openedPic]="eventHelpThumbnails[0]"></app-event-thumbnail>
+  <div class="edit-form-content ion-padding">
+    <div class="edit-form-control-input form-control-input">
+      <p class="edit-form-control-label">Give your event a name</p>
+      <ion-input
+        mode="md"
+        labelPlacement="stacked"
+        fill="outline" 
+        placeholder="Event name"
+        [ngModel]="event?.eventName"
+        [disabled]="isSubmitting"
+        [formControl]="eventName"
+      ></ion-input>
+    </div>
+    <ng-container *ngIf="event?.eventType === 'DONATION'">
+      <div class="edit-form-control-input form-control-input">
+        <p class="edit-form-control-label">Target Amount</p>
+        <ion-input
+          mode="md"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="Enter Amount"
+          [ngModel]="event?.donationTargetAmount"
+          [disabled]="isSubmitting"
+          [formControl]="donationTargetAmount"
+          type="Number"
+        ></ion-input>
+      </div>
+      <div class="edit-form-control-input form-control-input">
+        <p class="edit-form-control-label">Account Name</p>
+        <ion-input
+          mode="md"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="Enter Account Name"
+          [ngModel]="event?.transferAccountName"
+          [disabled]="isSubmitting"
+          [formControl]="transferAccountName"
+        ></ion-input>
+      </div>
+      <div class="edit-form-control-input form-control-input">
+        <p class="edit-form-control-label">Account Number</p>
+        <ion-input
+          mode="md"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="Enter Account Number"
+          [ngModel]="event?.transferAccountNumber"
+          [disabled]="isSubmitting"
+          [formControl]="transferAccountNumber"
+        ></ion-input>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="event?.eventType === 'ASSISTANCE'">
+      <div class="edit-form-control-input form-control-input">
+        <p class="edit-form-control-label">What type of Assistance?</p>
+      </div>
+      <div class="help-type">
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('FOOD') }" (click)="selectAssistanceItem('FOOD')"> 
+          <ion-icon slot="start" name="restaurant"></ion-icon>
+          Food
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('WATER') }" (click)="selectAssistanceItem('WATER')">
+          <ion-icon slot="start" name="water"></ion-icon>
+          Water
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected( 'CLOTHING') }" (click)="selectAssistanceItem('CLOTHING')">
+          <ion-icon slot="start" name="shirt"></ion-icon>
+          Clothing
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('SERVICES') }" (click)="selectAssistanceItem('SERVICES')">
+          <ion-icon slot="start" name="construct"></ion-icon>
+          Services
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+      </div>
+    </ng-container>
+    
+    <div class="edit-form-control-input form-control-input icon-right">
+      <p class="edit-form-control-label">Date & Time</p>
+      <ion-input 
+        mode="md"
+        labelPlacement="stacked"
+        fill="outline" 
+        readonly="true"
+        [disabled]="isSubmitting"
+        [formControl]="dateTime"
+        placeholder="Date & Time" (mouseup)="$event.preventDefault();showDatePicker()">
+        <ion-button fill="clear" slot="end">
+          <ion-icon slot="icon-only" name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-input>
+    </div>
+    <div class="edit-form-control-input form-control-input">
+      <p class="edit-form-control-label">Location</p>
+      <ion-input
+        mode="md"
+        labelPlacement="stacked"
+        fill="outline" 
+        placeholder="Select Location"
+        readonly="true"
+        [ngModel]="event?.eventLocName"
+        [disabled]="isSubmitting"
+        [formControl]="eventLocName"
+        (mouseup)="$event.preventDefault();showLocationPicker()">
+      <ion-button fill="clear" slot="end">
+        <ion-icon slot="icon-only" name="location-outline" aria-hidden="true"></ion-icon>
+      </ion-button></ion-input>
+    </div>
+    <div class="edit-form-control-input form-control-input">
+      <p class="edit-form-control-label">Event Description </p>
+      <ion-textarea
+        mode="md"
+        labelPlacement="stacked"
+        fill="outline" 
+        placeholder="Type event description here"
+        [ngModel]="event?.eventDesc"
+        [disabled]="isSubmitting"
+        [formControl]="eventDesc"
+      ></ion-textarea>
+    </div>
+  </div>
+</ion-content>
+
+
+<ion-footer>
+  <ion-toolbar mode="md" (click)="onSave()">
+    <ion-button [disabled]="!isFormValid || !isFormDirty" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+      Continue
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+

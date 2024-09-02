@@ -16,21 +16,21 @@ const Users_1 = require("./Users");
 let Interested = class Interested {
 };
 __decorate([
-    (0, typeorm_1.Column)("bigint", { primary: true, name: "UserId" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "bigint", name: "Id" }),
     __metadata("design:type", String)
-], Interested.prototype, "userId", void 0);
+], Interested.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Events_1.Events, (events) => events.interesteds),
     (0, typeorm_1.JoinColumn)([{ name: "EventId", referencedColumnName: "eventId" }]),
     __metadata("design:type", Events_1.Events)
 ], Interested.prototype, "event", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => Users_1.Users, (users) => users.interested),
+    (0, typeorm_1.ManyToOne)(() => Users_1.Users, (users) => users.interesteds),
     (0, typeorm_1.JoinColumn)([{ name: "UserId", referencedColumnName: "userId" }]),
     __metadata("design:type", Users_1.Users)
 ], Interested.prototype, "user", void 0);
 Interested = __decorate([
-    (0, typeorm_1.Index)("Ratings_pkey", ["userId"], { unique: true }),
+    (0, typeorm_1.Index)("Interested_pkey", ["id"], { unique: true }),
     (0, typeorm_1.Entity)("Interested", { schema: "dbo" })
 ], Interested);
 exports.Interested = Interested;

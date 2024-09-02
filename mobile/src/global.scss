@@ -1,0 +1,445 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+@font-face {
+  font-family: 'Poppins-Bold';
+  src: url("./assets/fonts/poppins/Poppins-Bold.ttf");
+}
+
+@font-face {
+  font-family: 'Poppins-SemiBold';
+  src: url("./assets/fonts/poppins/Poppins-SemiBold.ttf");
+}
+@font-face {
+  font-family: 'Poppins-Regular';
+  src: url("./assets/fonts/poppins/Poppins-Regular.ttf");
+}
+html,body {
+  font-family: 'Poppins-Regular'!important;
+  font-weight: 600;
+}
+
+body {
+}
+
+h1,h2,h3,h4,h5,h6,
+p,strong,span,label,input,textarea {
+  margin: 0;
+  font-family: 'Poppins-Regular'!important;
+}
+
+ion-button,ion-title,ion-input,ion-label,ion-item,ion-text {
+  font-family: 'Poppins-Regular'!important;
+}
+.modal-fullscreen {
+  --width: 100%;
+  --height: 100%;
+}
+ion-header {
+  ion-toolbar {
+    ion-title {
+      // font-size: 1.5rem!important;
+      font-weight: 600;
+    }
+  }
+}
+ion-header {
+    ion-toolbar {
+      &.android_enable_safe_area {
+        // padding-top: 22px!important;
+      }
+  }
+}
+ion-tabs {
+  &.android_enable_safe_area {
+    .tabs-inner {
+      .ion-page {
+        ion-header {
+            ion-toolbar {
+              padding-top: 22px!important;
+          }
+        }
+      }
+    }
+    ion-tab-bar {
+      padding-bottom: 22px!important;
+    }
+  }
+}
+ion-content {
+  --padding-bottom: env(safe-area-inset-bottom)!important;
+}
+form {
+  fieldset {
+    border: none!important;
+    padding: 0!important;
+    .form-list {
+      display: flex;
+      row-gap: 10px;
+      flex-direction: column;
+    }
+  }
+}
+
+ion-tab-button {
+  ion-label {
+      // font-size: 1rem;
+      font-weight: 600;
+  }
+  // font-size: 14px;
+  ion-icon {
+    font-size: 2.3rem;
+  }
+  ion-badge {
+    --background: var(--ion-color-primary-shade);
+    font-size: 15px;
+    padding: 5px;
+    border-radius: 100%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-content: center;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -2px!important;
+}
+}
+ion-footer {
+  display: flex;
+  margin-bottom: var(--ion-safe-area-bottom);
+  ion-toolbar {
+    display: flex;
+    padding: 10px!important;
+    .tool-bar-buttons {
+      display: flex;
+      gap: 10px!important;
+      flex-direction: row;
+      justify-content: flex-end;
+      ion-button {
+        height: 50px;
+        flex-grow: 1;
+        margin: 0!important;
+        max-width: fit-content;
+      }
+      @media only screen and (max-width: 500px) {
+        flex-direction: column;
+        align-items: unset!important;
+        ion-button {
+          max-width: 100%!important;
+        }
+      }
+    }
+
+  }
+}
+ion-tab-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.result-modal {
+
+  .success-modal-content {
+    display: flex;
+    min-height: 100%;
+    min-width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-content: space-between;
+    align-items: center;
+    row-gap: 20px!important;
+    overflow: hidden!important;
+    padding: 30px!important;
+    ion-icon {
+      font-size: 8rem!important;
+    }
+    .title {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+    .desc {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+
+    }
+    .action {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+
+.no-records {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-grow: 1;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  .text {
+    text-align: center;
+    width: 100%;
+  }
+  ion-icon {
+    font-size: 3rem!important;
+  }
+}
+
+.input-label-placement-floating {
+  .label-text-wrapper {
+    .label-text {
+      line-height: 1.2;
+    }
+  }
+}
+
+.form-control-input {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px!important;
+  ion-input {
+    --border-width: 2px!important;
+    --border-radius: 10px!important;
+    font-family: "Poppins-SemiBold" !important;
+    &.has-focus {
+      --border-width: 3px!important;
+      &.ion-valid {
+        --border-color: var(--ion-color-primary)!important;
+        .input-wrapper {
+          .label-text {
+            color: var(--ion-color-primary)!important;
+          }
+        }
+      }
+      &:not(.ion-invalid) {
+        .input-wrapper {
+          .label-text {
+            color: var(--ion-color-primary)!important;
+          }
+        }
+      }
+    }
+  }
+  ion-textarea {
+    --border-width: 2px!important;
+    --border-radius: 10px!important;
+    &.has-focus {
+      --border-width: 3px!important;
+      &.ion-valid {
+        --border-color: var(--ion-color-primary)!important;
+        .input-wrapper {
+          .label-text {
+            color: var(--ion-color-primary)!important;
+          }
+        }
+      }
+      &:not(.ion-invalid) {
+        .input-wrapper {
+          .label-text {
+            color: var(--ion-color-primary)!important;
+          }
+        }
+      }
+    }
+  }
+
+  ion-select {
+    --border-width: 2px!important;
+    --border-radius: 10px!important;
+    &.select-expanded {
+      --border-width: 3px!important;
+      &.ion-valid {
+        &::part(icon) {
+          color: var(--ion-color-primary) !important;
+        }
+        --border-color: var(--ion-color-primary)!important;
+        .select-wrapper {
+          .label-text {
+            color: var(--ion-color-primary)!important;
+          }
+        }
+      }
+      &:not(.ion-invalid) {
+        .input-wrapper {
+          .label-text {
+            color: var(--ion-color-primary)!important;
+          }
+        }
+      }
+    }
+  }
+
+  .form-control-label {
+    font-family: 'Poppins-Bold'!important;
+  }
+  
+}
+
+ion-item {
+  &.form-control-input { 
+    font-family: "Poppins-SemiBold" !important;
+    &.item-fill-outline {
+      --border-width: 2px!important;
+      --border-radius: 10px!important;
+      --highlight-background: var(--ion-color-primary)!important;
+      // --highlight-height: 3px;
+      ion-label {
+        font-family: "Poppins-SemiBold" !important;
+      }
+      ion-input {
+        input {
+          font-family: "Poppins-SemiBold" !important;
+        }
+      }
+      &.item-has-focus {
+        &.ion-valid {
+          --border-color: var(--ion-color-primary)!important;
+          .input-wrapper {
+            .label-text {
+              color: var(--ion-color-primary)!important;
+            }
+          }
+        }
+        &:not(.ion-invalid) {
+          .input-wrapper {
+            .label-text {
+              color: var(--ion-color-primary)!important;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+}
+
+.horizontal-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  .horizontal-list-header{
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    width: 100%;
+    justify-content: space-between;
+    .horizontal-list-title {
+      color: var(--ion-color-dark-tint)!important;
+    }
+    .horizontal-list-header-link {
+      overflow: hidden!important;
+      position: relative;
+      color: var(--ion-color-primary)!important;
+    }
+  }
+  .horizontal-list-content {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    gap: 10px;
+    padding-bottom: 20px;
+    .horizontal-cards-wrapper {
+      &:first-child {
+        margin-left: 16px;
+      }
+      &:last-child {
+        margin-right: 16px;
+      }
+    }
+  }
+}
+
+.vertical-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+  .vertical-list-header{
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    width: 100%;
+    justify-content: space-between;
+    .vertical-list-title {
+      color: var(--ion-color-dark-tint)!important;
+    }
+    .vertical-list-header-link {
+      overflow: hidden!important;
+      position: relative;
+      color: var(--ion-color-primary)!important;
+    }
+  }
+  .vertical-list-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    .vertical-cards-wrapper {
+    }
+  }
+}
+
+
+
+.alert-danger {
+  .alert-title {
+    color: #cc0000;
+  }
+  
+  .alert-sub-title {
+    color: var(--ion-color-danger-tint)!important;
+  }
+  .alert-button {
+    color: var(--ion-color-danger-shade)!important;
+  }
+}
+
+/* Note: These styles should be located in your global stylesheet */
+ion-action-sheet {
+  font-family: 'Poppins-Regular'!important;
+  .action-sheet-container {
+    font-family: 'Poppins-Regular'!important;
+    .action-sheet-button-inner {
+      font-family: 'Poppins-Regular'!important;
+    }
+    .close, .dismiss, .cancel {
+      color: #cc0000;
+    }
+  }
+}
+
+ion-toast {
+  font-family: 'Poppins-Regular'!important;
+}

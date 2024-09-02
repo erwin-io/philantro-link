@@ -1,0 +1,103 @@
+ion-header::after {
+  background-image: none;
+}
+h1,h2,h3,h4,h5,span,p,label {
+  margin: 0;
+}
+
+ion-content {
+  ::ng-deep {
+    display: flex;
+    .content {
+      display: flex;
+      height: 100%;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      .back {
+        position: absolute;
+        top: 40px;
+        left: 20px;
+      }
+      &::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: -100px;
+        left: -30px;
+        height: 300px;
+        width: 300px;
+        background-image: url('../../../../assets/img/login-cloud-top.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        z-index: -1;
+      }
+      &::after {
+        z-index: -1;
+        content: "";
+        display: block;
+        position: absolute;
+        left: 80px;
+        bottom: -120px;
+        height: 250px;
+        width: 250px;
+        background-image: url('../../../../assets/img/login-cloud-bottom.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+      }
+    }
+    form {
+      gap: 16px;
+      &.log-in-form {
+        max-width: 480px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        fieldset {
+          display: flex;
+          flex-direction: column;
+          padding: 16px!important;
+          .title {
+            font-family: 'Poppins-Bold'!important;
+            color: var(--ion-color-primary)!important;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 10px;
+            background-color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+          }
+          [field] {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+            &:last-child {
+              margin-bottom: 0!important;
+            }
+          }
+          ion-text {
+            background-color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+          }
+          ion-button[type="submit"] {
+            height: 45px!important;
+            width: max-content;
+            align-self: end;
+            /* On screens that are 600px or less, set the background color to olive */
+            @media screen and (max-width: 720px) {
+              width: -webkit-fill-available!important;
+            }
+          }
+        }
+      }
+    }
+
+  }
+}

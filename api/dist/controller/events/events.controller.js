@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EventsController = void 0;
+exports.EventsController = exports.EventPaginationParamsDto = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const api_response_constant_1 = require("../../common/constant/api-response.constant");
@@ -21,6 +21,46 @@ const events_update_dto_1 = require("../../core/dto/events/events.update.dto");
 const pagination_params_dto_1 = require("../../core/dto/pagination-params.dto");
 const events_service_1 = require("../../services/events.service");
 const path_1 = require("path");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class EventPaginationParamsDto {
+    constructor() {
+        this.order = {};
+    }
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        default: 10,
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumberString)(),
+    (0, class_transformer_1.Transform)(({ obj, key }) => {
+        return obj[key].toString();
+    }),
+    __metadata("design:type", String)
+], EventPaginationParamsDto.prototype, "pageSize", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        default: 0,
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumberString)(),
+    (0, class_transformer_1.Transform)(({ obj, key }) => {
+        return obj[key].toString();
+    }),
+    __metadata("design:type", String)
+], EventPaginationParamsDto.prototype, "pageIndex", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({}),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Object)
+], EventPaginationParamsDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({}),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], EventPaginationParamsDto.prototype, "userCode", void 0);
+exports.EventPaginationParamsDto = EventPaginationParamsDto;
 let EventsController = class EventsController {
     constructor(eventService) {
         this.eventService = eventService;
@@ -58,6 +98,32 @@ let EventsController = class EventsController {
         const res = {};
         try {
             res.data = await this.eventService.getPagination(params);
+            res.success = true;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async getPageJoinedEvents(params) {
+        const res = {};
+        try {
+            res.data = await this.eventService.getPageJoinedEvents(params);
+            res.success = true;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async getPageInterestedEvents(params) {
+        const res = {};
+        try {
+            res.data = await this.eventService.getPageInterestedEvents(params);
             res.success = true;
             return res;
         }
@@ -222,6 +288,20 @@ __decorate([
     __metadata("design:paramtypes", [pagination_params_dto_1.PaginationParamsDto]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getPaginated", null);
+__decorate([
+    (0, common_1.Post)("/getPageJoinedEvents"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [EventPaginationParamsDto]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getPageJoinedEvents", null);
+__decorate([
+    (0, common_1.Post)("/getPageInterestedEvents"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [EventPaginationParamsDto]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getPageInterestedEvents", null);
 __decorate([
     (0, common_1.Post)("createCharityVolunteerEvent"),
     __param(0, (0, common_1.Body)()),

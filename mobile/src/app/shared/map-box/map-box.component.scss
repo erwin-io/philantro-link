@@ -1,0 +1,51 @@
+
+::ng-deep {
+  .google-map-wrapper {
+    width: 100%;
+    height: 100%;
+    google-map {
+      flex-grow: 1;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      transition: ease-out opacity cubic-bezier(0.6, 0.04, 0.98, 0.335);
+      &:not(.visible) {
+        opacity: 0!important;
+      }
+      .map-container {
+        display: flex;
+        width: 100%!important;
+        height: 100%!important;
+        flex-grow: 1;
+        // position: unset!important;
+      }
+
+      .info-window {
+        display: flex;
+        flex-direction: row;
+        gap: 7px;
+        align-items: center;
+        max-width: 200px!important;
+        cursor: pointer;
+        .info-window-location {
+          display: flex;
+          flex-direction: column;
+          span {
+            font-size: 12px;
+            white-space: break-spaces;
+          }
+        }
+        .info-window-icon {
+          font-size: 15px!important;
+          font-family: system-ui!important;
+          display: flex;
+        }
+      }
+
+      .gm-style-iw button[title="Close"] {
+        display: none !important;
+      }
+    }
+
+  }
+}

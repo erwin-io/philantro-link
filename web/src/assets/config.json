@@ -305,33 +305,23 @@
         }
       },
       {
-        "name": "accountNumber",
-        "label": "Account #",
-        "apiNotation": "accountNumber",
+        "name": "from",
+        "label": "From",
+        "apiNotation": "user.name",
         "type": "string",
         "filterOptions": {
           "enable": true,
-          "placeholder": "Account #"
+          "placeholder": "From"
         }
       },
       {
-        "name": "accountName",
-        "label": "Account name",
-        "apiNotation": "accountName",
+        "name": "fromEmail",
+        "label": "Email",
+        "apiNotation": "user.email",
         "type": "string",
         "filterOptions": {
           "enable": true,
-          "placeholder": "Account name"
-        }
-      },
-      {
-        "name": "bank",
-        "label": "Bank",
-        "apiNotation": "bank",
-        "type": "string",
-        "filterOptions": {
-          "enable": true,
-          "placeholder": "Bank"
+          "placeholder": "Email"
         }
       }
     ],

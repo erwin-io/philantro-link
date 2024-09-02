@@ -1,3 +1,4 @@
+import { Files } from "./files.model";
 import { EventLocMap } from "./map.model";
 import { Users } from "./users";
 
@@ -12,7 +13,7 @@ export class Events {
   eventLocName: string;
   eventLocMap?: EventLocMap;
   eventAssistanceItems: any[];
-  eventStatus: string;
+  eventStatus: "PENDING" | "APPROVED" | "REJECTED" | "INPROGRESS" | "COMPLETED" | "CANCELLED";
   active: boolean;
   user: Users;
   eventImages: any[];
@@ -25,5 +26,6 @@ export class Events {
   transferAccountName: string;
   donationTargetAmount = 0;
   raisedDonation: number = 0;
+  thumbnailFile: Files;
   inProgress: boolean = false;
 }

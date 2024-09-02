@@ -1,0 +1,54 @@
+
+<div class="vertical-cards-thumbnail">
+  <ng-container *ngIf="!isLoading; else loadingImage">
+    <img [src]="eventImage()" (error)="imageErrorHandler($event, event?.eventType)" alt="">
+  </ng-container>
+  <ng-template #loadingImage>
+    <ion-skeleton-text [animated]="true" ></ion-skeleton-text>
+  </ng-template>
+</div>
+<div class="vertical-cards-content">
+  <ng-container *ngIf="currentUser?.userCode === event?.user?.userCode">
+    <div style="display: flex;flex-direction: row;">
+      <ion-text style="opacity: 0.8;" [color]="
+      event?.eventStatus === 'PENDING' ? 'warning' : '' ||
+      event?.eventStatus === 'APPROVED' || event?.eventStatus === 'INPROGRESS' ? 'primary' : '' ||
+      event?.eventStatus === 'REJECTED' || event?.eventStatus === 'CANCELLED'? 'danger' : '' ||
+      event?.eventStatus === 'COMPLETED' ? 'medium' : ''">
+        {{event?.eventType !== 'ASSISTANCE' && event?.inProgress ? 'IN PROGRESS' : event?.eventStatus}}
+      </ion-text>
+    </div>
+
+  </ng-container>
+  
+  <ion-text color="danger">
+    <span *ngIf="!isLoading; else loadingDateTime">{{event?.dateTime | date:'EEEE, MMMM d, y AT h a' }}</span>
+    <ng-template #loadingDateTime>
+      <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+    </ng-template>
+  </ion-text>
+  <h3 *ngIf="!isLoading; else loadingEventName"class="vertical-cards-title">{{event?.eventName}}</h3>
+  <ng-template #loadingEventName>
+    <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+  </ng-template>
+  <ion-text *ngIf="showEventType" color="primary"><b>{{event?.eventType}}</b></ion-text>
+  <p class="vertical-cards-description">{{event?.eventLocName}}</p>
+  <div *ngIf="event?.eventType === 'CHARITY' || event?.eventType === 'VOLUNTEER'">
+    <p>{{event?.interested}} interested - {{event?.responded}} going</p>
+  </div>
+  <div class="vertical-cards-donation" *ngIf="event?.eventType === 'DONATION'">
+    <ng-container *ngIf="event?.raisedDonation > 0; else noDonationYet">
+      <div class="vertical-cards-donation-value">
+        <p><span>{{event?.raisedDonation | currency: 'PHP'}}</span>/<span>{{event?.donationTargetAmount | currency: 'PHP'}}</span></p>
+        <ion-text color="primary">
+          <b>{{getDonationPercentage(event) | percent}}</b>
+        </ion-text>
+      </div>
+      <ion-progress-bar [value]="getDonationPercentage(event)" ></ion-progress-bar>
+    </ng-container>
+    <ng-template #noDonationYet>
+      <p>NO DONATION YET</p>
+    </ng-template>
+  </div>
+</div>
+<ion-ripple-effect></ion-ripple-effect>

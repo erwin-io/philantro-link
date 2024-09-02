@@ -1,0 +1,78 @@
+<!-- <ion-header no-border no-shadow mode="md" class="ion-no-border">
+  <ion-toolbar mode="md">
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" >
+        <ion-icon name="arrow-back-sharp" style="font-size: 2em!important;" color="primary"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title >Login - Passenger</ion-title>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-content class="">
+  <div class="content">
+    <ion-fab-button class="back" color="light" (click)="close()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-fab-button>
+    <br>
+    <form
+      autocomplete="off"
+      id="logInForm"
+      class="log-in-form"
+      [formGroup]="logInForm"
+      (ngSubmit)="onLogin()">
+      <fieldset [disabled]="isSubmitting">
+        <h1 class="title">Login</h1>
+        <div field>
+          <ion-item fill="outline" mode="md" class="form-control-input">
+            <ion-label position="stacked" >Email</ion-label>
+            <ion-input
+              type="email"
+              autocomplete="off"
+              autocorrect="off"
+              placeholder="Enter Email"
+              formControlName="email"
+              required
+              autofocus
+            ></ion-input>
+          </ion-item>
+          <ion-text color="danger" *ngIf="getError('email')">
+            {{
+              getError('email')['required'] ? 'Email can not be empty or blank' : ''
+            }}
+          </ion-text>
+        </div>
+        
+        <div field>
+          <ion-item fill="outline" mode="md" class="form-control-input">
+            <ion-label position="stacked" >Password</ion-label>
+            <ion-input
+              type="password"
+              autocomplete="off"
+              autocorrect="off"
+              placeholder="Enter Password"
+              formControlName="password"
+              required
+              autofocus
+              #password
+            ></ion-input>
+            <ion-icon *ngIf="logInForm?.value?.password && logInForm?.value?.password !== ''" name="eye" slot="end" (click)="password.type = password.type === 'text' ? 'password' : 'text'"></ion-icon>
+          </ion-item>
+          <ion-text color="danger" *ngIf="getError('password')">
+            {{
+              getError('password')['required'] ? 'Password can not be empty or blank' : ''
+            }}
+          </ion-text>
+        </div>
+        <ion-button shape="round" color="primary" type="submit" form="logInForm" [disabled]="isSubmitting">
+          Log In
+        </ion-button>
+        <ion-button fill="clear" (click)="onShowResetPasswordDialog()">Forgot your password?</ion-button>
+        <ion-text style="width: 100%!important;" *ngIf="error && error !== ''" position="floating" color="danger">
+          <h5>{{error}}</h5>
+        </ion-text>
+      </fieldset>
+    </form>
+  </div>
+
+</ion-content>

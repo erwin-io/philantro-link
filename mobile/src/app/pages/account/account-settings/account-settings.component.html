@@ -1,0 +1,118 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="modal.dismiss()">
+        <ion-icon name="close" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center">Account</ion-title>
+    <div slot="end" style="width: 48px"></div>
+
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <form
+    id="form"
+    [formGroup]="form"
+    (ngSubmit)="form.valid ? onSubmit() : false">
+    <fieldset [disabled]="isSubmitting">
+      <div class="form-control-input">
+        <p class="form-control-label">Email</p>
+        <ion-input
+          mode="md"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="Email"
+          formControlName="email"
+        ></ion-input>
+      </div>
+      <div class="form-control-input">
+        <p class="form-control-label">Name</p>
+        <ion-input
+          mode="md"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="Name"
+          formControlName="name"
+        ></ion-input>
+      </div>
+      <div class="form-control-input">
+        <p class="form-control-label">Select Your Notification Preferences:</p>
+      </div>
+      <div class="help-type">
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('FOOD') }" (click)="selectAssistanceItem('FOOD')"> 
+          <ion-icon slot="start" name="restaurant"></ion-icon>
+          Food
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('WATER') }" (click)="selectAssistanceItem('WATER')">
+          <ion-icon slot="start" name="water"></ion-icon>
+          Water
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected( 'CLOTHING') }" (click)="selectAssistanceItem('CLOTHING')">
+          <ion-icon slot="start" name="shirt"></ion-icon>
+          Clothing
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+        <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('SERVICES') }" (click)="selectAssistanceItem('SERVICES')">
+          <ion-icon slot="start" name="construct"></ion-icon>
+          Services
+          <ion-ripple-effect></ion-ripple-effect>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar mode="md">
+    <ion-button [disabled]="!form.dirty || !form.valid" type="submit" form="form" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+      Save
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+
+
+<ion-modal class="result-modal" [isOpen]="isOpenResultModal">
+  <ng-template>
+    <div class="success-modal-content">
+      <ion-icon name="checkmark-circle-outline" *ngIf="resultModal?.type==='success'; else errorIcon" color="primary"></ion-icon>
+      <ng-template #errorIcon>
+        <ion-icon name="checkmark-circle-outline" color="danger"></ion-icon>
+      </ng-template>
+
+      <div class="title">
+        <h1>{{resultModal?.title}}</h1>
+      </div>
+      <div class="desc">
+        <h1>{{resultModal?.desc}}</h1>
+      </div>
+      <div class="action">
+        <ion-button
+          *ngIf="resultModal?.type==='success'; else errorAction"
+          mode="md"
+          expand="outline"
+          shape="round"
+          size="large"
+          color="primary"
+          (click)="resultModal.done()">
+        Done
+      </ion-button>
+      <ng-template #errorAction>
+        <ion-button
+          mode="md"
+          expand="outline"
+          shape="round"
+          size="large"
+          color="danger"
+          (click)="resultModal.retry()">
+        Retry
+      </ion-button>
+      </ng-template>
+
+    </div>
+    </div>
+  </ng-template>
+</ion-modal>

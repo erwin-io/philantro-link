@@ -5,12 +5,26 @@ import { ApiResponseModel } from "src/core/models/api-response.model";
 import { Events } from "src/db/entities/Events";
 import { EventsService } from "src/services/events.service";
 import { Response } from "express";
+export declare class EventPaginationParamsDto {
+    pageSize: string;
+    pageIndex: string;
+    order: any;
+    userCode: string;
+}
 export declare class EventsController {
     private readonly eventService;
     constructor(eventService: EventsService);
     getDetails(eventCode: string, currentUserCode: any): Promise<ApiResponseModel<Events>>;
     getEventThumbnail(eventCode: string, res: Response): Promise<void>;
     getPaginated(params: PaginationParamsDto): Promise<ApiResponseModel<{
+        results: Events[];
+        total: number;
+    }>>;
+    getPageJoinedEvents(params: EventPaginationParamsDto): Promise<ApiResponseModel<{
+        results: Events[];
+        total: number;
+    }>>;
+    getPageInterestedEvents(params: EventPaginationParamsDto): Promise<ApiResponseModel<{
         results: Events[];
         total: number;
     }>>;

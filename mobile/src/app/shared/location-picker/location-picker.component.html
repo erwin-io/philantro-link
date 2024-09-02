@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="modal.dismiss()">
+        <ion-icon name="close" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center">Select Location</ion-title>
+    <div slot="end" style="width: 48px"></div>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar 
+  mode="ios" 
+  style="position: absolute;width: 100%;z-index: 99;background-color: #fff;"
+  show-cancel-button="never" 
+  placeholder="Search place" 
+  inputmode="search"
+  [debounce]="1000" 
+  [ngModel]="searchKey"
+  (ionChange)="onSearchChange($event)"
+  (setAddress)="getAddress($event)"></ion-searchbar>
+  
+  <ion-list *ngIf="placeResults.length > 0" lines="full" style="position: absolute;width: 100%;z-index: 99;background-color: #fff;top: 62px;">
+    <ion-item class="list-item" button="true" detail="false" *ngFor="let item of placeResults" (click)="placeSearchSelected(item)">
+      <ion-icon slot="start" name="location-outline" size="large"></ion-icon>
+      <ion-label>
+        <h2>{{item?.main_text}}</h2>
+        <ion-note color="medium" class="ion-text-wrap">
+          <h2 style="margin: 0;">{{item?.description}}</h2>
+        </ion-note>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <app-map-box fxFlex #mapBox *ngIf="mapEnable"></app-map-box>
+</ion-content>
+
+<ion-footer>
+  <div class="place-info ion-padding">
+    <p>{{locationName}}</p>
+  </div>
+  <ion-toolbar mode="md" (click)="onContinue()">
+    <ion-button [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+      Continue
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+

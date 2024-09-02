@@ -9,7 +9,7 @@ import {
   Query,
   Res,
 } from "@nestjs/common";
-import { ApiBody, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiProperty, ApiQuery, ApiTags } from "@nestjs/swagger";
 import {
   DELETE_SUCCESS,
   SAVING_SUCCESS,
@@ -35,6 +35,38 @@ import { EventsService } from "src/services/events.service";
 import { createReadStream } from "fs";
 import { Response } from "express";
 import { extname } from "path";
+import { IsNotEmpty, IsNumberString, IsArray } from "class-validator";
+import { Transform } from "class-transformer";
+
+export class EventPaginationParamsDto {
+  @ApiProperty({
+    default: 10,
+  })
+  @IsNotEmpty()
+  @IsNumberString()
+  @Transform(({ obj, key }) => {
+    return obj[key].toString();
+  })
+  pageSize: string;
+
+  @ApiProperty({
+    default: 0,
+  })
+  @IsNotEmpty()
+  @IsNumberString()
+  @Transform(({ obj, key }) => {
+    return obj[key].toString();
+  })
+  pageIndex: string;
+
+  @ApiProperty({})
+  @IsNotEmpty()
+  order = {} as any;
+
+  @ApiProperty({})
+  @IsNotEmpty()
+  userCode: string;
+}
 
 @ApiTags("events")
 @Controller("events")
@@ -96,6 +128,40 @@ export class EventsController {
     }> = {} as any;
     try {
       res.data = await this.eventService.getPagination(params);
+      res.success = true;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Post("/getPageJoinedEvents")
+  async getPageJoinedEvents(@Body() params: EventPaginationParamsDto) {
+    const res: ApiResponseModel<{
+      results: Events[];
+      total: number;
+    }> = {} as any;
+    try {
+      res.data = await this.eventService.getPageJoinedEvents(params);
+      res.success = true;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Post("/getPageInterestedEvents")
+  async getPageInterestedEvents(@Body() params: EventPaginationParamsDto) {
+    const res: ApiResponseModel<{
+      results: Events[];
+      total: number;
+    }> = {} as any;
+    try {
+      res.data = await this.eventService.getPageInterestedEvents(params);
       res.success = true;
       return res;
     } catch (e) {

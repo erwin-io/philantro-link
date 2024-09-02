@@ -1,0 +1,43 @@
+<ion-header mode="md" >
+  <ion-toolbar mode="md" color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" mode="md">
+        <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Report details</ion-title>
+    <div slot="end" style="width: 48px"></div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh()" class="refresher-custom">
+    <ion-refresher-content >
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="details-header ion-padding">
+    <div style="display: flex; flex-direction: row;">
+      <ion-button style="--ripple-color: transparent" fill="outline">#{{supportTicket?.supportTicketCode}}</ion-button>
+      <ion-button style="--ripple-color: transparent" fill="solid" [color]="
+      supportTicket.status === 'OPEN' ? 'medium' : '' ||
+      supportTicket.status === 'ACTIVE' ? 'primary' : '' ||
+      supportTicket.status === 'COMPLETED' ? 'success' : '' ||
+      supportTicket.status === 'CLOSED' ? 'medium' : ''">{{supportTicket?.status}}</ion-button>
+    </div>
+    <h4 type><strong>{{supportTicket?.type}}</strong></h4>
+    <h4 title>{{supportTicket?.title}}</h4>
+    <p date color="danger"><strong>{{supportTicket?.dateTimeSent | date: 'EEE, MMM d, y AT h a'}}</strong></p>
+  </div>
+  <div class="details-desc ion-padding">
+    <p color="danger"><strong>Description</strong></p>
+    <p>{{supportTicket?.description}}</p>
+  </div>
+</ion-content>
+<ion-footer *ngIf="supportTicket?.status === 'ACTIVE'">
+  <ion-toolbar mode="md" (click)="onOpenChat()">
+    <ion-button [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+      Open Message
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

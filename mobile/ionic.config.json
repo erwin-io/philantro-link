@@ -1,0 +1,7 @@
+{
+  "name": "PhilantroLink",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

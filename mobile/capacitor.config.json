@@ -1,0 +1,42 @@
+{
+  "appId": "com.philantrolink.app",
+  "appName": "PhilantroLink",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "DatePickerPlugin": {
+      "locale": "pt_PH",
+      "format": "dd/MM/yyyy",
+      "android": {
+      },
+      "ios": {
+      }
+    },
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "splashFullScreen": true,
+      "splashImmersive": true,
+      "backgroundColor": "#1d4d53",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "FIT_CENTER"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_launcher_background",
+      "iconColor": "#1d4d53",
+      "sound": "notif_alert.wav"
+    },
+    "PushNotifications": {
+      "sound": "notif_alert",
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    }
+  },
+  "cordova": {}
+}

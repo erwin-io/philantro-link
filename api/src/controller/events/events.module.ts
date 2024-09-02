@@ -8,12 +8,18 @@ import { Events } from "src/db/entities/Events";
 import { EventsService } from "src/services/events.service";
 import { UserConversation } from "src/db/entities/UserConversation";
 import { Notifications } from "src/db/entities/Notifications";
+import { Transactions } from "src/db/entities/Transactions";
 
 @Module({
   imports: [
     FirebaseProviderModule,
     HttpModule,
-    TypeOrmModule.forFeature([Events, UserConversation, Notifications]),
+    TypeOrmModule.forFeature([
+      Events,
+      UserConversation,
+      Notifications,
+      Transactions,
+    ]),
   ],
   controllers: [EventsController],
   providers: [EventsService, OneSignalNotificationService],

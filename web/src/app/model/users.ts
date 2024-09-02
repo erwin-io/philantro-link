@@ -5,6 +5,7 @@ export class Users {
     userId: string;
     userCode: string;
     userName: string;
+    email: string;
     name: string;
     mobileNumber: string;
     accessGranted: boolean;

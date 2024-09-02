@@ -13,13 +13,15 @@ import { Files } from "src/db/entities/Files";
 import { EventImage } from "src/db/entities/EventImage";
 import { EventMessage } from "src/db/entities/EventMessage";
 import { UserConversation } from "src/db/entities/UserConversation";
+import { Transactions } from "src/db/entities/Transactions";
 export declare class EventsService {
     private readonly eventRepo;
     private readonly userConversationRepo;
     private readonly notificationsRepo;
+    private readonly transactionsRepo;
     private firebaseProvoder;
     private oneSignalNotificationService;
-    constructor(eventRepo: Repository<Events>, userConversationRepo: Repository<UserConversation>, notificationsRepo: Repository<Notifications>, firebaseProvoder: FirebaseProvider, oneSignalNotificationService: OneSignalNotificationService);
+    constructor(eventRepo: Repository<Events>, userConversationRepo: Repository<UserConversation>, notificationsRepo: Repository<Notifications>, transactionsRepo: Repository<Transactions>, firebaseProvoder: FirebaseProvider, oneSignalNotificationService: OneSignalNotificationService);
     getPagination({ pageSize, pageIndex, order, columnDef }: {
         pageSize: any;
         pageIndex: any;
@@ -53,7 +55,7 @@ export declare class EventsService {
             user: Users;
             interesteds: Interested[];
             respondeds: Responded[];
-            transactions: import("../db/entities/Transactions").Transactions[];
+            transactions: Transactions[];
         }[];
         total: number;
     }>;
@@ -65,6 +67,7 @@ export declare class EventsService {
         isCurrentUserResponded: boolean;
         isCurrentUserInterested: boolean;
         visitorUserConversation: any;
+        visitorUserDonation: number;
         ownerUnReadNotifications: number;
         ownerUnReadMessage: number;
         ownerUnReadNotif: number;
@@ -91,7 +94,25 @@ export declare class EventsService {
         user: Users;
         interesteds: Interested[];
         respondeds: Responded[];
-        transactions: import("../db/entities/Transactions").Transactions[];
+        transactions: Transactions[];
+    }>;
+    getPageJoinedEvents({ pageSize, pageIndex, order, userCode }: {
+        pageSize: any;
+        pageIndex: any;
+        order: any;
+        userCode: any;
+    }): Promise<{
+        results: Events[];
+        total: number;
+    }>;
+    getPageInterestedEvents({ pageSize, pageIndex, order, userCode }: {
+        pageSize: any;
+        pageIndex: any;
+        order: any;
+        userCode: any;
+    }): Promise<{
+        results: Events[];
+        total: number;
     }>;
     getEventThumbnailFile(eventCode?: string): Promise<Files>;
     getEventThumbnailContent(path?: string): Promise<Buffer>;
@@ -127,7 +148,7 @@ export declare class EventsService {
         user: Users;
         interesteds: Interested[];
         respondeds: Responded[];
-        transactions: import("../db/entities/Transactions").Transactions[];
+        transactions: Transactions[];
     }>;
     updateEventResponded(eventCode: any, dto: UpdateEventRespondedDto): Promise<{
         responded: number;
@@ -154,7 +175,7 @@ export declare class EventsService {
         user: Users;
         interesteds: Interested[];
         respondeds: Responded[];
-        transactions: import("../db/entities/Transactions").Transactions[];
+        transactions: Transactions[];
     }>;
     saveEventImages(entityManager: EntityManager, event: Events, eventImages?: any[]): Promise<void>;
     logNotification(userIds: string[], data: Events, entityManager: EntityManager, title: string, description: string): Promise<Notifications[]>;

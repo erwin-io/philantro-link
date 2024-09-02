@@ -1,0 +1,46 @@
+::ng-deep {
+  h1,h2,h3,h4,h5,h6 {
+    margin: 0!important;
+    white-space: break-spaces;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    fieldset {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 10px;
+      .form-control {
+      }
+      .help-type {
+          display: flex;
+          flex-direction: row;
+          // gap: 10px;
+          overflow: auto;
+          scroll-behavior: smooth;
+          gap: 5px;
+          .help-type-item {
+              display: flex;
+              flex-direction: column;
+              margin: 0;
+              --box-shadow: none;
+              --background: #EFE9FF!important;
+              --color: #000;
+              width: -webkit-fill-available;
+              align-items: center;
+              overflow: hidden;
+              position: relative;
+              padding: 10px 0;
+              box-sizing: border-box;
+              border-radius: 5px;
+              &.active {
+                  color: #fff;
+                  background-color: var(--ion-color-secondary)!important;
+              }
+          }
+      }
+    }
+  }
+}

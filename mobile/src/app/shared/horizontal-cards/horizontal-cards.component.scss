@@ -1,0 +1,58 @@
+::ng-deep {
+    .horizontal-cards-wrapper {
+        display: flex;
+        min-width: 88%!important;   
+        width: 100%;
+        height: 200px;
+        flex-direction: row;
+        background-color: var(--ion-color-primary) !important;
+        border-radius: 10px;
+        overflow: hidden;
+        color: #fff;
+        box-shadow: 0px 8px 16px 0px #00000014,0px 0px 4px 0px #0000000A;
+        position: relative;
+        .horizontal-cards-thumbnail {
+            min-width: 40%;
+            max-width: 40%;
+            height: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            img {
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+        .horizontal-cards-content {
+            padding: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            .horizontal-cards-title {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .horizontal-cards-sched, .horizontal-cards-type {
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-family: "Poppins-Regular" !important;
+            }
+            .horizontal-cards-description {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-family: "Poppins-Regular" !important;
+              }
+        }
+    }
+}

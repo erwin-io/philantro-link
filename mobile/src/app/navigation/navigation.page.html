@@ -1,0 +1,26 @@
+
+
+<ion-tabs (ionTabsWillChange)="onTabsWillChange($event)" [ngClass]="{'android_enable_safe_area' : deviceInfo.platform === 'android' && deviceInfo.osVersion > 14 }">
+  <ion-tab-bar slot="bottom" >
+    <ion-tab-button tab="home" >
+      <ion-icon name="grid{{ active === 'home' ? '' : '-outline' }}"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="my-events" >
+      <ion-icon name="calendar{{ active === 'my-events' ? '' : '-outline' }}"></ion-icon>
+      <ion-label>My Events</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="message" >
+      <ion-icon name="chatbox-ellipses{{ active === 'message' ? '' : '-outline' }}"></ion-icon>
+      <ion-label>Message</ion-label>
+      <ion-badge color="danger" *ngIf="totalUnreadNotification > 0">{{totalUnreadNotification}}</ion-badge>
+    </ion-tab-button>
+
+    <ion-tab-button tab="account" >
+      <ion-icon name="person-circle{{ active === 'account' ? '' : '-outline' }}"></ion-icon>
+      <ion-label>Account</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

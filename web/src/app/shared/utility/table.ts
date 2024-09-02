@@ -71,9 +71,9 @@ export class TransactionsTableColumn {
   dateTime?: string;
   amount?: string;
   paymentType?: string;
-  accountNumber?: string;
-  accountName?: string;
-  bank?: string;
+  user?: string;
+  from?: string;
+  fromEmail?: string;
 }
 
 export class SupportTicketTableColumn {

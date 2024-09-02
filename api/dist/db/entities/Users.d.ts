@@ -29,9 +29,9 @@ export declare class Users {
     eventMessages: EventMessage[];
     eventMessages2: EventMessage[];
     events: Events[];
-    interested: Interested;
+    interesteds: Interested[];
     notifications: Notifications[];
-    responded: Responded;
+    respondeds: Responded[];
     supportTickets: SupportTicket[];
     supportTickets2: SupportTicket[];
     supportTicketMessages: SupportTicketMessage[];

@@ -43,7 +43,6 @@ export class RequestPaymentDto {
   @ApiProperty({
     type: String,
   })
-  @IsNotEmpty()
   accountNumber: string;
 }
 

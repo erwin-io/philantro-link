@@ -1,0 +1,29 @@
+<div class="event-thumbnail-selected">
+  <img #open [src]="openedPic ? openedPic?.url : ''" (error)="imageErrorHandler($event, type)" alt="0">
+  <!-- <ion-button change (click)="onShowChangeProfilePicMenu(openedPic?.fileId, openedPic?.fileId && openedPic?.fileId !== '' ? false : true)" shape="round" color="light">
+    <ion-icon slot="icon-only" name="image-outline"></ion-icon>
+  </ion-button>
+  <ion-button delete (click)="onShowChangeProfilePicMenu(openedPic?.fileId, openedPic?.fileId && openedPic?.fileId !== '' ? false : true)" fill="clear">
+    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+  </ion-button> -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <ion-fab-button color="light" (click)="onShowChangeProfilePicMenu(openedPic?.fileId, openedPic?.fileId && openedPic?.fileId !== '' ? false : true)">
+      <ion-icon name="image-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-fab slot="fixed" vertical="top" horizontal="end"  *ngIf="eventThumbnailsToDisplay.length > 0">
+    <ion-fab-button color="light" (click)="onDelete(openedPic?.fileId)">
+      <ion-icon color="danger" name="trash-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</div>
+<div class="event-thumbnail-list" *ngIf="eventThumbnailsToDisplay.length > 0">
+  <ng-container *ngFor="let item of eventThumbnailsToDisplay; index as i">
+    <div class="event-thumbnail-list-item" [ngClass]="{'selected-form-gallery-list': openedPic.fileId === item.fileId}" >
+      <img [src]="item.url" alt="{{i}}" (click)="openedPic = item">
+    </div>
+  </ng-container>
+  <ion-button *ngIf="eventThumbnailsToDisplay.length < 3" class="event-thumbnail-list-item add" (click)="onShowChangeProfilePicMenu(null, true)" shape="round" color="light">
+    <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+  </ion-button>
+</div>

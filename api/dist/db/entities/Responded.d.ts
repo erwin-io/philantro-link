@@ -1,7 +1,7 @@
 import { Events } from "./Events";
 import { Users } from "./Users";
 export declare class Responded {
-    userId: string;
+    id: string;
     event: Events;
     user: Users;
 }

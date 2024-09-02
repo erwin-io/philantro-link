@@ -1,0 +1,23 @@
+ion-content {
+    display: flex;
+    flex-direction: column;
+    .tools {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        overflow: auto;
+        padding: 16px 0 0;
+        scroll-behavior: smooth;
+        ion-button {
+            --box-shadow:none;
+            --background: #EFE9FF!important;
+            --color: #000;
+            &:first-child {
+                margin-left: 16px!important;
+            }
+            &:last-child {
+                margin-right: 16px!important;
+            }
+        }
+    }
+}

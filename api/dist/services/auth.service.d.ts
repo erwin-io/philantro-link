@@ -42,9 +42,9 @@ export declare class AuthService {
         eventMessages: import("../db/entities/EventMessage").EventMessage[];
         eventMessages2: import("../db/entities/EventMessage").EventMessage[];
         events: import("../db/entities/Events").Events[];
-        interested: import("../db/entities/Interested").Interested;
+        interesteds: import("../db/entities/Interested").Interested[];
         notifications: import("../db/entities/Notifications").Notifications[];
-        responded: import("../db/entities/Responded").Responded;
+        respondeds: import("../db/entities/Responded").Responded[];
         supportTickets: import("../db/entities/SupportTicket").SupportTicket[];
         supportTickets2: import("../db/entities/SupportTicket").SupportTicket[];
         supportTicketMessages: import("../db/entities/SupportTicketMessage").SupportTicketMessage[];
@@ -77,9 +77,9 @@ export declare class AuthService {
         eventMessages: import("../db/entities/EventMessage").EventMessage[];
         eventMessages2: import("../db/entities/EventMessage").EventMessage[];
         events: import("../db/entities/Events").Events[];
-        interested: import("../db/entities/Interested").Interested;
+        interesteds: import("../db/entities/Interested").Interested[];
         notifications: import("../db/entities/Notifications").Notifications[];
-        responded: import("../db/entities/Responded").Responded;
+        respondeds: import("../db/entities/Responded").Responded[];
         supportTickets: import("../db/entities/SupportTicket").SupportTicket[];
         supportTickets2: import("../db/entities/SupportTicket").SupportTicket[];
         supportTicketMessages: import("../db/entities/SupportTicketMessage").SupportTicketMessage[];

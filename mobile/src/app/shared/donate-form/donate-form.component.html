@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="modal.dismiss()">
+        <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center">Donate</ion-title>
+    <div slot="end" style="width: 48px"></div>
+
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <div class="donate-form-control">
+    <div class="form-control-input">
+      <ion-input
+        mode="md"
+        label="Enter Amount" 
+        label-placement="floating" 
+        fill="outline" 
+        placeholder="Amount"
+        [disabled]="isSubmitting"
+        [formControl]="amountFormControl"
+        type="number"
+      ></ion-input>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer >
+  <ion-toolbar mode="md">
+    <ion-button class="donate-submit" [disabled]="isSubmitting || !amountFormControl.dirty || !amountFormControl.valid" (click)="onSubmit()" mode="md"
+      expand="full" shape="round" color="primary">
+      Continue
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+

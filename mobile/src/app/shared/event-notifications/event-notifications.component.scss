@@ -1,0 +1,69 @@
+ion-content {
+    display: flex;
+    flex-direction: column;
+    .message-menu {
+        padding: 0 16px;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        overflow: auto;
+        box-sizing: border-box;
+        ion-button {
+            width: 50%!important;
+            box-sizing: border-box;
+            --box-shadow:none;
+            --background: #EFE9FF!important;
+            --color: #000;
+            &.active {
+                --color: #fff;
+                --background: var(--ion-color-secondary)!important;
+            }
+        }
+    }
+    .message-list {
+        ion-avatar {
+            width: 55px;
+            height: 55px;
+        }
+        ion-label {
+          text-overflow: unset;
+          white-space: unset;
+          overflow: unset;
+          position: relative;
+          h1,h2,h3,h4,h5,h6  {
+            margin: 0 !important;
+            display: -webkit-box;
+            max-width: 100%;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          &.unread {
+            opacity: 1!important;
+            font-weight: 800;
+          }
+        }
+        .desc {
+          opacity: 0.8!important;
+          font-size: 20px;
+          // color: var(--ion-color-tertiary)!important;
+          white-space: break-spaces!important;
+          -webkit-line-clamp: 2;
+        }
+        
+        .sub-title {
+            font-size: 16px;
+            white-space: break-spaces!important;
+            -webkit-line-clamp: 3;
+        }
+        .unread-symbol {
+          width: 10px;
+          height: 10px;
+          border-radius: 100px;
+          display: flex;
+          background: var(--ion-color-tertiary)!important;
+        }
+    }
+    [load-more] {
+      width: 100%;
+    }
+}

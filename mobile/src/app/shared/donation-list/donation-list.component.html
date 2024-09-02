@@ -1,0 +1,75 @@
+<ion-header mode="md">
+  <ion-toolbar mode="md" color="primary">
+    <ion-buttons slot="start" >
+      <ion-button (click)="close()" mode="md">
+        <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Donations</ion-title>
+    <div slot="end" style="width: 48px"></div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh()" class="refresher-custom">
+    <ion-refresher-content >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="donation-list-header ion-padding">
+    <div class="details-dontation">
+      <p><span>{{event?.raisedDonation | currency: 'PHP'}}</span>/<span>{{event?.donationTargetAmount | currency: 'PHP'}}</span></p>
+      <ion-text color="primary">
+        <b>{{getDonationPercentage(event) | percent}}</b>
+      </ion-text>
+    </div>
+    <ion-progress-bar [value]="getDonationPercentage(event)" ></ion-progress-bar>
+    <ng-container *ngIf="event?.user?.userCode !== currentUser?.userCode && event?.visitorUserDonation && event?.visitorUserDonation > 0">
+      <br>
+      <ion-text color="primary">My donation: {{event?.visitorUserDonation | currency: 'PHP'}}</ion-text>
+    </ng-container>
+  </div>
+
+  <div class="donation-list-body ion-padding">
+    <h3>People donated</h3>
+    <ion-list class="donation-list" *ngIf="transactions.length > 0; else noRecordsTemplate">
+      <ng-container *ngFor="let item of transactions">
+        <ion-item [button]="false" class="ion-no-padding">
+          <ion-avatar aria-hidden="true" slot="start">
+            <img alt="" [src]="item?.user?.userProfilePic?.file?.url" (error)="imageErrorHandler($event)"/>
+          </ion-avatar>
+          <ion-label >
+            <h3 class="desc">
+              <strong>{{item?.user.name}}</strong>
+            </h3>
+            <h4 class="sub-title">{{ item?.dateTime | date:'EEE, MMM d, y AT h a'}}</h4>
+          </ion-label>
+          <ion-note slot="end">
+            <h5>
+              <strong>{{item?.amount | currency: 'PHP'}}</strong>
+            </h5>
+          </ion-note>
+        </ion-item>
+      </ng-container>
+    </ion-list>
+  </div>
+  
+  <ion-button load-more fill="clear" *ngIf="!isLoading && total > transactions.length" (click)="loadMore()">
+    <ion-icon slot="start" name="chevron-down-outline"></ion-icon>
+    Load more
+  </ion-button>
+
+  <ng-template #noRecordsTemplate>
+    <div class="no-records ion-padding">
+      <ion-icon name="help-circle-outline"></ion-icon>
+      <h2>No donations to show</h2>
+      <br>
+    </div>
+  </ng-template>
+</ion-content>
+<ion-footer>
+  <ion-toolbar mode="md">
+    <ion-button [style.height.px]="45" mode="md" expand="full" shape="round" color="primary" (click)="onDonate()">
+      Donate
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

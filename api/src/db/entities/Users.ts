@@ -81,14 +81,14 @@ export class Users {
   @OneToMany(() => Events, (events) => events.user)
   events: Events[];
 
-  @OneToOne(() => Interested, (interested) => interested.user)
-  interested: Interested;
+  @OneToMany(() => Interested, (interested) => interested.user)
+  interesteds: Interested[];
 
   @OneToMany(() => Notifications, (notifications) => notifications.user)
   notifications: Notifications[];
 
-  @OneToOne(() => Responded, (responded) => responded.user)
-  responded: Responded;
+  @OneToMany(() => Responded, (responded) => responded.user)
+  respondeds: Responded[];
 
   @OneToMany(
     () => SupportTicket,

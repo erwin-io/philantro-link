@@ -1,0 +1,107 @@
+::ng-deep {
+    .message-details {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        .message-list {
+            height: -webkit-fill-available;
+            flex-grow: 1;
+            margin-bottom: 70px !important;
+            display: flex;
+            flex-direction: column-reverse;
+            padding: 10px;
+            gap: 3px;
+            justify-content: flex-start;
+            overflow: auto;
+            .message-item-container {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                .message-item-text {
+                    background: var(--ion-color-light);
+                    padding: 15px;
+                    border-radius: 20px 20px 20px 0;
+                    line-height: 1.5;
+                    font-weight: 500;
+                    margin-right: 15px!important;
+                    &.isFirstSibling {
+                        border-radius: 20px 20px 0 0;
+                        margin-top: 20px;
+                    }
+                    &.isCenterSibling {
+                        border-radius: 0px;
+                    }
+                    &.isLastSibling {
+                        border-radius: 20px 20px 20px 0;
+                        margin-bottom: 20px;
+                    }
+                }
+                &.owner {
+                    justify-content: flex-end;
+                    .message-item-text {
+                        margin-left: 15px!important;
+                        margin-right: 0!important;
+                        background: var(--ion-color-tertiary-tint) !important;
+                        color: #fff !important;
+                        border-radius: 20px 20px 0 20px !important;
+                        &.isFirstSibling {
+                            border-radius: 20px 20px 0 0!important;
+                            margin-top: 20px;
+                        }
+                        &.isCenterSibling {
+                            border-radius: 0px!important;
+                        }
+                        &.isLastSibling {
+                            border-radius: 20px 20px 0 20px!important;
+                            margin-bottom: 20px;
+                        }
+                    }
+                }
+            }
+        }
+        .message-form {
+            position: absolute;
+            bottom: 0!important;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            height: 70px !important;
+            padding: 0px 10px;
+            align-items: center;
+            gap: 10px!important;
+            ion-input {
+                --border-width: 2px!important;
+                --border-radius: 10px!important;
+                font-family: "Poppins-SemiBold" !important;
+                &.has-focus {
+                --border-width: 3px!important;
+                &.ion-valid {
+                    --border-color: var(--ion-color-primary)!important;
+                    .input-wrapper {
+                    .label-text {
+                        color: var(--ion-color-primary)!important;
+                    }
+                    }
+                }
+                &:not(.ion-invalid) {
+                    .input-wrapper {
+                    .label-text {
+                        color: var(--ion-color-primary)!important;
+                    }
+                    }
+                }
+                }
+            }
+            [button] {
+                min-width: 40px!important;
+                max-width: 40px!important;
+                height: 40px!important;
+            }
+            &.disabled {
+                background-color: var(--ion-color-light)!important;;
+            }
+        }
+    }
+}

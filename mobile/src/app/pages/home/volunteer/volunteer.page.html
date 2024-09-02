@@ -1,0 +1,35 @@
+<ion-content>
+  <div class="vertical-list-wrapper ion-padding">
+    <div class="vertical-list-header" *ngIf="!isLoading && events.length > 0">
+      <h4 class="vertical-list-title">For you</h4>
+    </div>
+    <div class="vertical-list-content">
+      <ng-container *ngIf="!isLoading; else loadingCards">
+        <ng-container *ngIf="events.length > 0; else noEventsToShow">
+          <ng-container *ngFor="let item of events">
+            <vertical-cards (click)="openEvent(item.eventCode)" [event]="item" class="ion-activatable"></vertical-cards>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #noEventsToShow>
+          <div style="background-color: #8469c726;display: flex;flex-direction: column;align-items: center;padding-bottom: 20px;border-radius: 10px; position: relative;text-align: center;" >
+            <img style="width: 250px;height: max-content;" src="../../../../assets/img/empty-placeholder.png" alt="">
+            <div >
+              <h4>Oh snap!</h4>
+              <p>No events near you. Try to search<br>with a different location.</p>
+            </div>
+          </div>
+        </ng-template>
+      </ng-container>
+
+      <ng-template #loadingCards>
+        <vertical-cards [isLoading]="true" class="ion-activatable"></vertical-cards>
+      </ng-template>
+
+      <ion-button fill="clear" *ngIf="!isLoading && eventsTotal > events.length" (click)="loadMore()">
+        <ion-icon slot="start" name="chevron-down-outline"></ion-icon>
+        Load more
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

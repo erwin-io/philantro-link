@@ -1,0 +1,64 @@
+::ng-deep {
+    .event-thumbnail {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: max-content;
+        .event-thumbnail-selected {
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            img {
+                height: 300px;
+                object-fit: scale-down;
+                width: auto;
+                object-position: center;
+            }
+            ion-button {
+                position: absolute;
+                &[change] {
+                    bottom: 10px;
+                    left: 10px;
+                }
+                &[delete] {
+                    top: 10px;
+                    right: 10px;
+                }
+            }
+            input[type="file"] {
+                display: none;
+            }
+        }
+        .event-thumbnail-list {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            overflow: auto;
+            scroll-behavior: smooth;
+            box-sizing: border-box;
+            padding: 16px;
+            .event-thumbnail-list-item {
+                min-width: 33.33%;
+                height: 70px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                border-radius: 5px;
+                overflow: hidden;
+                &.selected-form-gallery-list {
+                    outline: 5px solid var(--ion-color-secondary);
+                }
+                img {
+                    height: 100%;
+                    object-fit: cover;
+                }
+                &.add {
+                    overflow: unset!important;
+                }
+            }
+        }
+    }
+}

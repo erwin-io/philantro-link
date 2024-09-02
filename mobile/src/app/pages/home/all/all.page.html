@@ -1,0 +1,58 @@
+<ion-content mode="md">
+  
+  <div class="horizontal-list-wrapper">
+    <div class="horizontal-list-header ion-padding" *ngIf="!isHelpLoading && help.length > 0">
+      <h4 class="horizontal-list-title">Need Your Help</h4>
+      <h4 class="horizontal-list-header-link ion-activatable" routerLink="/home/help">More...
+        <ion-ripple-effect></ion-ripple-effect>
+      </h4>
+    </div>
+    <ng-container *ngIf="!isHelpLoading; else loadingHelpLoadingCards">
+      <ng-container *ngIf="help.length > 0;">
+        <div class="horizontal-list-content">
+          <ng-container *ngFor="let item of help">
+            <horizontal-cards [event]="item" (click)="openEvent(item.eventCode)" class="ion-activatable"></horizontal-cards>
+          </ng-container>
+        </div>
+      </ng-container>
+    </ng-container>
+    <ng-template #loadingHelpLoadingCards>
+      <div class="ion-padding">
+        <horizontal-cards [isLoading]="true" class="ion-activatable"></horizontal-cards>
+      </div>
+    </ng-template>
+  </div>
+  <div class="vertical-list-wrapper ion-padding" [ngStyle]="{ 'padding-top': help.length > 0 ? '0px!important' : '16px!important' }" *ngIf="!isNonHelpEventsLoading && nonHelpEvents.length > 0; else noNonHelpEventsFound">
+    <div class="vertical-list-header">
+      <h4 class="vertical-list-title">For you</h4>
+    </div>
+    <div class="vertical-list-content">
+      <ng-container *ngIf="!isNonHelpEventsLoading; else loadingCards">
+        <ng-container *ngFor="let item of nonHelpEvents;">
+          <vertical-cards [event]="item" (click)="openEvent(item.eventCode)" class="ion-activatable"></vertical-cards>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #loadingCards>
+        <vertical-cards [isLoading]="true" class="ion-activatable"></vertical-cards>
+      </ng-template>
+
+      <ion-button fill="clear" *ngIf="!isNonHelpEventsLoading && nonHelpEventsTotal > nonHelpEvents.length" (click)="loadMore()">
+        <ion-icon slot="start" name="chevron-down-outline"></ion-icon>
+        Load more
+      </ion-button>
+    </div>
+  </div>
+  <ng-template #noNonHelpEventsFound>
+    <div class="ion-padding">
+      <div style="background-color: #8469c726;display: flex;flex-direction: column;align-items: center;padding-bottom: 20px;border-radius: 10px; position: relative;text-align: center;" >
+        <img style="width: 250px;height: max-content;" src="../../../../assets/img/empty-placeholder.png" alt="">
+        <div >
+          <h4>Oh snap!</h4>
+          <p>No events near you. Try to search<br>with a different location.</p>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  
+</ion-content>

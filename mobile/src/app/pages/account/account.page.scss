@@ -1,0 +1,62 @@
+::ng-deep {
+  h1,h2,h3,h4,h5,h6 {
+    margin: 0!important;
+    white-space: break-spaces;
+  }
+  ion-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    .account-status {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      background-color: var(--ion-color-danger)!important;
+      color: #fff;
+    }
+    .profile {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      gap: 20px;
+      margin-top: 10px;
+      .image {
+        display: flex;
+        flex-direction: column;
+        max-width: 100px;
+        min-width: 100px;
+        height: 100px;
+        overflow: hidden;
+        border-radius: 50%;
+        border: 3px solid var(--ion-color-primary)!important;
+        img {
+          width: 100%;
+        };
+      }
+      .name {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: center;
+        * {
+          margin: 0!important;
+        }
+      }
+    }
+    .settings {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      ion-list {
+        ion-item {
+          ion-label {
+            font-size: 1.2rem;
+            * {
+              font-size: inherit!important;
+            }
+          }
+        }
+      }
+    }
+  }
+}

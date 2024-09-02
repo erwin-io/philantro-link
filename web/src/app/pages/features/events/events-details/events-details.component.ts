@@ -17,6 +17,8 @@ import { EventsService } from 'src/app/services/events.service';
 import { ApiResponse } from 'src/app/model/api-response.model';
 import { MapBoxComponent } from 'src/app/shared/map-box/map-box.component';
 import { LoaderService } from 'src/app/services/loader.service';
+import { getEventCardDefaultImage } from 'src/app/shared/utility/utility';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-events-details',
   templateUrl: './events-details.component.html',
@@ -192,4 +194,17 @@ export class EventsDetailsComponent {
     }
     });
   }
+  
+  getThumbnail(referenceId) {
+    return `${environment.apiBaseUrl}/events/thumbnail/${referenceId}`;
+  }
+
+  onOpenMap() {
+    window.open('https://www.google.com/maps/search/?api=1&query='+this.event?.eventLocMap?.latitude+','+this.event?.eventLocMap?.longitude, "_blank");
+  }
+
+  imageErrorHandler(event) {
+    event.target.src = getEventCardDefaultImage(this.event?.eventType);
+  }
+
 }

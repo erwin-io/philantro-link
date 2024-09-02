@@ -1,0 +1,92 @@
+::ng-deep {
+
+    .edit-form-gallery {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: max-content;
+        .edit-form-gallery-open {
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            img {
+                height: 300px;
+                object-fit: cover;
+                width: auto;
+                object-position: center;
+            }
+            ion-button {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+            }
+            input[type="file"] {
+                display: none;
+            }
+        }
+        .edit-form-gallery-list {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            padding: 16px;
+            img {
+                width: 33.33%;
+                height: 70px;
+                object-fit: cover;
+                position: relative;
+                border-radius: 5px;
+                &.selected-form-gallery-list {
+                    outline: 5px solid var(--ion-color-secondary);
+                }
+            }
+        }
+    }
+
+    .edit-form-content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px!important;
+        .edit-form-control-input {
+            box-sizing: border-box;
+            background: #fff;
+            &.icon-right {
+              ion-icon {
+                right: 10px !important;
+                top: 33px !important;
+              }
+            }
+        }
+        .edit-form-control-label {
+            font-family: 'Poppins-Bold'!important;
+        }
+        .help-type {
+            display: flex;
+            flex-direction: row;
+            // gap: 10px;
+            overflow: auto;
+            scroll-behavior: smooth;
+            gap: 5px;
+            .help-type-item {
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                --box-shadow: none;
+                --background: #EFE9FF!important;
+                --color: #000;
+                width: -webkit-fill-available;
+                align-items: center;
+                overflow: hidden;
+                position: relative;
+                padding: 10px 0;
+                box-sizing: border-box;
+                border-radius: 5px;
+                &.active {
+                    color: #fff;
+                    background-color: var(--ion-color-secondary)!important;
+                }
+            }
+        }
+    }
+}

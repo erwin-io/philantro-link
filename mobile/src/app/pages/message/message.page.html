@@ -1,0 +1,109 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Message</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content >
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh()" class="refresher-custom">
+    <ion-refresher-content >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="message-menu">
+    <ion-button shape="round" [ngClass]="{ 'active' : active === 'CHAT' }" (click)="changeTab('CHAT');">
+      <ion-icon slot="start" name="chatbubble-ellipses-outline"></ion-icon>
+      Message
+    </ion-button>
+    <ion-button shape="round" [ngClass]="{ 'active' : active === 'NOTIFICATIONS' }"  (click)="changeTab('NOTIFICATIONS');">
+      <ion-icon slot="start" name="notifications-outline"></ion-icon>
+      Notifications
+    </ion-button>
+  </div>
+  <ng-container *ngIf="active === 'CHAT'">
+    <ion-list class="message-list" *ngIf="userConversations.length > 0; else noMessageTemplate">
+      <ng-container *ngFor="let item of userConversations">
+        <ion-item (click)="onOpenMessage(item)" [detail]="true" [button]="true">
+          <ion-avatar aria-hidden="true" slot="start">
+            <ng-container *ngIf="item.type === 'EVENTS'; else elseSupportTicket">
+              <img alt="" [src]="getThumbnail(item.referenceId)" (error)="imageErrorHandler($event)"/>
+            </ng-container>
+            <ng-template #elseSupportTicket>
+              <img alt="" src="../../../assets/img/help-icon.png" (error)="imageErrorHandler($event)"/>
+            </ng-template>
+          </ion-avatar>
+          <ion-label>
+              <ng-container *ngIf="item.status === 'SENT'; else elseSeen">
+                <h2 class="desc">
+                  <strong>{{item.type === 'EVENTS' ? item?.event?.eventName + ' : ' + item.toUser?.name : 'Help Center: ' + item?.supportTicket?.title}}</strong>
+                </h2>
+                <h3 class="sub-title">
+                  <strong>{{ item.description}}</strong>
+                </h3>
+              </ng-container>
+              <ng-template #elseSeen>
+                <h2 class="desc">
+                  {{item.type === 'EVENTS' ? item?.event?.eventName + ' : ' + item.toUser?.name : 'Help Center: ' + item?.supportTicket?.title}}
+                </h2>
+                <h3 class="sub-title">
+                  {{ item.description}}
+                </h3>
+              </ng-template>
+          </ion-label>
+          <ion-note *ngIf="item.status === 'SENT' || item.status === 'DELIVERED'" slot="end">
+            <span class="unread-symbol"></span>
+          </ion-note>
+        </ion-item>
+      </ng-container>
+    </ion-list>
+  </ng-container>
+  <ng-container *ngIf="active === 'NOTIFICATIONS'">
+    <ion-list class="message-list notif" *ngIf="notifications.length > 0; else noNotifTemplate">
+      <ng-container *ngFor="let item of notifications">
+        <ion-item (click)="onOpenNotif(item)" [button]="true">
+          <ion-label>
+              <ng-container *ngIf="!item.isRead; else elseRead">
+                <h2 class="desc">
+                  <strong>{{item.title}}</strong>
+                </h2>
+                <h3 class="sub-title">
+                  <strong>{{ item.description}}</strong>
+                </h3>
+              </ng-container>
+              <ng-template #elseRead>
+                <h2 class="desc">
+                  {{item.title}}
+                </h2>
+                <h3 class="sub-title">
+                  {{ item.description}}
+                </h3>
+              </ng-template>
+          </ion-label>
+          <ion-note *ngIf="!item.isRead" slot="end">
+            <span class="unread-symbol"></span>
+          </ion-note>
+        </ion-item>
+      </ng-container>
+    </ion-list>
+  </ng-container>
+  <ion-button load-more fill="clear" *ngIf="!isLoading && total > (active === 'CHAT' ? userConversations.length : notifications.length)" (click)="loadMore()">
+    <ion-icon slot="start" name="chevron-down-outline"></ion-icon>
+    Load more
+  </ion-button>
+  
+  <ng-template #noMessageTemplate>
+    <div class="no-records">
+      <ion-icon name="chatbox-ellipses-outline"></ion-icon>
+      <h1>No message to show</h1>
+      <br>
+    </div>
+  </ng-template>
+  
+  <ng-template #noNotifTemplate>
+    <div class="no-records">
+      <ion-icon name="notifications-outline"></ion-icon>
+      <h1>No notifications to show</h1>
+      <br>
+    </div>
+  </ng-template>
+  
+</ion-content>

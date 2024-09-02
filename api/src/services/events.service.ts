@@ -49,6 +49,7 @@ import { EventImage } from "src/db/entities/EventImage";
 import { extname } from "path";
 import { EventMessage } from "src/db/entities/EventMessage";
 import { UserConversation } from "src/db/entities/UserConversation";
+import { Transactions } from "src/db/entities/Transactions";
 
 @Injectable()
 export class EventsService {
@@ -59,6 +60,8 @@ export class EventsService {
     private readonly userConversationRepo: Repository<UserConversation>,
     @InjectRepository(Notifications)
     private readonly notificationsRepo: Repository<Notifications>,
+    @InjectRepository(Transactions)
+    private readonly transactionsRepo: Repository<Transactions>,
     private firebaseProvoder: FirebaseProvider,
     private oneSignalNotificationService: OneSignalNotificationService
   ) {}
@@ -262,12 +265,14 @@ export class EventsService {
     let visitorUserConversation;
 
     let visitorUnReadMessage = 0;
+    let visitorUserDonation = 0;
     if (currentUserCode && currentUserCode !== "") {
       const [
         interestedCount,
         respondedCount,
         _visitorUnReadMessage,
         _visitorUserConversation,
+        _visitorUserDonation,
       ] = await Promise.all([
         this.eventRepo.manager.count(Interested, {
           where: {
@@ -312,11 +317,28 @@ export class EventsService {
             toUser: true,
           },
         }),
+        this.transactionsRepo.find({
+          where: {
+            event: {
+              eventCode: result?.eventCode,
+            },
+            user: {
+              userCode: currentUserCode,
+            },
+          },
+        }),
       ]);
+
       isCurrentUserInterested = interestedCount > 0;
       isCurrentUserResponded = respondedCount > 0;
       visitorUnReadMessage = _visitorUnReadMessage;
       visitorUserConversation = _visitorUserConversation;
+      visitorUserDonation = _visitorUserDonation.reduce(
+        (total, item) =>
+          Number(total) +
+          (!isNaN(Number(item.amount)) ? Number(item.amount) : 0),
+        0
+      );
     }
     result.eventImages = result.eventImages.filter((x) => x.active);
     delete result.user?.password;
@@ -331,10 +353,111 @@ export class EventsService {
       isCurrentUserResponded,
       isCurrentUserInterested,
       visitorUserConversation,
+      visitorUserDonation,
       ownerUnReadNotifications:
         Number(ownerUnReadMessage) + Number(ownerUnReadNotif),
       ownerUnReadMessage,
       ownerUnReadNotif,
+    };
+  }
+
+  async getPageJoinedEvents({ pageSize, pageIndex, order, userCode }) {
+    const eventsQuery = await this.eventRepo
+      .createQueryBuilder("event")
+      .leftJoinAndSelect("event.respondeds", "respond")
+      .leftJoinAndSelect("event.thumbnailFile", "thumbnailFile")
+      .leftJoinAndSelect("respond.user", "user")
+      .select([
+        "event.eventId",
+        "event.eventCode",
+        "event.dateTime",
+        "event.eventType",
+        "event.eventName",
+        "event.eventDesc",
+        "event.eventLocName",
+        "event.eventLocMap",
+        "event.eventAssistanceItems",
+        "event.eventStatus",
+        "event.active",
+        "event.transferType",
+        "event.transferAccountNumber",
+        "event.transferAccountName",
+        "event.donationTargetAmount",
+        "event.inProgress",
+        "event.dateTimeUpdate",
+        "thumbnailFile.fileId",
+        "thumbnailFile.fileName",
+        "thumbnailFile.url",
+        "thumbnailFile.guid",
+      ])
+      .where("user.userCode = :userCode", { userCode });
+
+    const countQuery = eventsQuery;
+    if (order && Object.keys(order).length > 0) {
+      Object.keys(order).forEach((key) => {
+        eventsQuery.addOrderBy(`event.${key}`, order[key]);
+      });
+    }
+    const [res, total] = await Promise.all([
+      eventsQuery
+        .take(pageSize)
+        .skip(pageIndex * pageSize)
+        .getMany(),
+      countQuery.getCount(),
+    ]);
+    return {
+      results: res,
+      total,
+    };
+  }
+
+  async getPageInterestedEvents({ pageSize, pageIndex, order, userCode }) {
+    const eventsQuery = await this.eventRepo
+      .createQueryBuilder("event")
+      .leftJoinAndSelect("event.interesteds", "interested")
+      .leftJoinAndSelect("event.thumbnailFile", "thumbnailFile")
+      .leftJoinAndSelect("respond.user", "user")
+      .select([
+        "event.eventId",
+        "event.eventCode",
+        "event.dateTime",
+        "event.eventType",
+        "event.eventName",
+        "event.eventDesc",
+        "event.eventLocName",
+        "event.eventLocMap",
+        "event.eventAssistanceItems",
+        "event.eventStatus",
+        "event.active",
+        "event.transferType",
+        "event.transferAccountNumber",
+        "event.transferAccountName",
+        "event.donationTargetAmount",
+        "event.inProgress",
+        "event.dateTimeUpdate",
+        "thumbnailFile.fileId",
+        "thumbnailFile.fileName",
+        "thumbnailFile.url",
+        "thumbnailFile.guid",
+      ])
+      .where("user.userCode = :userCode", { userCode });
+
+    const countQuery = eventsQuery;
+    if (order && Object.keys(order).length > 0) {
+      Object.keys(order).forEach((key) => {
+        eventsQuery.addOrderBy(`event.${key}`, order[key]);
+      });
+    }
+    const [res, total] = await Promise.all([
+      eventsQuery
+        .take(pageSize)
+        .skip(pageIndex * pageSize)
+        .getMany(),
+      countQuery.getCount(),
+    ]);
+    return {
+      results: res,
+      total,
     };
   }
 
@@ -356,26 +479,26 @@ export class EventsService {
       const file = bucket.file(path);
 
       const [exists] = await file.exists();
-      if (!exists) {
-        throw new Error("File does not exist");
+      if (exists) {
+        return new Promise<Buffer>((resolve, reject) => {
+          const fileStream = file.createReadStream();
+          const chunks: Buffer[] = [];
+
+          fileStream.on("data", (chunk) => {
+            chunks.push(chunk);
+          });
+
+          fileStream.on("end", () => {
+            resolve(Buffer.concat(chunks));
+          });
+
+          fileStream.on("error", (err) => {
+            reject(err);
+          });
+        });
+      } else {
+        return null;
       }
-
-      return new Promise<Buffer>((resolve, reject) => {
-        const fileStream = file.createReadStream();
-        const chunks: Buffer[] = [];
-
-        fileStream.on("data", (chunk) => {
-          chunks.push(chunk);
-        });
-
-        fileStream.on("end", () => {
-          resolve(Buffer.concat(chunks));
-        });
-
-        fileStream.on("error", (err) => {
-          reject(err);
-        });
-      });
     } else {
       return null;
     }
@@ -891,7 +1014,7 @@ export class EventsService {
           },
         },
       });
-      if(!event) {
+      if (!event) {
         throw new Error("The event was not found!");
       }
       if (
@@ -916,17 +1039,26 @@ export class EventsService {
         throw new Error("The event was not yet started!");
       }
 
-      if(event?.eventType === EVENT_TYPE.ASSISTANCE && dto.status === EVENT_STATUS.APPROVED) {
+      if (
+        event?.eventType === EVENT_TYPE.ASSISTANCE &&
+        dto.status === EVENT_STATUS.APPROVED
+      ) {
         event.inProgress = true;
         event.eventStatus = dto.status;
-      } else if(event?.eventType === EVENT_TYPE.ASSISTANCE && dto.status === EVENT_STATUS.COMPLETED) {
+      } else if (
+        event?.eventType === EVENT_TYPE.ASSISTANCE &&
+        dto.status === EVENT_STATUS.COMPLETED
+      ) {
         event.inProgress = false;
         event.eventStatus = dto.status;
       }
-      if (dto.status === EVENT_STATUS.INPROGRESS && event?.eventType !== EVENT_TYPE.ASSISTANCE) {
+      if (
+        dto.status === EVENT_STATUS.INPROGRESS &&
+        event?.eventType !== EVENT_TYPE.ASSISTANCE
+      ) {
         event.inProgress = true;
         event.eventStatus = EVENT_STATUS.APPROVED;
-      } else if(event?.eventType !== EVENT_TYPE.ASSISTANCE) {
+      } else if (event?.eventType !== EVENT_TYPE.ASSISTANCE) {
         event.eventStatus = dto.status;
         event.inProgress = false;
       }

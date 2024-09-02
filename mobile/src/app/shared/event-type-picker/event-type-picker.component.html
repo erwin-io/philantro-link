@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="modal.dismiss()">
+        <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center">Select Event</ion-title>
+    <div slot="end" style="width: 48px"></div>
+
+  </ion-toolbar>
+</ion-header>
+<ion-content >
+  <p class="ion-padding title">What type of event?</p>
+  <div class="event-type ion-padding" (click)="eventType = 'CHARITY'" [ngClass]="{ 'selected': eventType === 'CHARITY'}">
+    <div class="event-type-icon"><img src="../../../assets/img/charity.png" alt=""></div>
+    <div class="event-type-content">
+      <h4 class="event-type-name">Charity</h4>
+      <p class="event-type-desc">Organize events aimed at supporting various causes and raising funds for those in need.</p>
+    </div>
+  </div>
+  <div class="event-type ion-padding" (click)="eventType = 'VOLUNTEER'" [ngClass]="{ 'selected': eventType === 'VOLUNTEER'}">
+    <div class="event-type-icon"><img src="../../../assets/img/volunteer.png" alt=""></div>
+    <div class="event-type-content">
+      <h4 class="event-type-name">Volunteer</h4>
+      <p class="event-type-desc">Create events where people can offer their time and skills to help communities and organizations.</p>
+    </div>
+  </div>
+  <div class="event-type ion-padding" (click)="eventType = 'DONATION'" [ngClass]="{ 'selected': eventType === 'DONATION'}">
+    <div class="event-type-icon"><img src="../../../assets/img/donation.png" alt=""></div>
+    <div class="event-type-content">
+      <h4 class="event-type-name">Donation</h4>
+      <p class="event-type-desc">Create events to collect money, goods, or services to support individuals and groups in need.</p>
+    </div>
+  </div>
+  <div class="event-type ion-padding" (click)="eventType = 'ASSISTANCE'" [ngClass]="{ 'selected': eventType === 'ASSISTANCE'}">
+    <div class="event-type-icon"><img src="../../../assets/img/need-help.png" alt=""></div>
+    <div class="event-type-content">
+      <h4 class="event-type-name">Need Help</h4>
+      <p class="event-type-desc">Request urgent assistance for emergencies like food, water, clothing, or other services.</p>
+    </div>
+  </div>
+</ion-content>
+<ion-footer>
+  <ion-toolbar mode="md" (click)="onContinue()">
+    <ion-button [disabled]="!eventType" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+      Continue
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+

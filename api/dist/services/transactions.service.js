@@ -206,7 +206,8 @@ let TransactionsService = class TransactionsService {
                 }
                 transactions.user = user;
                 transactions.paymentType = payment_constant_1.PAYMENT_METHOD.WALLET;
-                transactions.fromAccountNumber = accountNumber;
+                transactions.fromAccountNumber =
+                    accountNumber && accountNumber !== "" ? accountNumber : "NA";
                 transactions.fromAccountName = user.name;
                 transactions.toAccountNumber = event.transferAccountNumber;
                 transactions.toAccountName = event.transferAccountName;

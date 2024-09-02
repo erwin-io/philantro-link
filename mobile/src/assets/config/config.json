@@ -1,0 +1,84 @@
+{
+  "auth": {
+    "requireOTP": "false"
+  },
+  "sessionConfig": {
+    "sessionTimeout": "1800"
+  },
+  "lookup": {
+  },
+  "apiEndPoints": {
+    "auth": {
+      "loginClient": "/auth/login/client",
+      "registerClient": "/auth/register/client",
+      "registerVerify": "/auth/register/verify",
+      "resetSubmit": "/auth/reset/submit/",
+      "resetVerify": "/auth/reset/verify/",
+      "resetPassword": "/auth/reset/"
+    },
+    "users": {
+      "getByCode": "/users/",
+      "updateProfile": "/users/updateClientProfile/",
+      "updatePassword": "/users/updatePassword/",
+      "resetPassword": "/users/resetPassword/",
+      "approveAccessRequest": "/users/approveAccessRequest/",
+      "updateProfilePicture": "/users/updateProfilePicture"
+    },
+    "events": {
+      "getByAdvanceSearch": "/events/page/",
+      "getPageJoinedEvents": "/events/getPageJoinedEvents/",
+      "getByCode": "/events/",
+      "createCharityVolunteerEvent": "/events/createCharityVolunteerEvent/",
+      "createDonationEvent": "/events/createDonationEvent/",
+      "createAssistanceEvent": "/events/createAssistanceEvent/",
+      "updateCharityVolunteerEvent": "/events/updateCharityVolunteerEvent/",
+      "updateDonationEvent": "/events/updateDonationEvent/",
+      "updateAssistanceEvent": "/events/updateAssistanceEvent/",
+      "updateStatus": "/events/updateStatus/",
+      "updateEventInterested": "/events/updateEventInterested/",
+      "updateEventResponded": "/events/updateEventResponded/"
+    },
+    "eventMessage": {
+      "getByAdvanceSearch": "/event-message/page/",
+      "postMessage": "/event-message/"
+    },
+    "transactions": {
+      "getByAdvanceSearch": "/transactions/page/",
+      "getByCode": "/transactions/",
+      "requestPaymentLink": "/transactions/requestPaymentLink/",
+      "comleteTopUpPayment": "/transactions/comleteTopUpPayment/",
+      "expirePaymentLink": "/transactions/expirePaymentLink/"
+    },
+    "notifications": {
+      "getByAdvanceSearch": "/notifications/page/",
+      "getUnreadByUser": "/notifications/getUnreadByUser/",
+      "marAsRead": "/notifications/marAsRead/"
+    },
+    "supportTicket": {
+      "getByAdvanceSearch": "/support-ticket/page/",
+      "getByCode": "/support-ticket/",
+      "create": "/support-ticket/",
+      "update": "/support-ticket/",
+      "updateStatus": "/support-ticket/updateStatus/",
+      "getMessageByAdvanceSearch": "/support-ticket/message/page/",
+      "postMessage": "/support-ticket/message/"
+    },
+    "userConversation": {
+      "getByAdvanceSearch": "/user-conversation/page/",
+      "getById": "/user-conversation/",
+      "getUnreadByUser": "/user-conversation/getUnreadByUser/",
+      "marAsRead": "/user-conversation/marAsRead/"
+    },
+    "userOneSignalSubscription": {
+      "getByDevice": "/user-one-signal-subscription/getBySubscriptionId/",
+      "create": "/user-one-signal-subscription/"
+    },
+    "googleMap": {
+      "searchPlace": "https://maps.googleapis.com/maps/api/place/textsearch/json?"
+    },
+    "dashboard": {
+      "getClientEventFeed": "/dashboard/getClientEventFeed/",
+      "getClientHelpFeed": "/dashboard/getClientHelpFeed/"
+    }
+  }
+}

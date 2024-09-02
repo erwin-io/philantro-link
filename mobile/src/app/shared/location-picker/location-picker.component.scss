@@ -1,0 +1,12 @@
+::ng-deep {
+    .location-picker {
+        ion-footer{
+            display: flex;
+            flex-direction: column;
+            .place-info {
+                display: flex;
+                width: 100%;
+            }
+        }
+    }
+}

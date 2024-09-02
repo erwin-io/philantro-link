@@ -41,11 +41,13 @@ const EventImage_1 = require("../db/entities/EventImage");
 const path_1 = require("path");
 const EventMessage_1 = require("../db/entities/EventMessage");
 const UserConversation_1 = require("../db/entities/UserConversation");
+const Transactions_1 = require("../db/entities/Transactions");
 let EventsService = class EventsService {
-    constructor(eventRepo, userConversationRepo, notificationsRepo, firebaseProvoder, oneSignalNotificationService) {
+    constructor(eventRepo, userConversationRepo, notificationsRepo, transactionsRepo, firebaseProvoder, oneSignalNotificationService) {
         this.eventRepo = eventRepo;
         this.userConversationRepo = userConversationRepo;
         this.notificationsRepo = notificationsRepo;
+        this.transactionsRepo = transactionsRepo;
         this.firebaseProvoder = firebaseProvoder;
         this.oneSignalNotificationService = oneSignalNotificationService;
     }
@@ -219,8 +221,9 @@ let EventsService = class EventsService {
         let isCurrentUserResponded = false;
         let visitorUserConversation;
         let visitorUnReadMessage = 0;
+        let visitorUserDonation = 0;
         if (currentUserCode && currentUserCode !== "") {
-            const [interestedCount, respondedCount, _visitorUnReadMessage, _visitorUserConversation,] = await Promise.all([
+            const [interestedCount, respondedCount, _visitorUnReadMessage, _visitorUserConversation, _visitorUserDonation,] = await Promise.all([
                 this.eventRepo.manager.count(Interested_1.Interested, {
                     where: {
                         user: {
@@ -264,11 +267,23 @@ let EventsService = class EventsService {
                         toUser: true,
                     },
                 }),
+                this.transactionsRepo.find({
+                    where: {
+                        event: {
+                            eventCode: result === null || result === void 0 ? void 0 : result.eventCode,
+                        },
+                        user: {
+                            userCode: currentUserCode,
+                        },
+                    },
+                }),
             ]);
             isCurrentUserInterested = interestedCount > 0;
             isCurrentUserResponded = respondedCount > 0;
             visitorUnReadMessage = _visitorUnReadMessage;
             visitorUserConversation = _visitorUserConversation;
+            visitorUserDonation = _visitorUserDonation.reduce((total, item) => Number(total) +
+                (!isNaN(Number(item.amount)) ? Number(item.amount) : 0), 0);
         }
         result.eventImages = result.eventImages.filter((x) => x.active);
         (_d = result.user) === null || _d === void 0 ? true : delete _d.password;
@@ -279,8 +294,105 @@ let EventsService = class EventsService {
             raisedDonation,
             isCurrentUserResponded,
             isCurrentUserInterested,
-            visitorUserConversation, ownerUnReadNotifications: Number(ownerUnReadMessage) + Number(ownerUnReadNotif), ownerUnReadMessage,
+            visitorUserConversation,
+            visitorUserDonation, ownerUnReadNotifications: Number(ownerUnReadMessage) + Number(ownerUnReadNotif), ownerUnReadMessage,
             ownerUnReadNotif });
+    }
+    async getPageJoinedEvents({ pageSize, pageIndex, order, userCode }) {
+        const eventsQuery = await this.eventRepo
+            .createQueryBuilder("event")
+            .leftJoinAndSelect("event.respondeds", "respond")
+            .leftJoinAndSelect("event.thumbnailFile", "thumbnailFile")
+            .leftJoinAndSelect("respond.user", "user")
+            .select([
+            "event.eventId",
+            "event.eventCode",
+            "event.dateTime",
+            "event.eventType",
+            "event.eventName",
+            "event.eventDesc",
+            "event.eventLocName",
+            "event.eventLocMap",
+            "event.eventAssistanceItems",
+            "event.eventStatus",
+            "event.active",
+            "event.transferType",
+            "event.transferAccountNumber",
+            "event.transferAccountName",
+            "event.donationTargetAmount",
+            "event.inProgress",
+            "event.dateTimeUpdate",
+            "thumbnailFile.fileId",
+            "thumbnailFile.fileName",
+            "thumbnailFile.url",
+            "thumbnailFile.guid",
+        ])
+            .where("user.userCode = :userCode", { userCode });
+        const countQuery = eventsQuery;
+        if (order && Object.keys(order).length > 0) {
+            Object.keys(order).forEach((key) => {
+                eventsQuery.addOrderBy(`event.${key}`, order[key]);
+            });
+        }
+        const [res, total] = await Promise.all([
+            eventsQuery
+                .take(pageSize)
+                .skip(pageIndex * pageSize)
+                .getMany(),
+            countQuery.getCount(),
+        ]);
+        return {
+            results: res,
+            total,
+        };
+    }
+    async getPageInterestedEvents({ pageSize, pageIndex, order, userCode }) {
+        const eventsQuery = await this.eventRepo
+            .createQueryBuilder("event")
+            .leftJoinAndSelect("event.interesteds", "interested")
+            .leftJoinAndSelect("event.thumbnailFile", "thumbnailFile")
+            .leftJoinAndSelect("respond.user", "user")
+            .select([
+            "event.eventId",
+            "event.eventCode",
+            "event.dateTime",
+            "event.eventType",
+            "event.eventName",
+            "event.eventDesc",
+            "event.eventLocName",
+            "event.eventLocMap",
+            "event.eventAssistanceItems",
+            "event.eventStatus",
+            "event.active",
+            "event.transferType",
+            "event.transferAccountNumber",
+            "event.transferAccountName",
+            "event.donationTargetAmount",
+            "event.inProgress",
+            "event.dateTimeUpdate",
+            "thumbnailFile.fileId",
+            "thumbnailFile.fileName",
+            "thumbnailFile.url",
+            "thumbnailFile.guid",
+        ])
+            .where("user.userCode = :userCode", { userCode });
+        const countQuery = eventsQuery;
+        if (order && Object.keys(order).length > 0) {
+            Object.keys(order).forEach((key) => {
+                eventsQuery.addOrderBy(`event.${key}`, order[key]);
+            });
+        }
+        const [res, total] = await Promise.all([
+            eventsQuery
+                .take(pageSize)
+                .skip(pageIndex * pageSize)
+                .getMany(),
+            countQuery.getCount(),
+        ]);
+        return {
+            results: res,
+            total,
+        };
     }
     async getEventThumbnailFile(eventCode = "") {
         var _a;
@@ -299,22 +411,24 @@ let EventsService = class EventsService {
             const bucket = this.firebaseProvoder.app.storage().bucket();
             const file = bucket.file(path);
             const [exists] = await file.exists();
-            if (!exists) {
-                throw new Error("File does not exist");
+            if (exists) {
+                return new Promise((resolve, reject) => {
+                    const fileStream = file.createReadStream();
+                    const chunks = [];
+                    fileStream.on("data", (chunk) => {
+                        chunks.push(chunk);
+                    });
+                    fileStream.on("end", () => {
+                        resolve(Buffer.concat(chunks));
+                    });
+                    fileStream.on("error", (err) => {
+                        reject(err);
+                    });
+                });
             }
-            return new Promise((resolve, reject) => {
-                const fileStream = file.createReadStream();
-                const chunks = [];
-                fileStream.on("data", (chunk) => {
-                    chunks.push(chunk);
-                });
-                fileStream.on("end", () => {
-                    resolve(Buffer.concat(chunks));
-                });
-                fileStream.on("error", (err) => {
-                    reject(err);
-                });
-            });
+            else {
+                return null;
+            }
         }
         else {
             return null;
@@ -763,15 +877,18 @@ let EventsService = class EventsService {
             if (dto.status === events_constant_1.EVENT_STATUS.COMPLETED && !event.inProgress) {
                 throw new Error("The event was not yet started!");
             }
-            if ((event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE && dto.status === events_constant_1.EVENT_STATUS.APPROVED) {
+            if ((event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE &&
+                dto.status === events_constant_1.EVENT_STATUS.APPROVED) {
                 event.inProgress = true;
                 event.eventStatus = dto.status;
             }
-            else if ((event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE && dto.status === events_constant_1.EVENT_STATUS.COMPLETED) {
+            else if ((event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE &&
+                dto.status === events_constant_1.EVENT_STATUS.COMPLETED) {
                 event.inProgress = false;
                 event.eventStatus = dto.status;
             }
-            if (dto.status === events_constant_1.EVENT_STATUS.INPROGRESS && (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE) {
+            if (dto.status === events_constant_1.EVENT_STATUS.INPROGRESS &&
+                (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE) {
                 event.inProgress = true;
                 event.eventStatus = events_constant_1.EVENT_STATUS.APPROVED;
             }
@@ -1182,7 +1299,9 @@ EventsService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(Events_1.Events)),
     __param(1, (0, typeorm_1.InjectRepository)(UserConversation_1.UserConversation)),
     __param(2, (0, typeorm_1.InjectRepository)(Notifications_1.Notifications)),
+    __param(3, (0, typeorm_1.InjectRepository)(Transactions_1.Transactions)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         firebase_provider_1.FirebaseProvider,

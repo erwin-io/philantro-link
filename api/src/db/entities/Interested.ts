@@ -1,25 +1,24 @@
 import {
-  Column,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Events } from "./Events";
 import { Users } from "./Users";
 
-@Index("Ratings_pkey", ["userId"], { unique: true })
+@Index("Interested_pkey", ["id"], { unique: true })
 @Entity("Interested", { schema: "dbo" })
 export class Interested {
-  @Column("bigint", { primary: true, name: "UserId" })
-  userId: string;
+  @PrimaryGeneratedColumn({ type: "bigint", name: "Id" })
+  id: string;
 
   @ManyToOne(() => Events, (events) => events.interesteds)
   @JoinColumn([{ name: "EventId", referencedColumnName: "eventId" }])
   event: Events;
 
-  @OneToOne(() => Users, (users) => users.interested)
+  @ManyToOne(() => Users, (users) => users.interesteds)
   @JoinColumn([{ name: "UserId", referencedColumnName: "userId" }])
   user: Users;
 }

@@ -1,0 +1,13 @@
+
+
+<ion-content>
+  <div class="google-map-wrapper">
+    <google-map class="{{this.mapLoaded ? 'visible' : ''}}" [options]="options" [zoom]="zoom" (mapInitialized)="onMapInitialized()">
+    </google-map>
+  </div>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button color="light" size="small" (click)="focusToMyLocation()">
+      <ion-icon name="locate-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  </ion-content>

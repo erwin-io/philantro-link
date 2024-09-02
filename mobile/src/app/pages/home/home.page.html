@@ -1,0 +1,111 @@
+<ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button routerLink="/account">
+          <ion-icon name="person-circle-outline" style="font-size: 1.8rem!important;"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-title class="ion-text-center">Home</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="isSearchModalOpen = true">
+          <ion-icon name="search-outline" style="font-size: 1.8rem!important;"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  
+    <ion-button class="location-picker" shape="round" fill="clear" (click)="showLocationPicker()">
+      <span slot="start" class="location-picker-text">
+        <span class="location-name">{{currentLocationName}}</span>
+      </span>
+      <ion-icon slot="end" name="location-sharp" style="font-size: 1.8rem!important;"></ion-icon>
+    </ion-button>
+  </ion-header>
+  
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh()" class="refresher-custom">
+    <ion-refresher-content >
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-tabs>
+    <ion-tab-bar slot="top">
+      <ion-tab-button tab="all">
+        <ion-label>All</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="help">
+        <ion-label>Help</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="donation">
+        <ion-label>Donation</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="charity">
+        <ion-label>Charity</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="volunteer">
+        <ion-label>Volunteer</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-tabs>
+  <ion-modal [isOpen]="isSearchModalOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar >
+          <ion-buttons slot="start">
+            <ion-button (click)="isSearchModalOpen = false">
+              <ion-icon name="arrow-back-outline" style="font-size: 2rem!important;"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-searchbar mode="ios" [(ngModel)]="searchKey" style="padding: 15px 15px 15px 0px!important;font-size: larger;border: 0 !important; --box-shadow: none !important" inputmode="search"
+            [debounce]="1000" 
+            show-cancel-button="never" placeholder="Search event"></ion-searchbar>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list class="search-result">
+          <ion-item [button]="true" >
+            <ion-avatar slot="start">
+              <img alt="Silhouette of a person's head" src="../../../assets/img/event-thumbnail.png" />
+            </ion-avatar>
+            <ion-label>
+              <ion-text color="danger">
+                <p class="date">{{'2024-07-18' | date:'EEE, MMM d, y AT h a' }}</p>
+              </ion-text>
+              <span class="title">Donation for Children</span>
+              <ion-note color="medium" class="ion-text-wrap">
+                Never gonna give you up Never gonna let you down Never gonna run...
+              </ion-note>
+            </ion-label>
+          </ion-item>
+          <ion-item [button]="true" >
+            <ion-avatar slot="start">
+              <img alt="Silhouette of a person's head" src="../../../assets/img/event-donation-thumbnail.png" />
+            </ion-avatar>
+            <ion-label>
+              <ion-text color="danger">
+                <p class="date">{{'2024-07-18' | date:'EEE, MMM d, y AT h a' }}</p>
+              </ion-text>
+              <span class="title">Donation for Children</span>
+              <ion-note color="medium" class="ion-text-wrap">
+                Never gonna give you up Never gonna let you down Never gonna run...
+              </ion-note>
+            </ion-label>
+          </ion-item>
+          <ion-item [button]="true" >
+            <ion-avatar slot="start">
+              <img alt="Silhouette of a person's head" src="../../../assets/img/event-help-thumbnail.png" />
+            </ion-avatar>
+            <ion-label>
+              <ion-text color="danger">
+                <p class="date">{{'2024-07-18' | date:'EEE, MMM d, y AT h a' }}</p>
+              </ion-text>
+              <span class="title">Donation for Children</span>
+              <ion-note color="medium" class="ion-text-wrap">
+                Never gonna give you up Never gonna let you down Never gonna run...
+              </ion-note>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  
+</ion-content>

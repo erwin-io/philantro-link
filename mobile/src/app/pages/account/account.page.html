@@ -1,0 +1,32 @@
+<ion-content class="">
+  <div class="profile ion-padding">
+    <div class="image" >
+      <!-- <img src="../../../assets/img/person.png"> -->
+      <img
+        src="{{currentUser?.userProfilePic && currentUser?.userProfilePic?.file?.url ? currentUser?.userProfilePic?.file?.url : '../../../assets/img/person.png'}}"
+        (error)="profilePicErrorHandler($event)"
+        [style]="isSubmitting ? 'opacity: 0.2' : 'opacity: 1'" id="profilePicture">
+    </div>
+    <div class="name">
+      <h1>{{currentUser?.name}}</h1>
+    </div>
+  </div>
+  <div class="settings ion-padding">
+    <ion-list lines="full">
+      <ion-item button="true" detail="false" (click)="onOpenAccountSettings()" class="ion-no-padding">
+        <ion-icon color="primary" slot="start" name="person-circle-outline" size="large"></ion-icon>
+        <ion-label>Account</ion-label>
+      </ion-item>
+      <ion-item button="true" detail="false" (click)="onOpenResetPassword()" class="ion-no-padding">
+        <ion-icon color="primary" slot="start" name="key-outline" size="large"></ion-icon>
+        <ion-label>Reset Password</ion-label>
+      </ion-item>
+      <ion-item button="true" detail="false" (click)="onOpenHelpSupport()" class="ion-no-padding">
+        <ion-icon color="primary" slot="start" name="help-circle-outline" size="large"></ion-icon>
+        <ion-label>Help Center</ion-label>
+      </ion-item>
+    </ion-list>
+    <br>
+    <ion-button color="danger" fill="outline" size="large" shape="round" (click)="signout()">Log out</ion-button>
+  </div>
+</ion-content>

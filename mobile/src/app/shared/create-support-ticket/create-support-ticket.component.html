@@ -1,0 +1,64 @@
+<ion-header no-border no-shadow mode="md" class="ion-no-border">
+  <ion-toolbar mode="md" >
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" mode="md">
+        <ion-icon name="close" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Report an Issue</ion-title>
+    <div slot="end" style="width: 48px"></div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form
+    id="form"
+    [formGroup]="form"
+    (ngSubmit)="isFormValid ? onSubmit() : false">
+    <fieldset [disabled]="isSubmitting">
+      <div class="form-control-input">
+        <p class="form-control-label">Type of Issue?</p>
+        <ion-select 
+          fill="outline" 
+          labelPlacement="stacked"
+          interface="action-sheet" 
+          placeholder="What kind of issue is this?"
+          cancelText="Cancel Choice"
+          formControlName="type">
+          <ion-select-option value="EVENTS">Event Issue</ion-select-option>
+          <ion-select-option value="TRANSACTIONS">Transaction Issue</ion-select-option>
+          <ion-select-option value="OTHERS">Other concerns</ion-select-option>
+        </ion-select>
+      </div>
+      <div class="form-control-input">
+        <p class="form-control-label">Title</p>
+        <ion-input
+          mode="md"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="What's the issue?"
+          formControlName="title"
+        ></ion-input>
+      </div>
+      <div class="form-control-input">
+        <p class="form-control-label">Description</p>
+        <ion-textarea
+          mode="md"
+          autoGrow="true"
+          labelPlacement="stacked"
+          fill="outline" 
+          placeholder="Can you describe what happened?"
+          formControlName="description"
+        ></ion-textarea>
+      </div>
+    </fieldset>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar mode="md" (click)="onSubmit()">
+    <ion-button [disabled]="!isFormValid" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+      Submit
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

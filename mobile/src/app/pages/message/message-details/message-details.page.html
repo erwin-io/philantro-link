@@ -1,0 +1,144 @@
+<ion-header >
+  <ion-toolbar mode="md" color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" color="light" mode="md">
+        <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center" *ngIf="type === 'EVENTS'; else elseSupportTicketMessage">{{
+      refererPage === 'MESSAGES' ? userConversation?.event?.eventName + ': ' + userConversation?.toUser?.name : '' ||
+      refererPage === 'EVENT_DETAILS' ? userConversation?.toUser?.name + ': ' + userConversation?.event?.eventName : '' ||
+      refererPage === 'EVENT_NOTIF' ? userConversation?.toUser?.name : ''
+    }}</ion-title>
+    <ng-template #elseSupportTicketMessage>
+      <ion-title class="ion-text-center" >Help Center: {{ userConversation?.supportTicket?.title}}</ion-title>
+    </ng-template>
+    <ion-buttons slot="end">
+      <ion-button (click)="onOpenInfo()" color="light" mode="md">
+        <ion-icon name="information-circle" style="font-size: 1.8rem!important;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content >
+  <div class="message-details">
+    <div class="message-list" #messageList (scroll)="onScroll()">
+      <ng-container *ngIf="type==='EVENTS'; else elseSupportMessage">
+        <ng-container *ngFor="let item of eventMessages;index as i">
+          <ng-container *ngIf="item.fromUser?.userCode !== currentUser.userCode; else elseOwner">
+            <div class="message-item-container">
+              <h5 class="message-item-text" [ngClass]="{
+                'isLastSibling': eventMessages[i + 1] &&
+                 eventMessages[i - 1] &&
+                  eventMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode &&
+                   eventMessages[i - 1]?.fromUser?.userCode === currentUser.userCode,
+                
+                'isCenterSibling': eventMessages[i + 1] &&
+                 eventMessages[i - 1] &&
+                  eventMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode &&
+                   eventMessages[i - 1]?.fromUser?.userCode !== currentUser.userCode,
+                
+                'isFirstSibling': eventMessages[i + 1] &&
+                 eventMessages[i - 1] &&
+                  eventMessages[i + 1]?.fromUser?.userCode === currentUser.userCode &&
+                   eventMessages[i - 1]?.fromUser?.userCode !== currentUser.userCode
+              }">{{item.message}}</h5>
+            </div>
+          </ng-container>
+          <ng-template #elseOwner>
+            <div class="message-item-container owner">
+              <h5 class="message-item-text" [ngClass]="{
+                'isLastSibling': eventMessages[i + 1] &&
+                  eventMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode && 
+                  eventMessages[i - 1]?.fromUser?.userCode === currentUser.userCode,
+                
+                'isCenterSibling': eventMessages[i + 1] &&
+                 eventMessages[i - 1] &&
+                  eventMessages[i + 1]?.fromUser?.userCode === currentUser.userCode &&
+                   eventMessages[i - 1]?.fromUser?.userCode === currentUser.userCode,
+                
+                'isFirstSibling': eventMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode &&
+                   eventMessages[i - 1]?.fromUser?.userCode === currentUser.userCode
+              }">{{item.message}}</h5>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #elseSupportMessage>
+        <ng-container *ngFor="let item of supportTicketMessages;index as i">
+          <ng-container *ngIf="item.fromUser?.userCode !== currentUser.userCode; else elseOwner">
+            <div class="message-item-container">
+              <h5 class="message-item-text" [ngClass]="{
+                'isLastSibling': supportTicketMessages[i + 1] &&
+                supportTicketMessages[i - 1] &&
+                supportTicketMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode &&
+                  supportTicketMessages[i - 1]?.fromUser?.userCode === currentUser.userCode,
+                
+                'isCenterSibling': supportTicketMessages[i + 1] &&
+                supportTicketMessages[i - 1] &&
+                supportTicketMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode &&
+                supportTicketMessages[i - 1]?.fromUser?.userCode !== currentUser.userCode,
+                
+                'isFirstSibling': supportTicketMessages[i + 1] &&
+                supportTicketMessages[i - 1] &&
+                supportTicketMessages[i + 1]?.fromUser?.userCode === currentUser.userCode &&
+                  supportTicketMessages[i - 1]?.fromUser?.userCode !== currentUser.userCode
+              }">{{item.message}}</h5>
+            </div>
+          </ng-container>
+          <ng-template #elseOwner>
+            <div class="message-item-container owner">
+              <h5 class="message-item-text" [ngClass]="{
+                'isLastSibling': supportTicketMessages[i + 1] &&
+                supportTicketMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode && 
+                supportTicketMessages[i - 1]?.fromUser?.userCode === currentUser.userCode,
+                
+                'isCenterSibling': supportTicketMessages[i + 1] &&
+                supportTicketMessages[i - 1] &&
+                supportTicketMessages[i + 1]?.fromUser?.userCode === currentUser.userCode &&
+                supportTicketMessages[i - 1]?.fromUser?.userCode === currentUser.userCode,
+                
+                'isFirstSibling': supportTicketMessages[i + 1]?.fromUser?.userCode !== currentUser.userCode &&
+                supportTicketMessages[i - 1]?.fromUser?.userCode === currentUser.userCode
+              }">{{item.message}}</h5>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-template>
+      
+    </div>
+    <ng-container *ngIf="userConversation?.type === 'EVENTS'; else elseSupportTicket;">
+      <ng-container *ngIf="userConversation?.event && ( userConversation?.event?.eventStatus !== 'CANCELLED' || userConversation?.event?.eventStatus !== 'COMPLETED'); else elseNoMessageControl">
+        <div class="message-form">
+          <ion-input [formControl]="messageControl" fill="outline" placeholder="Type your message"></ion-input>
+          <ion-fab-button button color="primary" (click)="messageControl.value && messageControl.value !== '' ? submit(messageControl.value) : false">
+            <ion-icon name="send"></ion-icon>
+          </ion-fab-button>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #elseSupportTicket>
+      <ng-container *ngIf="userConversation?.supportTicket && userConversation?.supportTicket?.status === 'ACTIVE'; else elseNoMessageControl">
+        <div class="message-form">
+          <ion-input [formControl]="messageControl" fill="outline" placeholder="Type your message"></ion-input>
+          <ion-fab-button button color="primary" (click)="messageControl.value && messageControl.value !== '' ? submit(messageControl.value) : false">
+            <ion-icon name="send"></ion-icon>
+          </ion-fab-button>
+        </div>
+      </ng-container>
+    </ng-template>
+    <ng-template #elseNoMessageControl>
+      <div class="message-form disabled">
+        <h5 style="    display: flex;
+        width: 100%;
+        text-align: center;
+        flex-direction: column;">You can't reply to this conversation.</h5>
+      </div>
+    </ng-template>
+    
+  </div>
+</ion-content>

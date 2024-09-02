@@ -99,17 +99,17 @@ __decorate([
     __metadata("design:type", Array)
 ], Users.prototype, "events", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => Interested_1.Interested, (interested) => interested.user),
-    __metadata("design:type", Interested_1.Interested)
-], Users.prototype, "interested", void 0);
+    (0, typeorm_1.OneToMany)(() => Interested_1.Interested, (interested) => interested.user),
+    __metadata("design:type", Array)
+], Users.prototype, "interesteds", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Notifications_1.Notifications, (notifications) => notifications.user),
     __metadata("design:type", Array)
 ], Users.prototype, "notifications", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => Responded_1.Responded, (responded) => responded.user),
-    __metadata("design:type", Responded_1.Responded)
-], Users.prototype, "responded", void 0);
+    (0, typeorm_1.OneToMany)(() => Responded_1.Responded, (responded) => responded.user),
+    __metadata("design:type", Array)
+], Users.prototype, "respondeds", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => SupportTicket_1.SupportTicket, (supportTicket) => supportTicket.assignedAdminUser),
     __metadata("design:type", Array)

@@ -1,0 +1,32 @@
+
+<div class="horizontal-cards-thumbnail">
+  <ng-container *ngIf="!isLoading; else loadingImage">
+    <img src="../../../assets/img/event-help-thumbnail.png" alt="">
+  </ng-container>
+  <ng-template #loadingImage>
+    <ion-skeleton-text [animated]="true" ></ion-skeleton-text>
+  </ng-template>
+</div>
+<div class="horizontal-cards-content" *ngIf="!isLoading; else loadingContent">
+  <p class="horizontal-cards-sched">{{event?.dateTime | date:'MMM d, y AT h a' }}</p>
+  <h4 class="horizontal-cards-title">{{event?.eventName}}</h4>
+  <p class="horizontal-cards-type">{{ showAssistanceItems ? event?.eventAssistanceItems.join(', ') : event?.eventType}}</p>
+  <p class="horizontal-cards-description">{{event?.eventLocName}}</p>
+</div>
+<ng-template #loadingContent>
+  <div class="horizontal-cards-content" style="width: 100%;">
+    <p>
+      <ion-skeleton-text [animated]="true" style="height: 20px;"></ion-skeleton-text>
+    </p>
+    <h4>
+      <ion-skeleton-text [animated]="true" style="height: 40px;"></ion-skeleton-text>
+    </h4>
+    <p>
+      <ion-skeleton-text [animated]="true" style="height: 20px;"></ion-skeleton-text>
+    </p>
+    <p>
+      <ion-skeleton-text [animated]="true" style="height: 20px;"></ion-skeleton-text>
+    </p>
+  </div>
+</ng-template>
+<ion-ripple-effect></ion-ripple-effect>
