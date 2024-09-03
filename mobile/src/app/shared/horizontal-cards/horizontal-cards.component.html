@@ -1,7 +1,7 @@
 
 <div class="horizontal-cards-thumbnail">
   <ng-container *ngIf="!isLoading; else loadingImage">
-    <img src="../../../assets/img/event-help-thumbnail.png" alt="">
+    <img [src]="event?.thumbnailFile?.url" (error)="imageErrorHandler($event, event?.eventType)" alt="">
   </ng-container>
   <ng-template #loadingImage>
     <ion-skeleton-text [animated]="true" ></ion-skeleton-text>

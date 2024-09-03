@@ -125,14 +125,15 @@ let DashboardService = class DashboardService {
         if (!user) {
             throw new Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
         }
-        let queryWildCard;
+        let queryWildCard = "";
         if (params.keyword && params.keyword !== "") {
             queryWildCard = ` AND (
-      "EventType" like '%${params.keyword}%' OR 
-      "EventName" like '%${params.keyword}%' OR 
-      "EventType" like '%${params.keyword}%' OR 
-      "EventLocName" like '%${params.keyword}%' OR 
-      "EventAssistanceItems" like '%${params.keyword}%'
+      LOWER("EventType") like '%${params.keyword.toLowerCase()}%' OR 
+      LOWER("EventDesc") like '%${params.keyword.toLowerCase()}%' OR 
+      LOWER("EventName") like '%${params.keyword.toLowerCase()}%' OR 
+      LOWER("EventLocName") like '%${params.keyword.toLowerCase()}%' OR
+      TRIM(LOWER(TO_CHAR("DateTime", 'Day'))) LIKE '%${params.keyword.toLowerCase()}%' OR
+      TRIM(LOWER(TO_CHAR("DateTime", 'Month'))) LIKE '%${params.keyword.toLowerCase()}%'
       ) `;
         }
         const query = `
@@ -146,7 +147,7 @@ let DashboardService = class DashboardService {
         FROM dbo."Events"
         WHERE "UserId" <> '${user.userId}' AND "EventType" IN(${params.eventType.length > 1
             ? `'` + params.eventType.join(`','`) + `'`
-            : `'` + params.eventType + `'`}) AND "EventStatus" = 'APPROVED' AND earth_box(ll_to_earth(${params.latitude}::float, ${params.longitude}::float), ${params.radius}::float) @> ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
+            : `'` + params.eventType + `'`}) AND "EventStatus" = 'APPROVED' ${queryWildCard} AND earth_box(ll_to_earth(${params.latitude}::float, ${params.longitude}::float), ${params.radius}::float) @> ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)
           AND earth_distance(ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float), ll_to_earth(("EventLocMap"->>'latitude')::float, ("EventLocMap"->>'longitude')::float)) <= ${params.radius}::float
       ),
       row_count AS (

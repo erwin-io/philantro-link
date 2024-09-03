@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { ActionSheetController, AlertController, IonRefresher, ModalController, ToastController } from '@ionic/angular';
@@ -34,6 +34,7 @@ export class EventDetailsComponent  implements OnInit {
   currentViewImage;
   currentUser: Users;
   @ViewChild(IonRefresher)ionRefresher: IonRefresher;
+  @ViewChild('openImage') openImage: ElementRef<HTMLImageElement>;
   constructor(
     private eventsService: EventsService,
     private storageService: StorageService,
@@ -55,6 +56,7 @@ export class EventDetailsComponent  implements OnInit {
 
         this.event = res.data;
         this.isLoading = false;
+        this.openImage.nativeElement.src = this.event?.thumbnailFile?.url;
         if(this.ionRefresher) {
           this.ionRefresher.complete();
         }
@@ -332,11 +334,11 @@ export class EventDetailsComponent  implements OnInit {
     try {
       let headerMessage;
       if(status === "INPROGRESS") {
-        headerMessage = "Are you sure you want to mark this event as In progress?";
+        headerMessage = `Are you sure you want to mark this ${this.event?.eventType !== 'ASSISTANCE' ? 'event' : 'request'} as In progress?`;
       } else if(status === "COMPLETED") {
-        headerMessage = "Are you sure you want to mark this event as Completed?";
+        headerMessage = `Are you sure you want to mark this ${this.event?.eventType !== 'ASSISTANCE' ? 'event' : 'request'} as Completed?`;
       } else if(status === "CANCELLED") {
-        headerMessage = "Are you sure you want to cancel this event?";
+        headerMessage = `Are you sure you want to cancel this ${this.event?.eventType !== 'ASSISTANCE' ? 'event' : 'request'}?`;
       }
 
       const actionSheet = await this.actionSheetController.create({
@@ -532,7 +534,7 @@ export class EventDetailsComponent  implements OnInit {
   }
 
   imageErrorHandler(event, type: "CHARITY" | "VOLUNTEER" | "DONATION" | "ASSISTANCE") {
-    event.target.src = getEventCardDefaultImage(type);
+    event.target.src = getEventCardDefaultImage(this.event?.eventType);
   }
 
   async presentAlert(options: AlertOptions) {

@@ -31,7 +31,9 @@ export class StatusBarService {
     const getPlatform = Capacitor.getPlatform();
     if (getPlatform !== 'web') {
       await StatusBar.setStyle({style});
-      await StatusBar.setBackgroundColor({color});
+      if(color && color !== '') {
+        await StatusBar.setBackgroundColor({color});
+      }
     }
   }
 

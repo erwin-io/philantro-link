@@ -23,6 +23,7 @@ import { EventDetailsComponent } from 'src/app/shared/event-details/event-detail
 import { SupportTicketDetailsComponent } from 'src/app/shared/support-ticket-details/support-ticket-details.component';
 import { SupportTicketService } from 'src/app/services/support-ticket.service';
 import { SupportTicket } from 'src/app/model/support-ticket.model';
+import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
 
 @Component({
   selector: 'app-message',
@@ -46,6 +47,7 @@ export class MessagePage implements OnInit {
     private statusBarService: StatusBarService,
     private modalCtrl: ModalController,
     private userConversationService: UserConversationService,
+    private oneSignalNotificationService: OneSignalNotificationService,
     private supportTicketService: SupportTicketService,
     private eventsService: EventsService,
     private notificationService: NotificationService,
@@ -56,6 +58,15 @@ export class MessagePage implements OnInit {
     private authService: AuthService,
   ) { 
     this.currentUser = this.storageService.getLoginProfile();
+    this.oneSignalNotificationService.data$.subscribe((res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE' })=> {
+      if(res.type === "EVENTS" || res.type === "MESSAGE") {
+        this.pageIndex = 0;
+        this.pageSize = 10;
+        this.initUserConversations(false, true);
+      } else {
+        this.initNotifications(false, true);
+      }
+    })
   }
 
   get isAuthenticated() {
@@ -66,9 +77,9 @@ export class MessagePage implements OnInit {
       this.pageIndex = 0;
       this.pageSize = 10;
       if(this.active === "CHAT") {
-        this.initUserConversations();
+        this.initUserConversations(true, true);
       } else {
-        this.initNotifications();
+        this.initNotifications(true, true);
       }
     }
   }

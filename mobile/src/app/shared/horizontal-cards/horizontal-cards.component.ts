@@ -1,6 +1,7 @@
 /* eslint-disable @angular-eslint/component-selector */
 import { Component, Input, OnInit } from '@angular/core';
 import { Events } from 'src/app/model/events.model';
+import { getEventCardDefaultImage } from '../utility/utility';
 
 @Component({
   selector: 'horizontal-cards',
@@ -17,5 +18,9 @@ export class HorizontalCardsComponent  implements OnInit {
   constructor() { }
 
   ngOnInit() {}
+
+  imageErrorHandler(event, type) {
+    event.target.src = getEventCardDefaultImage(type);
+  }
 
 }

@@ -84,6 +84,7 @@ export class SupportTicketDetailsComponent  implements OnInit {
       leaveAnimation: this.animationService.leavePushLeftAnimation,
       componentProps: { modal, userConversation: {
         ...this.supportTicket?.userConversation,
+        referenceId: this.supportTicket?.supportTicketCode,
         supportTicket: this.supportTicket,
       }, currentUser: this.currentUser, type: "SUPPORT_TICKET", refererPage: "SUPPORT_DETAILS" },
     });

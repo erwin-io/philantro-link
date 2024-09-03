@@ -6,7 +6,7 @@ export const environment = {
   pdfViewerLinkTemplate: "https://psg4-word-view.officeapps.live.com/wv/WordViewer/request.pdf?type=printpdf&access_token=1&access_token_ttl=0&useNamedAction=1&WOPIsrc=http://psg4-view-wopi.wopi.online.office.net:808/oh/wopi/files/@/wFileId?wFileId=",
   production: false,
   apiBaseUrl: "http://localhost:3000/api/v1",
-  oneSignalAppId: "aa133277-ab58-49ec-a14c-7a06f8fb455e"
+  oneSignalAppId: "f466c8d5-af8a-4281-97b6-3ea14453173c"
 };
 
 /*

@@ -155,3 +155,28 @@ export const getEventCardDefaultImage = (type: "CHARITY" | "VOLUNTEER" | "DONATI
   }
 }
 
+export const timeAgo = (date) => {
+  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+  let interval = Math.floor(seconds / 31536000);
+
+  if (interval > 1) {
+      return `${!isNaN(Number(Math.floor(interval))) ? Math.floor(interval) : 0 } years ago`;
+  }
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) {
+      return `${!isNaN(Number(Math.floor(interval))) ? Math.floor(interval) : 0 } months ago`;
+  }
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) {
+      return `${!isNaN(Number(Math.floor(interval))) ? Math.floor(interval) : 0 } days ago`;
+  }
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) {
+      return `${!isNaN(Number(Math.floor(interval))) ? Math.floor(interval) : 0 } hours ago`;
+  }
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) {
+      return `${!isNaN(Number(Math.floor(interval))) ? Math.floor(interval) : 0 } minutes ago`;
+  }
+  return `${!isNaN(Number(Math.floor(seconds))) ? Math.floor(seconds) : 0 } seconds ago`;
+}

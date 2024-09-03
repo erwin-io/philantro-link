@@ -1,17 +1,14 @@
-<!-- 
-<ion-header>
+
+<ion-header no-border no-shadow mode="md" class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-button (click)="modal.dismiss()">
-        <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
+        <ion-icon name="close" style="font-size: 1.8rem!important;"></ion-icon>
       </ion-button>
     </ion-buttons>
 
-    <ion-title class="ion-text-center">Date picker</ion-title>
-    <div slot="end" style="width: 48px"></div>
-
   </ion-toolbar>
-</ion-header> -->
+</ion-header>
 
 <ion-content>
   <ion-datetime
@@ -27,7 +24,7 @@
 <ion-footer >
   <ion-toolbar mode="md">
     <ion-button [style.height.px]="45" mode="md" (click)="modal.dismiss(datetime.value)" expand="full" shape="round" color="primary">
-      Continue
+      Done
     </ion-button>
   </ion-toolbar>
 </ion-footer>

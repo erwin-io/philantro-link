@@ -14,7 +14,7 @@ export const environment = {
     announcement: 'announcement',
     appUpdate: 'app-update'
   },
-  oneSignalAppId: 'aa133277-ab58-49ec-a14c-7a06f8fb455e',
+  oneSignalAppId: 'f466c8d5-af8a-4281-97b6-3ea14453173c',
   // apiBaseUrl: 'http://localhost:3000/api/v1',
   apiBaseUrl: 'http://192.168.254.182:3000/api/v1',
 };

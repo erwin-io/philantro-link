@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder, ValidationErrors } from '@angular/forms';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { ModalController } from '@ionic/angular';
 import { catchError, Observable, of, Subject, takeUntil } from 'rxjs';
 import { Users } from 'src/app/model/users';
@@ -9,7 +8,6 @@ import { AnimationService } from 'src/app/services/animation.service';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { PageLoaderService } from 'src/app/services/page-loader.service';
-import { StatusBarService } from 'src/app/services/status-bar.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { UserOneSignalSubscriptionService } from 'src/app/services/user-one-signal-subscription.service';
 
@@ -22,6 +20,7 @@ export class ResetPasswordComponent implements OnInit {
   headerColor: any | "primary" = "";
   title = "Forgot Password";
   modal;
+  isFromLandingPage = false;
   isSubmitting = false;
   submitForm = new FormGroup({
     email: new FormControl(null, [Validators.required, Validators.email]),
@@ -29,8 +28,8 @@ export class ResetPasswordComponent implements OnInit {
   
   otp = "";
   resetForm = new FormGroup({
-    password: new FormControl("123456", [Validators.required,Validators.minLength(6),Validators.maxLength(16)]),
-    confirmPassword : new FormControl("123456", [Validators.required]),
+    password: new FormControl(null, [Validators.required,Validators.minLength(6),Validators.maxLength(16)]),
+    confirmPassword : new FormControl(null, [Validators.required]),
   });
   error;
   mode: 'SUBMIT' | 'VERIFY' | 'RESET' = 'SUBMIT';
@@ -50,7 +49,6 @@ export class ResetPasswordComponent implements OnInit {
     private storageService: StorageService,
     private userOneSignalSubscriptionService: UserOneSignalSubscriptionService,
     private authService: AuthService,
-    private statusBarService: StatusBarService,
     private animationService: AnimationService,
     private formBuilder: FormBuilder) {
       window.addEventListener("deviceorientation", (e)=> {
@@ -58,12 +56,6 @@ export class ResetPasswordComponent implements OnInit {
     }
 
   async ngOnInit() {
-    const getPlatform = Capacitor.getPlatform();
-    if (getPlatform !== 'web') {
-      await StatusBar.setOverlaysWebView({ overlay: false});
-      await StatusBar.setStyle({style: Style.Dark});
-      await StatusBar.setBackgroundColor({color:"#311B92"});
-    }
 
 
     this.ngUnsubscribe.next();
@@ -356,10 +348,6 @@ export class ResetPasswordComponent implements OnInit {
     return (error: any): Observable<any> => of(error.error as any);
   }
   async close() {
-    const getPlatform = Capacitor.getPlatform();
-    if (getPlatform !== 'web') {
-      await StatusBar.setOverlaysWebView({ overlay: true});
-    }
     this.modal.dismiss(null, 'cancel');
   }
 }

@@ -238,7 +238,8 @@ export class CreateEventFormComponent implements OnInit {
       enterAnimation: this.animationService.pushLeftAnimation,
       leaveAnimation: this.animationService.leavePushLeftAnimation,
       componentProps: { 
-        modal
+        modal,
+        datePreferedStart: new Date(this.dateTime.value).toISOString()
        },
     });
     modal.present();

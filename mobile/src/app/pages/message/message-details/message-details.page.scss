@@ -19,6 +19,7 @@
                 width: 100%;
                 display: flex;
                 flex-direction: row;
+                position: relative;
                 .message-item-text {
                     background: var(--ion-color-light);
                     padding: 15px;
@@ -74,6 +75,7 @@
             ion-input {
                 --border-width: 2px!important;
                 --border-radius: 10px!important;
+                min-height: 50px;
                 font-family: "Poppins-SemiBold" !important;
                 &.has-focus {
                 --border-width: 3px!important;

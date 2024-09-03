@@ -110,6 +110,10 @@ export class AllPage implements OnInit {
       this.help = res.data.results;
       this.helpTotal = res.data.total;
       this.isHelpLoading = false;
+      this.dashboardService.logEvents({
+        help: this.help,
+        nonHelpEvents: this.nonHelpEvents,
+      })
     } catch(ex) {
       this.isHelpLoading = false;
       this.isNonHelpEventsLoading = false;
@@ -138,6 +142,10 @@ export class AllPage implements OnInit {
       }
       this.nonHelpEventsTotal = res.data.total;
       this.isNonHelpEventsLoading = false;
+      this.dashboardService.logEvents({
+        help: this.help,
+        nonHelpEvents: this.nonHelpEvents,
+      })
     } catch(ex) {
       this.isHelpLoading = false;
       this.isNonHelpEventsLoading = false;

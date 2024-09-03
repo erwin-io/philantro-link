@@ -8,6 +8,9 @@ ion-content {
         gap: 10px;
         overflow: auto;
         box-sizing: border-box;
+        position: fixed;
+        z-index: 9999;
+        background: #fff;
         ion-button {
             width: 50%!important;
             box-sizing: border-box;
@@ -21,6 +24,7 @@ ion-content {
         }
     }
     .message-list {
+      margin-top: 44px!important;
         ion-avatar {
             width: 55px;
             height: 55px;

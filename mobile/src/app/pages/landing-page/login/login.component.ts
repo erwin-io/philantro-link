@@ -45,14 +45,6 @@ export class LoginComponent implements OnInit {
     }
 
   async ngOnInit() {
-    const getPlatform = Capacitor.getPlatform();
-    if (getPlatform !== 'web') {
-      await StatusBar.setOverlaysWebView({ overlay: false});
-      await StatusBar.setStyle({style: Style.Dark});
-      await StatusBar.setBackgroundColor({color:"#311B92"});
-    }
-
-
     this.ngUnsubscribe.next();
     // This completes the subject properlly.
     this.ngUnsubscribe.complete();
@@ -165,16 +157,14 @@ export class LoginComponent implements OnInit {
       canDismiss: true,
       enterAnimation: this.animationService.pushLeftAnimation,
       leaveAnimation: this.animationService.leavePushLeftAnimation,
-      componentProps: { modal, },
+      componentProps: { modal, isFromLandingPage: true },
     });
     modal.onDidDismiss().then(async ()=> {
       this.logInForm.reset();
-      let getPlatform = Capacitor.getPlatform();
-      if (getPlatform !== 'web') {
-        await StatusBar.setOverlaysWebView({overlay: true});
-        await StatusBar.setStyle({style: Style.Dark});
-      }
     });
+    // this.statusBarService.show();
+    // this.statusBarService.overLay(false);
+    // this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
     modal.present();
   }
 

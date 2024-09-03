@@ -72,6 +72,29 @@
         .details-cards-title {
             font-family: 'Poppins-SemiBold'!important;
         }
+        .help-type {
+            display: flex;
+            flex-direction: row;
+            // gap: 10px;
+            overflow: auto;
+            scroll-behavior: smooth;
+            gap: 5px;
+            .help-type-item {
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                --box-shadow: none;
+                background-color: var(--ion-color-secondary)!important;
+                color: #fff;
+                width: -webkit-fill-available;
+                align-items: center;
+                overflow: hidden;
+                position: relative;
+                padding: 10px 0;
+                box-sizing: border-box;
+                border-radius: 5px;
+            }
+        }
         .details-dontation {
             padding: 16px 0 0;
             display: flex;

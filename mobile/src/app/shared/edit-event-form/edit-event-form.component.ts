@@ -90,7 +90,7 @@ export class EditEventFormComponent implements OnInit {
     this.eventsService.getByCode(this.eventCode, this.currentUser?.userCode).subscribe(res=> {
       this.event = res.data;
       this.eventLocMap.setValue(this.event?.eventLocMap);
-      this.eventAssistanceItems.setValue(this.event?.eventAssistanceItems);
+      this.eventAssistanceItems.setValue(this.event?.eventAssistanceItems as any);
       this.event.dateTime = moment(this.event.dateTime).format("MMM DD YYYY h:mm A");
       this.eventThumbnails = this.event?.eventImages.map((x,i)=> {
         return {

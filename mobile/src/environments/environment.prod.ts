@@ -5,5 +5,5 @@ export const environment = {
     cluster: 'ap1',
   },
   apiBaseUrl: 'https://philantro-link-api.vercel.app/api/v1',
-  oneSignalAppId: 'aa133277-ab58-49ec-a14c-7a06f8fb455e'
+  oneSignalAppId: 'f466c8d5-af8a-4281-97b6-3ea14453173c'
 };

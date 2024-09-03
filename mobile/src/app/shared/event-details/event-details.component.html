@@ -40,18 +40,22 @@
   </div>
   <div class="details-gallery">
     <div class="details-gallery-open">
-      <img #open [src]="event?.thumbnailFile ? event?.thumbnailFile?.url : null" (error)="imageErrorHandler($event, event?.eventType)" alt="0">
+      <img style="{{isLoading ? 'display:none!important': ''}}" #openImage [src]="event?.thumbnailFile ? event?.thumbnailFile?.url : null" (error)="imageErrorHandler($event, event?.eventType)" alt="0">
+      <ng-container *ngIf="isLoading">
+        <ion-skeleton-text style="width: 100%;height: 100%;" [animated]="true"></ion-skeleton-text>
+      </ng-container>
+      
     </div>
     <div class="details-gallery-list">
       <ng-container *ngIf="event?.eventImages && event?.eventImages.length > 0; else showDefault">
         <ng-container *ngFor="let item of event.eventImages; index as i">
-        <img [src]="item?.file?.url" *ngIf="i.toString() !== open.alt" alt="" (click)="open.src = item?.file?.url;open.alt = i.toString()">
+        <img [src]="item?.file?.url" *ngIf="i.toString() !== openImage.alt" alt="" (click)="openImage.src = item?.file?.url;openImage.alt = i.toString()">
       </ng-container>
       </ng-container>
       <ng-template #showDefault>
         <ng-container *ngFor="let item of [
         '../../../assets/img/event-thumbnail.png']; index as i">
-        <img [src]="item" *ngIf="i.toString() !== open.alt" alt="" (click)="open.src = item;open.alt = i.toString()">
+        <img [src]="item" *ngIf="i.toString() !== openImage.alt" alt="" (click)="openImage.src = item;openImage.alt = i.toString()">
       </ng-container>
     </ng-template>
       
@@ -63,7 +67,7 @@
         Mark as In progress
       </ion-button>
       <ion-button (click)="onUpdateStaus('CANCELLED')" shape="round" fill="outline" color="danger" *ngIf="event?.eventStatus !== 'CANCELLED' && (event?.eventStatus === 'APPROVED' || event?.eventStatus === 'PENDING')" >
-        Cancel this event
+        Cancel this {{event?.eventType !== 'ASSISTANCE' ? 'event' : 'request'}}
       </ion-button>
       <ion-button (click)="onUpdateStaus('COMPLETED')" shape="round" fill="outline" color="tertiary" *ngIf="event?.eventType !== 'ASSISTANCE' ? event?.inProgress : event?.eventStatus === 'APPROVED'" >
         Mark as Completed
@@ -87,6 +91,21 @@
     </ion-text>
     <h2 *ngIf="!isLoading; else loadingEventName"class="details-cards-title">{{event?.eventName}}</h2>
     <ion-text color="primary"><b>{{event?.eventType}}</b></ion-text>
+    <ng-container *ngIf="event?.eventAssistanceItems && event?.eventAssistanceItems.length > 0">
+      <div class="help-type">
+        <ng-container *ngFor="let item of event?.eventAssistanceItems">
+          <div class="help-type-item ion-activatable" shape="round"> 
+            <ion-icon slot="start" name="{{
+              item === 'FOOD' ? 'restaurant': '' ||
+              item === 'WATER' ? 'water': '' ||
+              item === 'CLOTHING' ? 'shirt': '' ||
+              item === 'SERVICES' ? 'construct': '' }}"></ion-icon>
+            {{item}}
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+    
     <ng-template #loadingEventName>
       <ion-skeleton-text [animated]="true"></ion-skeleton-text>
     </ng-template>

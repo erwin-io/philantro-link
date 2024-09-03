@@ -2,7 +2,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ValidatorFn, AbstractControl, ValidationErrors, FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { IonModal, ModalController } from '@ionic/angular';
 import { Observable, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
@@ -45,11 +44,11 @@ export class RegisterComponent implements OnInit {
   };
 
   signUpForm = new FormGroup({
-    name : new FormControl("Erwin", [Validators.required, Validators.minLength(2)]),
-    email: new FormControl("erwinramirez220@gmail.com", [Validators.required,Validators.email]),
+    name : new FormControl(null, [Validators.required, Validators.minLength(2)]),
+    email: new FormControl(null, [Validators.required,Validators.email]),
     helpNotifPreferences: new FormControl([]),
-    password: new FormControl("123456", [Validators.required,Validators.minLength(6),Validators.maxLength(16)]),
-    confirmPassword : new FormControl("123456", [Validators.required]),
+    password: new FormControl(null, [Validators.required,Validators.minLength(6),Validators.maxLength(16)]),
+    confirmPassword : new FormControl(null, [Validators.required]),
   },
   { validators: this.checkPasswords });
   protected ngUnsubscribe: Subject<void> = new Subject<void>();
@@ -72,11 +71,6 @@ export class RegisterComponent implements OnInit {
     }
 
   async ngOnInit() {
-    const getPlatform = Capacitor.getPlatform();
-    if (getPlatform !== 'web') {
-      await StatusBar.setStyle({style: Style.Light});
-      await StatusBar.setBackgroundColor({color:"#ffffff"});
-    }
   }
 
   onOtpChange(otp) {
@@ -192,12 +186,6 @@ export class RegisterComponent implements OnInit {
               desc: 'Welcome to Philantrolink! Start exploring, connecting, and sharing with others now.',
               type: 'success',
               done: async ()=> {
-                const getPlatform = Capacitor.getPlatform();
-                if (getPlatform !== 'web') {
-                  await StatusBar.setOverlaysWebView({ overlay: false});
-                  await StatusBar.setStyle({style: Style.Light});
-                  await StatusBar.setBackgroundColor({color:"#ffffff"});
-                }
                 this.isOpenResultModal = false;
                 this.close();
               },

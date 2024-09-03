@@ -56,7 +56,9 @@
       </ng-container>
 
       <ng-template #loadingCards>
-        <vertical-cards [isLoading]="true" class="ion-activatable"></vertical-cards>
+        <ng-container *ngFor="let item of [1,2]">
+          <vertical-cards [isLoading]="true" class="ion-activatable"></vertical-cards>
+        </ng-container>
       </ng-template>
 
       <ion-button fill="clear" *ngIf="!isLoading && eventsTotal > events.length" (click)="loadMore()">

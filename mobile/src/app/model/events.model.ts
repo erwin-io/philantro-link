@@ -13,7 +13,7 @@ export class Events {
   eventDesc: string;
   eventLocName: string;
   eventLocMap?: MapPoint;
-  eventAssistanceItems: any[];
+  eventAssistanceItems: any[] = [];
   eventStatus: "PENDING" | "APPROVED" | "REJECTED" | "INPROGRESS" | "COMPLETED" | "CANCELLED";
   active: boolean;
   user: Users;

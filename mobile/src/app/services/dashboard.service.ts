@@ -16,6 +16,9 @@ export class DashboardService implements IServices {
 
   private refresh = new BehaviorSubject({});
   refresh$ = this.refresh.asObservable();
+
+  private logAllDisplayedEvents = new BehaviorSubject({});
+  logAllDisplayedEvents$ = this.logAllDisplayedEvents.asObservable();
   constructor(private http: HttpClient, private appconfig: AppConfigService) { }
 
   doRefresh() {
@@ -25,7 +28,12 @@ export class DashboardService implements IServices {
     this.refresh.next({ refresh: false });
   }
 
+  logEvents(data: { help: Events[]; nonHelpEvents: Events[];}) {
+    this.logAllDisplayedEvents.next(data);
+  }
+
   getClientEventFeed(params: {
+    keyword?: string;
     latitude: number;
     longitude: number;
     radius: number;

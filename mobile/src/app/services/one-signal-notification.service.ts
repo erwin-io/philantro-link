@@ -154,9 +154,7 @@ export class OneSignalNotificationService {
         OneSignalPlugin.InAppMessages.addTrigger('in_app_type', name);
       }
 
-      if(type === "BOOKING") {
-        this.data.next(referenceId??"")
-      }
+      this.data.next({ notificationIds, inAppData, type, referenceId })
     });
   }
 

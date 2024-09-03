@@ -145,6 +145,7 @@
       <p class="create-form-control-label">Event Description </p>
       <ion-textarea
         mode="md"
+        autoGrow="true"
         labelPlacement="stacked"
         fill="outline" 
         placeholder="Type event description here"
@@ -156,8 +157,8 @@
 </ion-content>
 
 <ion-footer>
-  <ion-toolbar mode="md" (click)="onSave()">
-    <ion-button [disabled]="!isFormValid" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+  <ion-toolbar mode="md" >
+    <ion-button (click)="onSave()" [disabled]="!isFormValid" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
       Continue
     </ion-button>
   </ion-toolbar>

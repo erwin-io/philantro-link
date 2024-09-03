@@ -1,5 +1,8 @@
 <ion-content>
   <div class="help-type">
+    <ion-button shape="round" [ngClass]="{ 'active' : active === 'ALL' }" (click)="active !== 'ALL' ? getHelpEvent('ALL') : null">
+      All
+    </ion-button>
     <ion-button shape="round" [ngClass]="{ 'active' : active === 'FOOD' }" (click)="active !== 'FOOD' ? getHelpEvent('FOOD') : null">
       <ion-icon slot="start" name="restaurant"></ion-icon>
       Food

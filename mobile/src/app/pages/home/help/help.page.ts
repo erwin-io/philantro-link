@@ -17,7 +17,7 @@ import { EventDetailsComponent } from 'src/app/shared/event-details/event-detail
 })
 export class HelpPage implements OnInit {
 
-  active: 'FOOD' | 'WATER' | 'CLOTHING' | 'SERVICES' = 'FOOD';
+  active: 'ALL' | 'FOOD' | 'WATER' | 'CLOTHING' | 'SERVICES' = 'ALL';
   help: Events[] = [];
   helpTotal = 0;
   helpPageIndex = 0;
@@ -82,7 +82,7 @@ export class HelpPage implements OnInit {
         latitude,
         longitude,
         radius: 40000,
-        helpType: [this.active],
+        helpType: this.active === "ALL" ? ["WATER","FOOD","CLOTHING","SERVICES"] : [this.active],
         skip: this.helpPageIndex * this.helpPageSize,
         limit: this.helpPageSize,
         userCode: this.currentUser?.userCode

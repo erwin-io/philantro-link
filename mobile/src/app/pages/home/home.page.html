@@ -54,56 +54,138 @@
               <ion-icon name="arrow-back-outline" style="font-size: 2rem!important;"></ion-icon>
             </ion-button>
           </ion-buttons>
-          <ion-searchbar mode="ios" [(ngModel)]="searchKey" style="padding: 15px 15px 15px 0px!important;font-size: larger;border: 0 !important; --box-shadow: none !important" inputmode="search"
+          <ion-searchbar (ionInput)="onSearchInput($event)" mode="ios" [(ngModel)]="searchKey" style="padding: 15px 15px 15px 0px!important;font-size: larger;border: 0 !important; --box-shadow: none !important" inputmode="search"
             [debounce]="1000" 
-            show-cancel-button="never" placeholder="Search event"></ion-searchbar>
+            show-cancel-button="never" placeholder="Search event" ></ion-searchbar>
         </ion-toolbar>
+        <ion-button class="location-picker" shape="round" fill="clear" (click)="showLocationPicker()">
+          <span slot="start" class="location-picker-text">
+            <span class="location-name">{{currentLocationName}}</span>
+          </span>
+          <ion-icon slot="end" name="location-sharp" style="font-size: 1.8rem!important;"></ion-icon>
+        </ion-button>
       </ion-header>
       <ion-content class="ion-padding">
-        <ion-list class="search-result">
-          <ion-item [button]="true" >
-            <ion-avatar slot="start">
-              <img alt="Silhouette of a person's head" src="../../../assets/img/event-thumbnail.png" />
-            </ion-avatar>
-            <ion-label>
-              <ion-text color="danger">
-                <p class="date">{{'2024-07-18' | date:'EEE, MMM d, y AT h a' }}</p>
-              </ion-text>
-              <span class="title">Donation for Children</span>
-              <ion-note color="medium" class="ion-text-wrap">
-                Never gonna give you up Never gonna let you down Never gonna run...
-              </ion-note>
-            </ion-label>
-          </ion-item>
-          <ion-item [button]="true" >
-            <ion-avatar slot="start">
-              <img alt="Silhouette of a person's head" src="../../../assets/img/event-donation-thumbnail.png" />
-            </ion-avatar>
-            <ion-label>
-              <ion-text color="danger">
-                <p class="date">{{'2024-07-18' | date:'EEE, MMM d, y AT h a' }}</p>
-              </ion-text>
-              <span class="title">Donation for Children</span>
-              <ion-note color="medium" class="ion-text-wrap">
-                Never gonna give you up Never gonna let you down Never gonna run...
-              </ion-note>
-            </ion-label>
-          </ion-item>
-          <ion-item [button]="true" >
-            <ion-avatar slot="start">
-              <img alt="Silhouette of a person's head" src="../../../assets/img/event-help-thumbnail.png" />
-            </ion-avatar>
-            <ion-label>
-              <ion-text color="danger">
-                <p class="date">{{'2024-07-18' | date:'EEE, MMM d, y AT h a' }}</p>
-              </ion-text>
-              <span class="title">Donation for Children</span>
-              <ion-note color="medium" class="ion-text-wrap">
-                Never gonna give you up Never gonna let you down Never gonna run...
-              </ion-note>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+        <ng-container *ngIf="(!searchKey || searchKey === ''); else showSearchResults">
+          <ng-container *ngIf="allDisplayedEvents.nonHelpEvents.length > 0">
+            <ion-text color="dark">Suggested Events</ion-text>
+            <ion-list class="search-result">
+              <ion-item [button]="true" *ngFor="let item of allDisplayedEvents.nonHelpEvents | slice:0:3" (click)="openEvent(item?.eventCode)">
+                <ion-avatar slot="start">
+                  <img alt="{{item.eventName}}" [src]="item.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.eventType)" alt=""/>
+                </ion-avatar>
+                <ion-label>
+                  <ion-text color="danger">
+                    <p class="date">{{item.dateTime| date:'EEE, MMM d, y AT h a' }}</p>
+                  </ion-text>
+                  <span class="title">{{item.eventName}}</span>
+                  <ion-note color="medium" class="ion-text-wrap">
+                    {{item.eventDesc}}
+                  </ion-note>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+            <ion-text color="primary" routerLink="/home">See more</ion-text>
+            <br>
+          </ng-container>
+          <ng-container *ngIf="allDisplayedEvents.help.length > 0">
+            <ion-text color="dark">Need help nearby</ion-text>
+            <ion-list class="search-result">
+              <ion-item [button]="true" *ngFor="let item of allDisplayedEvents.help | slice:0:3" (click)="openEvent(item?.eventCode)">
+                <ion-avatar slot="start">
+                  <img alt="{{item.eventName}}" [src]="item.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.eventType)" alt=""/>
+                </ion-avatar>
+                <ion-label>
+                  <ion-text color="danger">
+                    <p class="date">{{item.dateTime| date:'EEE, MMM d, y AT h a' }}</p>
+                  </ion-text>
+                  <span class="title">{{item.eventName}}</span>
+                  <ion-note color="medium" class="ion-text-wrap">
+                    {{item.eventDesc}}
+                  </ion-note>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+            <ion-text color="primary" routerLink="/home/help">See more</ion-text>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #showSearchResults>
+          <ng-container *ngIf="!isSearching; else elseSearching">
+            <ng-container *ngIf="searchResults.length > 0; else elseNoResults">
+              <ion-text color="dark">{{searchResults.length}} event{{searchResults.length >= 2 ? 's': ''}} found</ion-text>
+              <ion-list class="search-result">
+                <ion-item [button]="true" *ngFor="let item of searchResults" (click)="openEvent(item?.eventCode)">
+                  <ion-avatar slot="start">
+                    <img alt="{{item.eventName}}" [src]="item.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.eventType)" alt=""/>
+                  </ion-avatar>
+                  <ion-label>
+                    <ion-text color="danger">
+                      <p class="date">{{item.dateTime| date:'EEE, MMM d, y AT h a' }}</p>
+                    </ion-text>
+                    <span class="title">{{item.eventName}}</span>
+                    <ion-note color="medium" class="ion-text-wrap">
+                      {{item.eventDesc}}
+                    </ion-note>
+                    <ion-text color="primary">
+                      <p>{{item?.eventType}}</p>
+                    </ion-text>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+
+              <ion-button fill="clear" *ngIf="!isSearching && searchResultsTotal > searchResults.length" (click)="loadMore()">
+                <ion-icon slot="start" name="chevron-down-outline"></ion-icon>
+                Load more
+              </ion-button>
+            </ng-container>
+          </ng-container>
+        </ng-template>
+
+        <ng-template #elseSearching>
+          <ion-list class="search-result">
+            <ion-item *ngFor="let item of [1,2,3,4]">
+              <ion-avatar slot="start">
+                <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+              </ion-avatar>
+              <ion-label>
+                <ion-text color="danger">
+                  <p class="date">
+                    <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+                  </p>
+                </ion-text>
+                <span class="title">
+                  <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+                </span>
+                <ion-note color="medium" class="ion-text-wrap">
+                  <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+                </ion-note>
+                <ion-text color="primary">
+                  <p>
+                    <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+                  </p>
+                </ion-text>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ng-template>
+        
+
+        <ng-template #elseNoResults>
+          <div class="ion-padding">
+            <div style="background-color: #8469c726;display: flex;flex-direction: column;align-items: center;padding-bottom: 20px;border-radius: 10px; position: relative;text-align: center;" >
+              <img style="width: 250px;height: max-content;" src="../../../../assets/img/empty-placeholder.png" alt="">
+              <div >
+                <ion-text color="dark"><h4>Oh snap!</h4></ion-text>
+                <ion-text color="dark">
+                  <p>No events near you. Try to search<br>with a different location.</p>
+                </ion-text>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        
+        
       </ion-content>
     </ng-template>
   </ion-modal>

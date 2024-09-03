@@ -56,8 +56,8 @@
 </ion-content>
 
 <ion-footer>
-  <ion-toolbar mode="md" (click)="onSubmit()">
-    <ion-button [disabled]="!isFormValid" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
+  <ion-toolbar mode="md">
+    <ion-button (click)="onSubmit()" [disabled]="!isFormValid" [style.height.px]="45" mode="md" expand="full" shape="round" color="primary">
       Submit
     </ion-button>
   </ion-toolbar>

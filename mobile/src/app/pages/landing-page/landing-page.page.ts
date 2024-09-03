@@ -8,6 +8,7 @@ import { LoginComponent } from './login/login.component';
 import { DeviceService } from 'src/app/services/device.service';
 import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
 import { LocalNotificationsService } from 'src/app/services/local-notifications.service';
+import { StatusBarService } from 'src/app/services/status-bar.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -22,6 +23,7 @@ export class LandingPagePage implements OnInit {
     private deviceService: DeviceService,
     private oneSignalNotificationService: OneSignalNotificationService,
     private localNotificationsService: LocalNotificationsService,
+    private statusBarService: StatusBarService,
     private animationService: AnimationService) { }
 
   ngOnInit() {
@@ -47,8 +49,13 @@ export class LandingPagePage implements OnInit {
       componentProps: { modal },
     });
     modal.onDidDismiss().then(()=> {
-      // this.modifyStatusBar();
+      this.statusBarService.show();
+      this.statusBarService.overLay(true);
+      this.statusBarService.modifyStatusBar(Style.Dark, '');
     });
+    this.statusBarService.show();
+    this.statusBarService.overLay(false);
+    this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
     modal.present();
   }
 
@@ -64,8 +71,13 @@ export class LandingPagePage implements OnInit {
       componentProps: { modal },
     });
     modal.onDidDismiss().then(()=> {
-      this.modifyStatusBar();
+      this.statusBarService.show();
+      this.statusBarService.overLay(true);
+      this.statusBarService.modifyStatusBar(Style.Dark, '');
     });
+    this.statusBarService.show();
+    this.statusBarService.overLay(false);
+    this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
     modal.present();
   }
 

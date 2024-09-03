@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UserConversation } from '../../../model/user-conversation.model';
 import { Users } from 'src/app/model/users';
-import { getEventCardDefaultImage } from 'src/app/shared/utility/utility';
+import { getEventCardDefaultImage, timeAgo } from 'src/app/shared/utility/utility';
 import { AlertController, AlertOptions, ModalController, ToastController, ToastOptions } from '@ionic/angular';
 import { EventMessage } from 'src/app/model/events.model';
 import { SupportTicket, SupportTicketMessage } from 'src/app/model/support-ticket.model';
@@ -19,6 +19,7 @@ import { SupportTicketService } from 'src/app/services/support-ticket.service';
 import { SupportTicketDetailsComponent } from 'src/app/shared/support-ticket-details/support-ticket-details.component';
 import { Style } from '@capacitor/status-bar';
 import { StatusBarService } from 'src/app/services/status-bar.service';
+import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
 
 
 @Component({
@@ -52,12 +53,42 @@ export class MessageDetailsPage implements OnInit {
     private statusBarService: StatusBarService, 
     private modalCtrl: ModalController,
     private userConversationService: UserConversationService,
-  ) { }
+    private oneSignalNotificationService: OneSignalNotificationService,
+  ) {
+    this.oneSignalNotificationService.data$.subscribe(async (res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE' })=> {
+      
+      this.pageIndex = 0;
+      this.pageSize = 10;
+      this.eventMessages = [];
+      this.supportTicketMessages = [];
+      if(res.type === "EVENTS" || res.type === "MESSAGE") {
+        await Promise.all([
+          this.initEventMessage(),
+          this.markAsRead()
+        ]).then(res=> {
+          this.messageList.nativeElement.scrollTo({
+            top: 0,
+            behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
+          })
+        })
+      } else {
+        await Promise.all([
+          this.initSupportTicketMessage(),
+          this.markAsRead()
+        ]).then(res=> {
+          this.messageList.nativeElement.scrollTo({
+            top: 0,
+            behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
+          })
+        })
+      }
+    })
+     }
 
   ngOnInit() {
   }
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
     //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
     //Add 'implements AfterViewInit' to the class.
     this.pageIndex = 0;
@@ -66,12 +97,12 @@ export class MessageDetailsPage implements OnInit {
     this.eventMessages = [];
     this.supportTicketMessages = [];
     if(this.type === "EVENTS") {
-      Promise.all([
+      await Promise.all([
         this.initEventMessage(),
         this.markAsRead()
       ])
     } else {
-      Promise.all([
+      await Promise.all([
         this.initSupportTicketMessage(),
         this.markAsRead()
       ])
@@ -304,16 +335,16 @@ export class MessageDetailsPage implements OnInit {
         {
           supportTicketMessageId: tempId,
           message: message,
-          fromUser: this.userConversation?.fromUser
+          fromUser: this.currentUser
         },
         ...this.supportTicketMessages
       ];
       this.messageControl.setValue(null);
       this.isLoading = true;
       await this.supportTicketService.postMessage({
-        supportTicketCode: this.userConversation?.referenceId,
+        supportTicketCode: this.userConversation?.referenceId && this.userConversation?.referenceId !== '' ?  this.userConversation?.referenceId : this.userConversation?.supportTicket?.supportTicketCode,
         message ,
-        userCode: this.userConversation?.fromUser?.userCode,
+        userCode: this.currentUser?.userCode,
       }).pipe(
         takeUntil(this.ngUnsubscribe),
         catchError(this.handleError('support-ticket-message', []))
@@ -405,6 +436,11 @@ export class MessageDetailsPage implements OnInit {
     }
   }
 
+  getTimeAgo(date) {
+    const time = timeAgo(date);
+    return !isNaN(Number(time));
+  }
+
   close() {
     this.modal.dismiss();
   }
@@ -436,3 +472,7 @@ export class MessageDetailsPage implements OnInit {
     };
   }
 }
+function ngAfterViewInit() {
+  throw new Error('Function not implemented.');
+}
+
