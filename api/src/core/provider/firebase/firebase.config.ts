@@ -1,4 +1,4 @@
-import * as firebaseConfig from "./philantrolink-62f13-firebase-adminsdk-4oabp-6946c38e2f.json";
+import * as firebaseConfig from "./philantrolink-62f13-firebase-adminsdk-4oabp-d41602df25.json";
 
 export default {
   type: firebaseConfig.type,
