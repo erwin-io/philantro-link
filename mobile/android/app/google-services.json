@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "244403582589",
+    "project_id": "philantrolink-62f13",
+    "storage_bucket": "philantrolink-62f13.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244403582589:android:37e783b03d41600d002314",
+        "android_client_info": {
+          "package_name": "com.philantrolink.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwGR4O5DKQAVJHkOSAzZsvkrXeetXOJWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244403582589:android:68c2923c13125e02002314",
+        "android_client_info": {
+          "package_name": "com.philantrolink.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwGR4O5DKQAVJHkOSAzZsvkrXeetXOJWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
