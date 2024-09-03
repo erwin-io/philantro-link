@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import OneSignalPlugin, { UserChangedState } from 'onesignal-cordova-plugin';
+import OneSignalPlugin from 'onesignal-cordova-plugin';
 import { environment } from 'src/environments/environment';
 import { UserOneSignalSubscriptionService } from './user-one-signal-subscription.service';
 import { AuthService } from './auth.service';
@@ -63,22 +63,36 @@ export class OneSignalNotificationService {
      lights: true,
      vibration: true,
      sound: 'notif_alert'
-   });
-    OneSignalPlugin.initialize(environment.oneSignalAppId);
-    OneSignalPlugin.Notifications.requestPermission(true);
-    this.addCredentials();
-    console.log('calling addSubscriptionObserver');
-    OneSignalPlugin.User.addEventListener("change", (userState: UserChangedState)=> {
-      console.log(userState)
-      console.log('credentials should be added');
+    });
+    OneSignalPlugin.setLogLevel(6, 0);
+    OneSignalPlugin.setAppId(environment.oneSignalAppId);
+    OneSignalPlugin.promptForPushNotificationsWithUserResponse(true);
+    OneSignalPlugin.getDeviceState(res=> {
+      console.log('getDeviceState ', JSON.stringify(res));
       this.addCredentials();
     });
-    console.log('calling addPermissionObserver');
-    OneSignalPlugin.Notifications.requestPermission(true).then((success: Boolean) => {
-      console.log("Notification permission granted " + success);
-    })
+    this.addCredentials();
+    console.log('calling addSubscriptionObserver');
+    OneSignalPlugin.addSubscriptionObserver(res=> {
+      console.log('Subscription id ', res?.to?.userId);
 
-    OneSignalPlugin.Notifications.addEventListener("click", async (res)=> {
+      this.storageService.saveOneSignalSubscriptionId(res?.to?.userId);
+      if(this.isAuthenticated) {
+        // this.addCredentials();
+        // const currentUser = this.storageService.getLoginProfile();
+        // this.userOneSignalSubscriptionService.create({
+        //   userId: currentUser?.userId,
+        //   subscriptionId: res?.to?.userId
+        // }).subscribe((res)=> {
+        //   console.log('subscription saved');
+        // }, (err)=>{console.log('error saving subscription');console.log(err);});
+      }
+    });
+    console.log('calling addPermissionObserver');
+    OneSignalPlugin.addPermissionObserver(res=> {
+      console.log('addPermissionObserver result', JSON.stringify(res));
+    });
+    OneSignalPlugin.setNotificationOpenedHandler(async res=> {
       if(!this.isAuthenticated) {
         this.authService.logout();
       }
@@ -142,7 +156,7 @@ export class OneSignalNotificationService {
       }
     });
 
-    OneSignalPlugin.Notifications.addEventListener("foregroundWillDisplay", (res)=> {
+    OneSignalPlugin.setNotificationWillShowInForegroundHandler(res=> {
       console.log('Nofication received data ', JSON.stringify(res.getNotification().additionalData));
       const { notificationIds, inAppData, type, referenceId } = res.getNotification().additionalData as any;
       if(notificationIds) {
@@ -151,7 +165,7 @@ export class OneSignalNotificationService {
       if(inAppData) {
         // OneSignalPlugin.removeTriggerForKey('in_app_type');
         const { name } = inAppData;
-        OneSignalPlugin.InAppMessages.addTrigger('in_app_type', name);
+        OneSignalPlugin.addTrigger('in_app_type', name);
       }
 
       this.data.next({ notificationIds, inAppData, type, referenceId })
@@ -161,8 +175,8 @@ export class OneSignalNotificationService {
   async addCredentials() {
     if(this.isAuthenticated) {
       const currentUser = this.storageService.getLoginProfile();
-      console.log('OneSignalPlugin.login  ', currentUser?.userName);
-      OneSignalPlugin.login(currentUser?.userName);
+      console.log('OneSignalPlugin.setExternalUserId  ', currentUser?.userName);
+      OneSignalPlugin.setExternalUserId(currentUser?.userName);
     }
   }
 
