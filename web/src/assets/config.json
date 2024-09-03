@@ -219,7 +219,7 @@
       {
         "name": "eventName",
         "label": "Name",
-        "apiNotation": "Name",
+        "apiNotation": "eventName",
         "type": "string",
         "filterOptions": {
           "enable": true,
