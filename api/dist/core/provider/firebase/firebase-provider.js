@@ -45,11 +45,8 @@ let FirebaseProvider = class FirebaseProvider {
             privateKeyId: this.config.get("FIREBASE_PRIVATE_KEY_ID"),
             privateKey: this.config
                 .get("FIREBASE_PRIVATE_KEY")
-                .toString()
-                .split("\\n")
-                .join("")
-                .split("\n")
-                .join(""),
+                .split(String.raw `\n`)
+                .join("\n"),
             clientEmail: this.config.get("FIREBASE_CLIENT_EMAIL"),
             clientId: this.config.get("FIREBASE_CLIENT_ID"),
             authUri: this.config.get("FIREBASE_AUTH_URI"),

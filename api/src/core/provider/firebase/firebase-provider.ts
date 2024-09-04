@@ -12,11 +12,8 @@ export class FirebaseProvider {
       privateKeyId: this.config.get<string>("FIREBASE_PRIVATE_KEY_ID"),
       privateKey: this.config
         .get<string>("FIREBASE_PRIVATE_KEY")
-        .toString()
-        .split("\\n")
-        .join("")
-        .split("\n")
-        .join(""),
+        .split(String.raw`\n`)
+        .join("\n"),
       clientEmail: this.config.get<string>("FIREBASE_CLIENT_EMAIL"),
       clientId: this.config.get<string>("FIREBASE_CLIENT_ID"),
       authUri: this.config.get<string>("FIREBASE_AUTH_URI"),
