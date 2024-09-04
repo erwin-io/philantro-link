@@ -131,3 +131,4 @@ out
 .angular
 mobile/WWW
 api/src/common/envs
+api/dist/common/envs
