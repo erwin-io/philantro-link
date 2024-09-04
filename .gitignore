@@ -130,5 +130,4 @@ out
 .pnp.*
 .angular
 mobile/WWW
-api/src/common/envs
-api/dist/common/envs
+development.env

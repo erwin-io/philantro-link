@@ -42,11 +42,14 @@ let FirebaseProvider = class FirebaseProvider {
         const firebaseConfig = {
             type: this.config.get("FIREBASE_TYPE"),
             projectId: this.config.get("FIREBASE_PROJECT_ID"),
-            privateKeyId: this.config
-                .get("FIREBASE_PRIVATE_KEY_ID")
+            privateKeyId: this.config.get("FIREBASE_PRIVATE_KEY_ID"),
+            privateKey: this.config
+                .get("FIREBASE_PRIVATE_KEY")
                 .toString()
-                .replaceAll("\n", ""),
-            privateKey: this.config.get("FIREBASE_PRIVATE_KEY"),
+                .split("\\n")
+                .join("")
+                .split("\n")
+                .join(""),
             clientEmail: this.config.get("FIREBASE_CLIENT_EMAIL"),
             clientId: this.config.get("FIREBASE_CLIENT_ID"),
             authUri: this.config.get("FIREBASE_AUTH_URI"),
@@ -54,7 +57,6 @@ let FirebaseProvider = class FirebaseProvider {
             authProviderX509CertUrl: this.config.get("FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
             clientC509CertUrl: this.config.get("FIREBASE_CLIENT_X509_CERT_URL"),
         };
-        "".replaceAll("\n", "");
         this.app = admin.initializeApp({
             credential: admin.credential.cert(firebaseConfig),
             storageBucket: this.config.get("FIREBASE_BUCKET"),

@@ -6,7 +6,6 @@
     "watchAssets": true,
     "assets": [
       "assets/*",
-      "common/envs/*",
       "**/*.hbs",
       "public/css/*",
       "public/js/*"
