@@ -135,7 +135,7 @@ export class UsersComponent implements OnInit {
               userCode: d.userCode,
               userName: d.userName,
               name: d.name,
-              mobileNumber: d.mobileNumber,
+              email: d.email,
               enable: d.accessGranted,
               access: d.access?.name,
               userType: d.userType,

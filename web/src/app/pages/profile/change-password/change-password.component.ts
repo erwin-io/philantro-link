@@ -137,12 +137,14 @@ export class ChangePasswordComponent {
           this.f["currentPassword"].markAllAsTouched();
           dialogRef.close();
           dialogRef.componentInstance.isProcessing = this.isProcessing;
+          this.loaderService.hide();
           return;
         }
         this.f["currentPassword"].setErrors(null);
-        res = await this.userService.resetUserPassword(this.currentUserCode, params).toPromise();
+        res = await this.userService.profileResetPassword(this.currentUserCode, params).toPromise();
 
         if (res.success) {
+          this.loaderService.hide();
           this.snackBar.open('Password updated!', 'close', {
             panelClass: ['style-success'],
           });
@@ -152,6 +154,7 @@ export class ChangePasswordComponent {
           this.changePasswordForm.markAsPristine();
           this.changePasswordForm.markAsUntouched();
         } else {
+          this.loaderService.hide();
           this.isProcessing = false;
           dialogRef.componentInstance.isProcessing = this.isProcessing;
           this.error = Array.isArray(res.message)
@@ -162,7 +165,6 @@ export class ChangePasswordComponent {
           });
           dialogRef.close();
         }
-        this.loaderService.hide();
       } catch (e) {
         this.loaderService.hide();
         this.isProcessing = false;

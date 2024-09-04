@@ -137,7 +137,7 @@
               </div>
               <!-- birth date -->
               <!-- address -->
-              <!-- mobile -->
+              <!-- email -->
               <div
                 fxFlex="100"
                 fxLayout="column"
@@ -150,27 +150,24 @@
                   class="cell"
                   [ngClass.gt-sm]="{ isLargeScreen: true }"
                 >
-                  <mat-label>Mobile number</mat-label>
+                  <mat-label>Email</mat-label>
                   <input
                     matInput
-                    placeholder="Mobile number"
-                    formControlName="mobileNumber"
+                    type="email"
+                    placeholder="Email"
+                    formControlName="email"
                   />
                   <mat-error
-                    *ngIf="getError('mobileNumber') !== (null || undefined)"
+                    *ngIf="getError('email') !== (null || undefined)"
                     >{{
-                      (getError("mobileNumber") &&
-                      getError("mobileNumber").required
-                        ? "Please enter mobile number"
+                      (getError("email") &&
+                      getError("email").required
+                        ? "Please enter Email"
                         : "") ||
-                        (getError("mobileNumber") &&
-                        getError("mobileNumber").minlength
-                          ? "Please enter a valid mobile number"
-                          : "") ||
-                        (getError("mobileNumber") &&
-                        getError("mobileNumber").maxlength
-                          ? "Please enter a valid 11 digit mobile number"
-                          : "")
+                        (getError("email") &&
+                        getError("email").email
+                          ? "Please enter a valid email"
+                          : "") 
                     }}</mat-error
                   >
                 </mat-form-field>

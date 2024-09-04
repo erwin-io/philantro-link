@@ -30,15 +30,18 @@ export interface AppConfig {
     apiEndPoints: {
       auth: {
         login: string;
-        registerTenant: string;
+        registerClient: string;
       };
       user: {
         getByCode: string;
-        createUsers: string;
-        updateProfile: string;
-        updateUsers: string;
+        createClientUser: string;
+        createAdminUser: string;
+        updateAdminProfile: string;
+        updateClientUser: string;
+        updateAdminUser: string;
         getUsersByAdvanceSearch: string;
-        resetUserPassword: string;
+        updateUserPassword: string;
+        profileResetPassword: string;
         approveAccessRequest: string;
         delete: string;
       };

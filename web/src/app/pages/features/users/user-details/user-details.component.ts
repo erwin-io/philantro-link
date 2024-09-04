@@ -141,12 +141,10 @@ export class UserDetailsComponent implements OnInit {
           {
             userType: [null,[Validators.required]],
             name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z0-9\\-\\s]+$')]),
-            mobileNumber: new FormControl(
+            email: new FormControl(
               '',
               [
-                Validators.minLength(11),
-                Validators.maxLength(11),
-                Validators.pattern('^[0-9]*$'),
+                Validators.email,
                 Validators.required,
               ]),
             password: new FormControl(
@@ -167,12 +165,10 @@ export class UserDetailsComponent implements OnInit {
         this.userForm = this.formBuilder.group({
           userType: new FormControl(null),
           name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z0-9\\-\\s]+$')]),
-          mobileNumber: new FormControl(
+          email: new FormControl(
             '',
             [
-              Validators.minLength(11),
-              Validators.maxLength(11),
-              Validators.pattern('^[0-9]*$'),
+              Validators.email,
               Validators.required,
             ]),
           accessCode: new FormControl(),
@@ -199,7 +195,7 @@ export class UserDetailsComponent implements OnInit {
             this.userForm.patchValue({
               userType: user.data.userType,
               name: user.data.name,
-              mobileNumber: user.data.mobileNumber,
+              email: user.data.email,
               accessCode: user.data.access?.accessCode,
             });
             this.userForm.updateValueAndValidity();
@@ -246,11 +242,6 @@ export class UserDetailsComponent implements OnInit {
             this.accessPagesTable.setDataSource(access.data.accessPages)
           }
           // this.spinner.hide();
-        }
-      })
-      this.f['birthDate'].valueChanges.subscribe(async res=> {
-        if(this.f['birthDate'].touched) {
-          this.f['age'].setValue(getAge(new Date(res)));
         }
       })
       if(this.isNew) {
@@ -413,15 +404,15 @@ export class UserDetailsComponent implements OnInit {
         this.loaderService.show();
         if(this.isNew) {
           if(this.formData.userType !== "CLIENT") {
-            res = await this.userService.createUsers(params).toPromise();
+            res = await this.userService.createAdminUser(params).toPromise();
           } else {
-            res = await this.userService.createTenantUsers(params).toPromise();
+            res = await this.userService.createClientUser(params).toPromise();
           }
         } else {
           if(this.formData.userType !== "CLIENT") {
-            res = await this.userService.updateUsers(this.userCode, params).toPromise();
+            res = await this.userService.updateAdminUser(this.userCode, params).toPromise();
           } else {
-            res = await this.userService.updateProfile(this.userCode, params).toPromise();
+            res = await this.userService.updateClientUser(this.userCode, params).toPromise();
           }
         }
         this.loaderService.hide();

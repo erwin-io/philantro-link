@@ -7,7 +7,6 @@ export class Users {
     userName: string;
     email: string;
     name: string;
-    mobileNumber: string;
     accessGranted: boolean;
     active: boolean;
     userType: "ADMIN" | "CLIENT";

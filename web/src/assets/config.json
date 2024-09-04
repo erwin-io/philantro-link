@@ -53,13 +53,13 @@
         }
       },
       {
-        "name": "mobileNumber",
-        "label": "Mobile number",
-        "apiNotation": "mobileNumber",
+        "name": "email",
+        "label": "Email",
+        "apiNotation": "email",
         "type": "string",
         "filterOptions": {
           "enable": true,
-          "placeholder": "Mobile number"
+          "placeholder": "Email"
         }
       },
       {
@@ -434,16 +434,18 @@
   },
   "apiEndPoints": {
     "auth": {
-      "login": "/auth/login/admin",
-      "registerTenant": "/auth/register/tenant"
+      "login": "/auth/login/admin"
     },
     "user": {
       "getByCode": "/users/",
-      "createUsers": "/users/",
-      "updateProfile": "/users/updateProfile/",
-      "updateUsers": "/users/",
+      "createClientUser": "/users/createClientUser/",
+      "createAdminUser": "/users/createAdminUser",
+      "updateAdminProfile": "/users/updateAdminProfile/",
+      "updateClientUser": "/users/updateClientUser/",
+      "updateAdminUser": "/users/updateAdminUser/",
       "getUsersByAdvanceSearch": "/users/page/",
-      "resetUserPassword": "/users/",
+      "updateUserPassword": "/users/updateUserPassword/",
+      "profileResetPassword": "/users/profileResetPassword/",
       "approveAccessRequest": "/users/",
       "delete": "/users/"
     },

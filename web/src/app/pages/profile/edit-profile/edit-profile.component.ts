@@ -91,12 +91,10 @@ export class EditProfileComponent {
           this.user.name,
           [Validators.required, Validators.pattern('^[a-zA-Z0-9\\-\\s]+$')],
         ],
-        mobileNumber: [
-          this.user.mobileNumber,
+        email: [
+          this.user.email,
           [
-            Validators.minLength(11),
-            Validators.maxLength(11),
-            Validators.pattern('^[0-9]*$'),
+            Validators.email,
             Validators.required,
           ],
         ],
@@ -179,7 +177,7 @@ export class EditProfileComponent {
         this.isProcessing = true;
         const params = this.formData;
         this.loaderService.show();
-        const res = await this.userService.updateProfile(this.currentUserCode, params).toPromise();
+        const res = await this.userService.updateAdminProfile(this.currentUserCode, params).toPromise();
         this.loaderService.hide();
         if (res.success) {
           this.snackBar.open('Saved!', 'close', {
@@ -190,7 +188,7 @@ export class EditProfileComponent {
           dialogRef.close();
           this.profileForm.markAsPristine();
           this.user.name = this.formData.name;
-          this.user.mobileNumber = this.formData.mobileNumber;
+          this.user.email = this.formData.email;
           this.user.userProfilePic = res.data.userProfilePic;
           this.storageService.saveLoginProfile(this.user);
           this.loaderService.hide();

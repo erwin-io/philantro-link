@@ -36,8 +36,16 @@ export class UserService implements IServices {
     );
   }
 
-  createUsers(data: any): Observable<ApiResponse<Users>> {
-    return this.http.post<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.createUsers, data)
+  createClientUser(data: any): Observable<ApiResponse<Users>> {
+    return this.http.post<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.createClientUser, data)
+    .pipe(
+      tap(_ => this.log('user')),
+      catchError(this.handleError('user', []))
+    );
+  }
+
+  createAdminUser(data: any): Observable<ApiResponse<Users>> {
+    return this.http.post<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.createAdminUser, data)
     .pipe(
       tap(_ => this.log('user')),
       catchError(this.handleError('user', []))
@@ -45,31 +53,47 @@ export class UserService implements IServices {
   }
 
   createTenantUsers(data: any): Observable<ApiResponse<Users>> {
-    return this.http.post<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.auth.registerTenant, data)
+    return this.http.post<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.auth.registerClient, data)
     .pipe(
       tap(_ => this.log('user')),
       catchError(this.handleError('user', []))
     );
   }
 
-  updateProfile(userCode: string, data: any): Observable<ApiResponse<Users>> {
-    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.updateProfile + userCode, data)
+  updateAdminProfile(userCode: string, data: any): Observable<ApiResponse<Users>> {
+    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.updateAdminProfile + userCode, data)
     .pipe(
       tap(_ => this.log('user')),
       catchError(this.handleError('user', []))
     );
   }
 
-  updateUsers(id: string, data: any): Observable<ApiResponse<Users>> {
-    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.updateUsers + id, data)
+  updateClientUser(id: string, data: any): Observable<ApiResponse<Users>> {
+    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.updateClientUser + id, data)
     .pipe(
       tap(_ => this.log('user')),
       catchError(this.handleError('user', []))
     );
   }
 
-  resetUserPassword(userCode: string, data: any): Observable<ApiResponse<Users>> {
-    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.resetUserPassword + userCode + "/resetPassword", data)
+  updateAdminUser(id: string, data: any): Observable<ApiResponse<Users>> {
+    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.updateAdminUser + id, data)
+    .pipe(
+      tap(_ => this.log('user')),
+      catchError(this.handleError('user', []))
+    );
+  }
+
+  updateUserPassword(userCode: string, data: any): Observable<ApiResponse<Users>> {
+    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.updateUserPassword + userCode , data)
+    .pipe(
+      tap(_ => this.log('user')),
+      catchError(this.handleError('user', []))
+    );
+  }
+
+  profileResetPassword(userCode: string, data: any): Observable<ApiResponse<Users>> {
+    return this.http.put<any>(environment.apiBaseUrl + this.appconfig.config.apiEndPoints.user.profileResetPassword + userCode , data)
     .pipe(
       tap(_ => this.log('user')),
       catchError(this.handleError('user', []))

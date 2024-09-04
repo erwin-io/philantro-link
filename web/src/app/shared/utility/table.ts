@@ -35,7 +35,7 @@ export class UsersTableColumn {
   userName: string;
   name: string;
   userType: string;
-  mobileNumber: string;
+  email: string;
   enable: boolean;
   userProfilePic?: string;
   url?: string;
