@@ -233,6 +233,7 @@ export class EventMessageService {
               : event.eventName;
           userConversation.description = `You: ${desc}`;
           userConversation.type = USER_CONVERSATION_TYPE.EVENTS;
+          userConversation.dateTime = timestamp;
           userConversation = await entityManager.save(
             UserConversation,
             userConversation
@@ -264,6 +265,7 @@ export class EventMessageService {
               ? `${eventMessage.fromUser?.name}: ${event.eventName}`
               : event.eventName;
           userConversation.description = `${eventMessage.fromUser.name}: ${desc}`;
+          userConversation.dateTime = timestamp;
           userConversation = await entityManager.save(
             UserConversation,
             userConversation

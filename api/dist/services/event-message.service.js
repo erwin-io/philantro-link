@@ -230,6 +230,7 @@ let EventMessageService = class EventMessageService {
                         : event.eventName;
                 userConversation.description = `You: ${desc}`;
                 userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.EVENTS;
+                userConversation.dateTime = timestamp;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
                 userConversation = await entityManager.findOne(UserConversation_1.UserConversation, {
                     where: {
@@ -256,6 +257,7 @@ let EventMessageService = class EventMessageService {
                         ? `${(_f = eventMessage.fromUser) === null || _f === void 0 ? void 0 : _f.name}: ${event.eventName}`
                         : event.eventName;
                 userConversation.description = `${eventMessage.fromUser.name}: ${desc}`;
+                userConversation.dateTime = timestamp;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
                 const pushNotifResults = await Promise.all([
                     this.oneSignalNotificationService.sendToExternalUser((_g = eventMessage.toUser) === null || _g === void 0 ? void 0 : _g.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, userConversation === null || userConversation === void 0 ? void 0 : userConversation.userConversationId, [], userConversation.title, eventMessage.message),

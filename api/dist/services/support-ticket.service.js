@@ -401,6 +401,7 @@ let SupportTicketService = class SupportTicketService {
                     userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
                     userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
                 }
+                userConversation.dateTime = new Date(dateTimeSent);
                 userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
                 userConversation.description = `You: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
@@ -421,6 +422,7 @@ let SupportTicketService = class SupportTicketService {
                     userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
                     userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
                 }
+                userConversation.dateTime = new Date(dateTimeSent);
                 userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
                 userConversation.description = `${(_c = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser) === null || _c === void 0 ? void 0 : _c.name}: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);

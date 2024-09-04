@@ -7,6 +7,7 @@ export declare class UserConversation {
     type: string;
     referenceId: string;
     status: string;
+    dateTime: Date;
     fromUser: Users;
     toUser: Users;
 }

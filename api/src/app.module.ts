@@ -19,7 +19,6 @@ import { PaymentDoneModule } from "./controller/payment-done/payment-done.module
 import { SupportTicketModule } from "./controller/support-ticket/support-ticket.module";
 import { MessageService } from "./services/message.service";
 import { EmailService } from "./services/email.service";
-import { DeepLinkModule } from "./controller/deep-link/deep-link.module";
 import { EventMessageModule } from "./controller/event-message/event-message.module";
 import { UserConversationModule } from "./controller/user-conversation/user-conversation.module";
 const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
@@ -46,7 +45,6 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
     TransactionsModule,
     PaymentDoneModule,
     SupportTicketModule,
-    DeepLinkModule,
     EventMessageModule,
     UserConversationModule
   ],

@@ -29,6 +29,7 @@ export declare class UserConversationService {
             type: string;
             referenceId: string;
             status: string;
+            dateTime: Date;
             fromUser: Users;
             toUser: Users;
         } | {
@@ -40,6 +41,7 @@ export declare class UserConversationService {
             type: string;
             referenceId: string;
             status: string;
+            dateTime: Date;
             fromUser: Users;
             toUser: Users;
         })[];
@@ -54,6 +56,7 @@ export declare class UserConversationService {
         type: string;
         referenceId: string;
         status: string;
+        dateTime: Date;
         fromUser: Users;
         toUser: Users;
     } | {
@@ -65,6 +68,7 @@ export declare class UserConversationService {
         type: string;
         referenceId: string;
         status: string;
+        dateTime: Date;
         fromUser: Users;
         toUser: Users;
     }>;
@@ -78,6 +82,7 @@ export declare class UserConversationService {
         type: string;
         referenceId: string;
         status: string;
+        dateTime: Date;
         fromUser: Users;
         toUser: Users;
     }>;

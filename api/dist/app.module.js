@@ -51,7 +51,6 @@ const payment_done_module_1 = require("./controller/payment-done/payment-done.mo
 const support_ticket_module_1 = require("./controller/support-ticket/support-ticket.module");
 const message_service_1 = require("./services/message.service");
 const email_service_1 = require("./services/email.service");
-const deep_link_module_1 = require("./controller/deep-link/deep-link.module");
 const event_message_module_1 = require("./controller/event-message/event-message.module");
 const user_conversation_module_1 = require("./controller/user-conversation/user-conversation.module");
 const envFilePath = (0, utils_1.getEnvPath)(`${__dirname}/common/envs`);
@@ -80,7 +79,6 @@ AppModule = __decorate([
             transactions_module_1.TransactionsModule,
             payment_done_module_1.PaymentDoneModule,
             support_ticket_module_1.SupportTicketModule,
-            deep_link_module_1.DeepLinkModule,
             event_message_module_1.EventMessageModule,
             user_conversation_module_1.UserConversationModule
         ],

@@ -32,6 +32,12 @@ export class UserConversation {
   @Column("character varying", { name: "Status", default: () => "'SENT'" })
   status: string;
 
+  @Column("timestamp with time zone", {
+    name: "DateTime",
+    default: () => "(now() AT TIME ZONE 'Asia/Manila')",
+  })
+  dateTime: Date;
+
   @ManyToOne(() => Users, (users) => users.userConversations)
   @JoinColumn([{ name: "FromUserId", referencedColumnName: "userId" }])
   fromUser: Users;

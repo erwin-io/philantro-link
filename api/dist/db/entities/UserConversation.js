@@ -43,6 +43,13 @@ __decorate([
     __metadata("design:type", String)
 ], UserConversation.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)("timestamp with time zone", {
+        name: "DateTime",
+        default: () => "(now() AT TIME ZONE 'Asia/Manila')",
+    }),
+    __metadata("design:type", Date)
+], UserConversation.prototype, "dateTime", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => Users_1.Users, (users) => users.userConversations),
     (0, typeorm_1.JoinColumn)([{ name: "FromUserId", referencedColumnName: "userId" }]),
     __metadata("design:type", Users_1.Users)

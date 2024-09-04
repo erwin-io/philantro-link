@@ -9,7 +9,10 @@ export class FirebaseProvider {
     const firebaseConfig = {
       type: this.config.get<string>("FIREBASE_TYPE"),
       projectId: this.config.get<string>("FIREBASE_PROJECT_ID"),
-      privateKeyId: this.config.get<string>("FIREBASE_PRIVATE_KEY_ID"),
+      privateKeyId: this.config
+        .get<string>("FIREBASE_PRIVATE_KEY_ID")
+        .toString()
+        .replaceAll("\n", ""),
       privateKey: this.config.get<string>("FIREBASE_PRIVATE_KEY"),
       clientEmail: this.config.get<string>("FIREBASE_CLIENT_EMAIL"),
       clientId: this.config.get<string>("FIREBASE_CLIENT_ID"),
@@ -22,6 +25,7 @@ export class FirebaseProvider {
         "FIREBASE_CLIENT_X509_CERT_URL"
       ),
     };
+    "".replaceAll("\n", "")
     this.app = admin.initializeApp({
       credential: admin.credential.cert(firebaseConfig),
       storageBucket: this.config.get<string>("FIREBASE_BUCKET"),

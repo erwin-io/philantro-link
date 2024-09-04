@@ -463,6 +463,7 @@ export class SupportTicketService {
             userConversation.referenceId = supportTicket?.supportTicketCode;
             userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
           }
+          userConversation.dateTime = new Date(dateTimeSent);
           userConversation.title = supportTicket?.title;
           userConversation.description = `You: ${supportTicketMessage?.message}`;
           userConversation = await entityManager.save(
@@ -488,6 +489,7 @@ export class SupportTicketService {
             userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
           }
 
+          userConversation.dateTime = new Date(dateTimeSent);
           userConversation.title = supportTicket?.title;
           userConversation.description = `${supportTicket?.assignedAdminUser?.name}: ${supportTicketMessage?.message}`;
           userConversation = await entityManager.save(

@@ -31,20 +31,32 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FirebaseProvider = void 0;
 const common_1 = require("@nestjs/common");
 const admin = __importStar(require("firebase-admin"));
-const firebase_config_1 = __importDefault(require("./firebase.config"));
 const config_1 = require("@nestjs/config");
 let FirebaseProvider = class FirebaseProvider {
     constructor(config) {
         this.config = config;
+        const firebaseConfig = {
+            type: this.config.get("FIREBASE_TYPE"),
+            projectId: this.config.get("FIREBASE_PROJECT_ID"),
+            privateKeyId: this.config
+                .get("FIREBASE_PRIVATE_KEY_ID")
+                .toString()
+                .replaceAll("\n", ""),
+            privateKey: this.config.get("FIREBASE_PRIVATE_KEY"),
+            clientEmail: this.config.get("FIREBASE_CLIENT_EMAIL"),
+            clientId: this.config.get("FIREBASE_CLIENT_ID"),
+            authUri: this.config.get("FIREBASE_AUTH_URI"),
+            tokenUri: this.config.get("FIREBASE_TOKEN_URI"),
+            authProviderX509CertUrl: this.config.get("FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
+            clientC509CertUrl: this.config.get("FIREBASE_CLIENT_X509_CERT_URL"),
+        };
+        "".replaceAll("\n", "");
         this.app = admin.initializeApp({
-            credential: admin.credential.cert(firebase_config_1.default),
+            credential: admin.credential.cert(firebaseConfig),
             storageBucket: this.config.get("FIREBASE_BUCKET"),
         });
     }
