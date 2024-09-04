@@ -27,6 +27,7 @@
     "events": {
       "getByAdvanceSearch": "/events/page/",
       "getPageJoinedEvents": "/events/getPageJoinedEvents/",
+      "getPageInterestedEvents": "/events/getPageInterestedEvents/",
       "getByCode": "/events/",
       "createCharityVolunteerEvent": "/events/createCharityVolunteerEvent/",
       "createDonationEvent": "/events/createDonationEvent/",

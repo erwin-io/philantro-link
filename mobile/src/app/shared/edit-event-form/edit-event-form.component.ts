@@ -89,6 +89,8 @@ export class EditEventFormComponent implements OnInit {
     this.isLoading = true;
     this.eventsService.getByCode(this.eventCode, this.currentUser?.userCode).subscribe(res=> {
       this.event = res.data;
+      this.eventName.markAsDirty();
+      this.eventDesc.markAsDirty();
       this.eventLocMap.setValue(this.event?.eventLocMap);
       this.eventAssistanceItems.setValue(this.event?.eventAssistanceItems as any);
       this.event.dateTime = moment(this.event.dateTime).format("MMM DD YYYY h:mm A");
@@ -130,38 +132,20 @@ export class EditEventFormComponent implements OnInit {
   }
 
   get isFormDirty () {
-    let _isValid = false;
     if(!this.event) {
       return false;
     }
     if(this.event?.eventType === "CHARITY" || this.event?.eventType === "VOLUNTEER") {
-      _isValid = (this.eventName.dirty) ||
-      (this.eventDesc.dirty) ||
-      (this.dateTime.dirty) ||
-      (this.eventLocName.dirty) ||
-      (this.eventLocMap.dirty) || 
+      return this.eventName.dirty || this.eventDesc.dirty || this.dateTime.dirty || this.eventLocName.dirty || this.eventLocMap.dirty|| 
       this.eventThumbnails.some(x=>x.changed);
     } else if(this.event?.eventType === "DONATION") {
-      _isValid = (this.eventName.dirty) ||
-      (this.eventDesc.dirty) ||
-      (this.dateTime.dirty) ||
-      (this.eventLocName.dirty) ||
-      (this.eventLocMap.dirty) ||
-      (this.transferType.dirty) ||
-      (this.transferAccountName.dirty) &&
-      (this.transferAccountNumber.dirty) ||
-      (this.donationTargetAmount.dirty) || 
-      this.eventDonationThumbnails.some(x=>x.changed);
+      return this.eventName.dirty || this.eventDesc.dirty || this.dateTime.dirty || this.eventLocName.dirty || this.eventLocMap.dirty ||
+      this.transferType.dirty || this.transferAccountName.dirty || this.donationTargetAmount.dirty ||  this.eventDonationThumbnails.some(x=>x.changed);
     } else if(this.event?.eventType === "ASSISTANCE") {
-      _isValid = (this.eventName.dirty) ||
-      (this.eventDesc.dirty) ||
-      (this.dateTime.dirty) ||
-      (this.eventLocName.dirty) ||
-      (this.eventLocMap.dirty) ||
-      (this.eventAssistanceItems.dirty) || 
-      this.eventHelpThumbnails.some(x=>x.changed);
+      return this.eventName.dirty || this.eventDesc.dirty || this.dateTime.dirty || this.eventLocName.dirty || this.eventLocMap.dirty || this.eventAssistanceItems.dirty || this.eventHelpThumbnails.some(x=>x.changed);
+    } else {
+      return false
     }
-    return _isValid;
   }
 
   get isFormValid () {
@@ -193,6 +177,30 @@ export class EditEventFormComponent implements OnInit {
       (this.eventLocMap.valid) &&
       (this.eventAssistanceItems.valid);
     }
+    console.log("this.eventName ", {
+      valid: this.eventName.valid,
+      dirty: this.eventName.dirty,
+    });
+    console.log("this.eventDesc ", {
+      valid: this.eventDesc.valid,
+      dirty: this.eventDesc.dirty,
+    });
+    console.log("this.dateTime ", {
+      valid: this.dateTime.valid,
+      dirty: this.dateTime.dirty,
+    });
+    console.log("this.eventLocName ", {
+      valid: this.eventLocName.valid,
+      dirty: this.eventLocName.dirty,
+    });
+    console.log("this.eventLocMap ", {
+      valid: this.eventLocMap.valid,
+      dirty: this.eventLocMap.dirty,
+    });
+    console.log("this.eventAssistanceItems", {
+      valid: this.eventAssistanceItems.valid,
+      dirty: this.eventAssistanceItems.dirty,
+    });
     return _isValid;
   }
 
@@ -331,8 +339,12 @@ export class EditEventFormComponent implements OnInit {
       items = items.filter(x=> x.toString().toLowerCase() !== helpType.toString().toLowerCase());
     }
     this.eventAssistanceItems.setValue(items);
-    this.eventAssistanceItems.markAsDirty();
-    this.eventAssistanceItems.markAsTouched();
+    this.eventAssistanceItems.markAsDirty({
+      onlySelf: true,
+    });
+    this.eventAssistanceItems.markAsTouched({
+      onlySelf: true,
+    });
   }
   async onSave() {
     

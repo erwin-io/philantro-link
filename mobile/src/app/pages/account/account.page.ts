@@ -19,6 +19,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { ResetPasswordComponent } from '../../shared/reset-password/reset-password.component';
 import { Capacitor } from '@capacitor/core';
 import { HelpSupportComponent } from 'src/app/shared/help-support/help-support.component';
+import { MyDonationComponent } from 'src/app/shared/my-donation/my-donation.component';
 
 @Component({
   selector: 'app-account',
@@ -61,6 +62,25 @@ export class AccountPage implements OnInit {
     let modal: HTMLIonModalElement = null;
     modal = await this.modalCtrl.create({
       component: AccountSettingsComponent,
+      cssClass: 'modal-fullscreen',
+      backdropDismiss: false,
+      canDismiss: true,
+      enterAnimation: this.animationService.flyUpAnimation,
+      leaveAnimation: this.animationService.leaveFlyUpAnimation,
+      componentProps: { modal, currentUser: this.currentUser },
+    });
+    modal.present();
+    this.statusBarService.show();
+    this.statusBarService.modifyStatusBar(Style.Dark, '#311B92');
+    modal.onWillDismiss().then(()=> {
+      this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
+    })
+  }
+
+  async onOpenMyDonation() {
+    let modal: HTMLIonModalElement = null;
+    modal = await this.modalCtrl.create({
+      component: MyDonationComponent,
       cssClass: 'modal-fullscreen',
       backdropDismiss: false,
       canDismiss: true,

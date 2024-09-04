@@ -90,22 +90,22 @@
       <div class="help-type">
         <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('FOOD') }" (click)="selectAssistanceItem('FOOD')"> 
           <ion-icon slot="start" name="restaurant"></ion-icon>
-          Food
+          <p class="label">Food</p>
           <ion-ripple-effect></ion-ripple-effect>
         </div>
         <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('WATER') }" (click)="selectAssistanceItem('WATER')">
           <ion-icon slot="start" name="water"></ion-icon>
-          Water
+          <p class="label">Water</p>
           <ion-ripple-effect></ion-ripple-effect>
         </div>
         <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected( 'CLOTHING') }" (click)="selectAssistanceItem('CLOTHING')">
           <ion-icon slot="start" name="shirt"></ion-icon>
-          Clothing
+          <p class="label">Clothing</p>
           <ion-ripple-effect></ion-ripple-effect>
         </div>
         <div class="help-type-item ion-activatable" shape="round" [ngClass]="{ 'active' : isAssistanceItemSelected('SERVICES') }" (click)="selectAssistanceItem('SERVICES')">
           <ion-icon slot="start" name="construct"></ion-icon>
-          Services
+          <p class="label">Services</p>
           <ion-ripple-effect></ion-ripple-effect>
         </div>
       </div>

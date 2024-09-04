@@ -1,0 +1,52 @@
+ion-content {
+    ::ng-deep {
+        display: flex;
+        flex-direction: column;
+    }
+    .donation-list-header {
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        margin-bottom: 10px;
+        .details-dontation {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        ion-progress-bar {
+            height: 15px !important;
+            border-radius: 10px;
+        }
+    }
+    .donation-list-body {
+        background-color: #fff;
+        .donation-list {
+            ion-label {
+                
+              h1,h2,h3,h4,h5,h6  {
+                margin: 0 !important;
+                display: -webkit-box;
+                max-width: 100%;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              }
+              .desc {
+                opacity: 0.8!important;
+                font-size: 20px;
+                // color: var(--ion-color-tertiary)!important;
+                white-space: break-spaces!important;
+                -webkit-line-clamp: 2;
+              }
+              
+              .sub-title {
+                  font-size: 16px;
+                  white-space: break-spaces!important;
+                  -webkit-line-clamp: 3;
+              }
+            }
+        }
+        [load-more] {
+          width: 100%;
+        }
+    }
+}

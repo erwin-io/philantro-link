@@ -28,6 +28,7 @@ import { CreateSupportTicketModule } from './shared/create-support-ticket/create
 import { SupportTicketDetailsModule } from './shared/support-ticket-details/support-ticket-details.module';
 import { DonationListModule } from './shared/donation-list/donation-list.module';
 import { DonationDetailsModule } from './shared/donation-details/donation-details.module';
+import { MyDonationModule } from './shared/my-donation/my-donation.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -53,6 +54,7 @@ import { DonationDetailsModule } from './shared/donation-details/donation-detail
     SupportTicketDetailsModule,
     DonationListModule,
     DonationDetailsModule,
+    MyDonationModule,
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'en_PH' },

@@ -1,29 +1,30 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActionSheetController, AlertController, IonRefresher, ModalController } from '@ionic/angular';
 import { Transactions } from 'src/app/model/transactions.model';
 import { Users } from 'src/app/model/users';
+import { getEventCardDefaultImage } from '../utility/utility';
+import { IonRefresher, ModalController, AlertController, ActionSheetController } from '@ionic/angular';
+import { Events } from 'src/app/model/events.model';
 import { AnimationService } from 'src/app/services/animation.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { EventsService } from 'src/app/services/events.service';
 import { NotificationService } from 'src/app/services/notification.service';
 import { PageLoaderService } from 'src/app/services/page-loader.service';
 import { StatusBarService } from 'src/app/services/status-bar.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { TransactionsService } from 'src/app/services/transactions.service';
 import { UserConversationService } from 'src/app/services/user-conversation.service';
-import { DonationDetailsComponent } from '../donation-details/donation-details.component';
-import { getPersonDefaultImage } from '../utility/utility';
-import { Events } from 'src/app/model/events.model';
 import { DonateFormComponent } from '../donate-form/donate-form.component';
-import { EventsService } from 'src/app/services/events.service';
+import { DonationDetailsComponent } from '../donation-details/donation-details.component';
+import { Style } from '@capacitor/status-bar';
+import { EventDetailsComponent } from '../event-details/event-details.component';
 
 @Component({
-  selector: 'app-donation-list',
-  templateUrl: './donation-list.component.html',
-  styleUrls: ['./donation-list.component.scss'],
+  selector: 'app-my-donation',
+  templateUrl: './my-donation.component.html',
+  styleUrls: ['./my-donation.component.scss'],
 })
-export class DonationListComponent implements OnInit {
+export class MyDonationComponent  implements OnInit {
   modal: HTMLIonModalElement;
-  event: Events;
   currentUser: Users;
   transactions: Transactions[] = [];
   pageIndex = 0;
@@ -64,18 +65,21 @@ export class DonationListComponent implements OnInit {
         this.transactions = [];
       }
       this.isLoading = showProgress;
-      const [paginated, event, _unReadMessage, _unReadNotif] = await Promise.all([
+      const [paginated, _unReadMessage, _unReadNotif] = await Promise.all([
         this.supportTicketService.getByAdvanceSearch({
           order: { transactionId: "DESC" },
           columnDef: [{
-            apiNotation: "event.eventCode",
-            filter: this.event?.eventCode,
+            apiNotation: "user.userCode",
+            filter: this.currentUser?.userCode,
             type: "precise"
-          } as any],
+          } as any, {
+            apiNotation: "status",
+            filter: "COMPLETED",
+            type: "precise" 
+          }],
           pageIndex: this.pageIndex,
           pageSize: this.pageSize
         }).toPromise(),
-        this.eventsService.getByCode(this.event?.eventCode, this.currentUser?.userCode).toPromise(),
         this.userConversationService.getUnreadByUser(this.currentUser?.userId).toPromise(),
         this.notificationService.getUnreadByUser(this.currentUser?.userId).toPromise()
       ]);
@@ -83,10 +87,6 @@ export class DonationListComponent implements OnInit {
       if(paginated.data.results) {
         this.transactions = [ ...this.transactions, ...paginated.data.results ];
         this.total = paginated.data.total;
-      }
-
-      if(event) {
-        this.event.raisedDonation = event?.data?.raisedDonation;
       }
 
       let unReadMessage = 0;
@@ -116,8 +116,8 @@ export class DonationListComponent implements OnInit {
     }
   }
 
-  imageErrorHandler(event) {
-    event.target.src = getPersonDefaultImage(null);
+  imageErrorHandler(event, type: "CHARITY" | "VOLUNTEER" | "DONATION" | "ASSISTANCE") {
+    event.target.src = getEventCardDefaultImage(type);
   }
 
   ionViewWillEnter(){
@@ -139,66 +139,23 @@ export class DonationListComponent implements OnInit {
     });
   }
 
-  async onDonate() {
-    try {
-      const actionSheet = await this.actionSheetController.create({
-        header: 'Do you want to donate to this event?',
-        buttons: [
-          {
-            text: "Yes, proceed please",
-            handler: async () => {
-              let modal: HTMLIonModalElement = null;
-              modal = await this.modalCtrl.create({
-                component: DonateFormComponent,
-                cssClass: 'modal-fullscreen',
-                backdropDismiss: false,
-                canDismiss: true,
-                enterAnimation: this.animationService.pushLeftAnimation,
-                leaveAnimation: this.animationService.leavePushLeftAnimation,
-                componentProps: { 
-                  modal, 
-                  event: this.event, 
-                  currentUser: this.currentUser
-                 },
-              });
-              modal.present();
-              modal.onDidDismiss().then(res=> {
-                if(res.role && res.role === "ok") {
-                  this.initTransactions(true, true);
-                }
-              });
-            },
-          },
-          {
-            text: 'No',
-            cssClass: 'close dismiss cancel',
-            handler: async () => {
-              actionSheet.dismiss();
-            },
-          },
-        ],
-      });
-      await actionSheet.present();
-    } catch(ex) {
-      this.isLoading = false;
-      this.presentAlert({
-        header: 'Try Again!',
-        subHeader: 'There was an error when marking as going!',
-        message: ex.message,
-        cssClass: 'alert-danger',
-        buttons: ['OK'],
-      })
-    }
-  }
-
-  getDonationPercentage(event: Events) {
-    if(event && !isNaN(Number(event?.raisedDonation)) && !isNaN(Number(event?.donationTargetAmount))) {
-      // return (100 * Number(event?.raisedDonation)) / Number(event?.donationTargetAmount);
-      const percent = ((Number(event?.raisedDonation) / Number(event?.donationTargetAmount)) * 100);
-      return percent > 0.5 ? percent / 100 : percent;
-    } else {
-      return 0;
-    }
+  async openEvent(eventCode) {
+    let modal: HTMLIonModalElement = null;
+    modal = await this.modalCtrl.create({
+      component: EventDetailsComponent,
+      cssClass: 'modal-fullscreen',
+      backdropDismiss: false,
+      canDismiss: true,
+      enterAnimation: this.animationService.pushLeftAnimation,
+      leaveAnimation: this.animationService.leavePushLeftAnimation,
+      componentProps: { modal, eventCode },
+    });
+    modal.present();
+    this.statusBarService.show();
+    this.statusBarService.modifyStatusBar(Style.Dark, '#311B92');
+    modal.onDidDismiss().then(res=> {
+      this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
+    });
   }
 
   async loadMore() {

@@ -5,7 +5,7 @@
         <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="ion-text-center">Donations</ion-title>
+    <ion-title class="ion-text-center">Donation History</ion-title>
     <div slot="end" style="width: 48px"></div>
   </ion-toolbar>
 </ion-header>
@@ -15,31 +15,17 @@
     <ion-refresher-content >
     </ion-refresher-content>
   </ion-refresher>
-  <div class="donation-list-header ion-padding">
-    <div class="details-dontation">
-      <p><span>{{event?.raisedDonation | currency: 'PHP'}}</span>/<span>{{event?.donationTargetAmount | currency: 'PHP'}}</span></p>
-      <ion-text color="primary">
-        <b>{{getDonationPercentage(event) | percent}}</b>
-      </ion-text>
-    </div>
-    <ion-progress-bar [value]="getDonationPercentage(event)" ></ion-progress-bar>
-    <ng-container *ngIf="event?.user?.userCode !== currentUser?.userCode && event?.visitorUserDonation && event?.visitorUserDonation > 0">
-      <br>
-      <ion-text color="primary">My donation: {{event?.visitorUserDonation | currency: 'PHP'}}</ion-text>
-    </ng-container>
-  </div>
 
   <div class="donation-list-body ion-padding">
-    <h3>Donation history</h3>
     <ion-list class="donation-list" *ngIf="transactions.length > 0; else noRecordsTemplate">
       <ng-container *ngFor="let item of transactions">
-        <ion-item [button]="false" class="ion-no-padding">
+        <ion-item [button]="true" class="ion-no-padding" (click)="openEvent(item?.event?.eventCode)">
           <ion-avatar aria-hidden="true" slot="start">
-            <img alt="" [src]="item?.user?.userProfilePic?.file?.url" (error)="imageErrorHandler($event)"/>
+            <img alt="" [src]="item?.event?.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.event?.eventType)"/>
           </ion-avatar>
           <ion-label >
             <h3 class="desc">
-              <strong>{{item?.user.name}}</strong>
+              <strong>{{item?.event?.eventName}}</strong>
             </h3>
             <h4 class="sub-title">{{ item?.dateTime | date:'EEE, MMM d, y AT h a'}}</h4>
           </ion-label>
@@ -66,10 +52,3 @@
     </div>
   </ng-template>
 </ion-content>
-<ion-footer>
-  <ion-toolbar mode="md">
-    <ion-button [style.height.px]="45" mode="md" expand="full" shape="round" color="primary" (click)="onDonate()">
-      Donate
-    </ion-button>
-  </ion-toolbar>
-</ion-footer>
