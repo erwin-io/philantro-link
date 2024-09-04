@@ -28,7 +28,6 @@ import { CreateSupportTicketModule } from './shared/create-support-ticket/create
 import { SupportTicketDetailsModule } from './shared/support-ticket-details/support-ticket-details.module';
 import { DonationListModule } from './shared/donation-list/donation-list.module';
 import { DonationDetailsModule } from './shared/donation-details/donation-details.module';
-
 @NgModule({
   declarations: [AppComponent],
   imports: [

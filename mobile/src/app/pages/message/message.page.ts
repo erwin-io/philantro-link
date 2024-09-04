@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { DeviceInfo } from '@capacitor/device';
 import { Style } from '@capacitor/status-bar';
@@ -42,8 +42,10 @@ export class MessagePage implements OnInit {
   error: any;
   totalUnreadMessage = 0;
   totalUnreadNotification = 0;
+  pageLoaded = false;
   @ViewChild(IonRefresher)ionRefresher: IonRefresher;
   constructor(
+    private cdr: ChangeDetectorRef,
     private statusBarService: StatusBarService,
     private modalCtrl: ModalController,
     private userConversationService: UserConversationService,
@@ -58,13 +60,21 @@ export class MessagePage implements OnInit {
     private authService: AuthService,
   ) { 
     this.currentUser = this.storageService.getLoginProfile();
-    this.oneSignalNotificationService.data$.subscribe((res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE' })=> {
-      if(res.type === "EVENTS" || res.type === "MESSAGE") {
-        this.pageIndex = 0;
-        this.pageSize = 10;
-        this.initUserConversations(false, true);
-      } else {
-        this.initNotifications(false, true);
+    this.oneSignalNotificationService.data$.subscribe(async (res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE'; referenceId; })=> {
+      if(this.pageLoaded) {
+        if(res.type === "EVENTS" || res.type === "MESSAGE") {
+          const userConversationRes = await this.userConversationService.getById(res.referenceId).toPromise();
+          if(userConversationRes && userConversationRes.success && userConversationRes.data) {
+            this.userConversations.find(x=>x.userConversationId === res.referenceId).dateTime = userConversationRes.data.dateTime;
+            this.userConversations.find(x=>x.userConversationId === res.referenceId).title = userConversationRes.data.title;
+            this.userConversations.find(x=>x.userConversationId === res.referenceId).description = userConversationRes.data.description;
+            this.userConversations.find(x=>x.userConversationId === res.referenceId).status = "SENT";
+            this.userConversations.find(x=>x.userConversationId === res.referenceId).unReadMessage = userConversationRes.data.unReadMessage;
+            this.cdr.detectChanges();
+          }
+        } else {
+          this.initNotifications(false, true);
+        }
       }
     })
   }
@@ -72,15 +82,16 @@ export class MessagePage implements OnInit {
   get isAuthenticated() {
     return this.currentUser && this.currentUser.userCode;
   }
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if(this.isAuthenticated) {
       this.pageIndex = 0;
       this.pageSize = 10;
       if(this.active === "CHAT") {
-        this.initUserConversations(true, true);
+        await this.initUserConversations(true, true);
       } else {
-        this.initNotifications(true, true);
+        await this.initNotifications(true, true);
       }
+      this.pageLoaded = true;
     }
   }
 
@@ -90,16 +101,18 @@ export class MessagePage implements OnInit {
     this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
   }
 
-  changeTab(active: "CHAT" | "NOTIFICATIONS") {
+  async changeTab(active: "CHAT" | "NOTIFICATIONS") {
+    this.pageLoaded = false;
     this.active = active;
     this.total = 0;
     this.pageIndex = 0;
     this.pageSize = 10;
     if(active === "CHAT") {
-      this.initUserConversations(true, true);
+      await this.initUserConversations(true, true);
     } else {
-      this.initNotifications(true, true);
+      await this.initNotifications(true, true);
     }
+    this.pageLoaded = true;
   }
 
   async initUserConversations(showProgress = false, clear = false) {
@@ -141,6 +154,7 @@ export class MessagePage implements OnInit {
       const totalUnreadNotif = Number(unReadMessage) + Number(unReadNotif);
       this.storageService.saveTotalUnreadNotif(totalUnreadNotif);
       this.isLoading = false;
+      this.cdr.detectChanges();
       if(this.ionRefresher) {
         this.ionRefresher.complete();
       }
@@ -194,6 +208,7 @@ export class MessagePage implements OnInit {
       this.storageService.saveTotalUnreadNotif(totalUnreadNotif);
 
       this.isLoading = false;
+      this.cdr.detectChanges();
       if(this.ionRefresher) {
         this.ionRefresher.complete();
       }
@@ -325,16 +340,19 @@ export class MessagePage implements OnInit {
   }
 
   async loadMore() {
+    this.pageLoaded = false;
     this.pageIndex = this.pageIndex + 1;
     if(this.active === "CHAT") {
       await this.initUserConversations();
     } else {
       await this.initNotifications();
     }
+    this.pageLoaded = true;
   }
 
   async doRefresh(){
     try {
+      this.pageLoaded = false;
       if(this.isLoading) {
         return;
       }
@@ -345,8 +363,10 @@ export class MessagePage implements OnInit {
       } else {
         await this.initNotifications(true, true);
       }
+      this.pageLoaded = true;
     }catch(ex) {
       this.isLoading = false;
+      this.pageLoaded = false;
       if(this.ionRefresher) {
         this.ionRefresher.complete();
       }

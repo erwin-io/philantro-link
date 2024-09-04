@@ -1,11 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UserConversation } from '../../../model/user-conversation.model';
 import { Users } from 'src/app/model/users';
 import { getEventCardDefaultImage, timeAgo } from 'src/app/shared/utility/utility';
-import { AlertController, AlertOptions, ModalController, ToastController, ToastOptions } from '@ionic/angular';
+import { AlertController, AlertOptions, ModalController, Platform, ToastController, ToastOptions } from '@ionic/angular';
 import { EventMessage } from 'src/app/model/events.model';
 import { SupportTicket, SupportTicketMessage } from 'src/app/model/support-ticket.model';
-import { catchError, Observable, of, Subject, takeUntil } from 'rxjs';
+import { catchError, Observable, of, Subject, Subscription, takeUntil } from 'rxjs';
 import { EventMessageService } from 'src/app/services/event-message.service';
 import * as uuid from 'uuid';
 import { ApiResponse } from 'src/app/model/api-response.model';
@@ -35,15 +35,20 @@ export class MessageDetailsPage implements OnInit {
   eventMessages: EventMessage[] = [];
   supportTicketMessages: SupportTicketMessage[] = [];
   pageIndex = 0;
-  pageSize = 10;
+  pageSize = 30;
   total = 0;
   isLoading = false;
   error: any;
+  newMessage = false;
   messageControl = new FormControl();
   protected ngUnsubscribe: Subject<void> = new Subject<void>();
   refererPage: "MESSAGES" | "EVENT_DETAILS" | "EVENT_NOTIF" | "SUPPORT_DETAILS";
   @ViewChild('messageList') private messageList: ElementRef<HTMLDivElement>;
+  private oneSignalSub: Subscription;
+  pageLoaded = false;
   constructor(
+    private platform: Platform,
+    private cdr: ChangeDetectorRef,
     private alertController: AlertController,
     private eventMessageService: EventMessageService,
     private supportTicketService: SupportTicketService,
@@ -55,32 +60,23 @@ export class MessageDetailsPage implements OnInit {
     private userConversationService: UserConversationService,
     private oneSignalNotificationService: OneSignalNotificationService,
   ) {
-    this.oneSignalNotificationService.data$.subscribe(async (res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE' })=> {
-      
-      this.pageIndex = 0;
-      this.pageSize = 10;
-      if(res.type === "EVENTS" || res.type === "MESSAGE") {
-        await Promise.all([
-          this.initEventMessage(),
-          this.markAsRead()
-        ]).then(res=> {
-          this.messageList.nativeElement.scrollTo({
-            top: 0,
-            behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
-          })
-        })
-      } else {
-        await Promise.all([
-          this.initSupportTicketMessage(),
-          this.markAsRead()
-        ]).then(res=> {
-          this.messageList.nativeElement.scrollTo({
-            top: 0,
-            behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
-          })
-        })
+    this.oneSignalSub = this.oneSignalNotificationService.data$.subscribe(async (res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE' })=> {
+      if(this.pageLoaded) {
+        this.pageIndex = 0;
+        this.pageSize = 30;
+        if(res && res.type && res.type === "EVENTS" || res.type === "MESSAGE") {
+          await Promise.all([
+            this.initEventMessage(true),
+            this.markAsRead()
+          ]);
+        } else if(res && res.type && (res.type === "SUPPORT_TICKET")) {
+          await Promise.all([
+            this.initSupportTicketMessage(true),
+            this.markAsRead()
+          ])
+        }
       }
-    })
+      })
      }
 
   ngOnInit() {
@@ -90,7 +86,7 @@ export class MessageDetailsPage implements OnInit {
     //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
     //Add 'implements AfterViewInit' to the class.
     this.pageIndex = 0;
-    this.pageSize = 10;
+    this.pageSize = 30;
     this.total = 0;
     this.eventMessages = [];
     this.supportTicketMessages = [];
@@ -99,12 +95,20 @@ export class MessageDetailsPage implements OnInit {
         this.initEventMessage(),
         this.markAsRead()
       ])
+      this.pageLoaded = true;
     } else {
       await Promise.all([
         this.initSupportTicketMessage(),
         this.markAsRead()
       ])
+      this.pageLoaded = true;
     }
+  }
+
+  ngOnDestroy(): void {
+    //Called once, before the instance is destroyed.
+    //Add 'implements OnDestroy' to the class.
+    this.oneSignalSub.unsubscribe();
   }
 
   async onScroll() {
@@ -112,8 +116,7 @@ export class MessageDetailsPage implements OnInit {
     // Check if the user has scrolled to the "top" in column-reverse layout
     const isScrolledToBottom = (element.scrollTop > 0 ? element.scrollTop : element.scrollTop*-1) + element.clientHeight >= element.scrollHeight;
 
-    const allMesageDisplayed = this.eventMessages.length >= this.total;
-    if (isScrolledToBottom && !this.isLoading && !allMesageDisplayed) {
+    if (isScrolledToBottom && !this.isLoading) {
       this.pageIndex = this.pageIndex + 1;
       if(this.type === "EVENTS") {
         this.initEventMessage();
@@ -121,9 +124,13 @@ export class MessageDetailsPage implements OnInit {
         this.initSupportTicketMessage();
       }
     }
+
+    if(element.scrollTop >= 0) {
+      this.newMessage = false;
+    }
   }
 
-  async initEventMessage() {
+  async initEventMessage(showNew = false) {
     try{
       const filter = [{
           apiNotation: "event.eventCode",
@@ -141,6 +148,15 @@ export class MessageDetailsPage implements OnInit {
       ]
 
       this.isLoading = true;
+      if(showNew) {
+        this.newMessage = showNew;
+        setTimeout(()=> {
+          this.messageList.nativeElement.scrollTo({
+            top: -1,
+            behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
+          });
+        }, 1000);
+      }
       const res = await this.eventMessageService.getByAdvanceSearch({
         order: { dateTimeSent: "DESC"},
         columnDef: filter,
@@ -152,13 +168,23 @@ export class MessageDetailsPage implements OnInit {
       ).toPromise();
       
       if(res.success){
-        this.eventMessages = [
-          ...this.eventMessages,
-          ...res.data.results.filter((data: EventMessage) =>
-            !this.eventMessages.some((message) => message.eventMessageId === data.eventMessageId)
-          ),
-        ];
+        if(showNew) {
+          this.eventMessages = [
+            ...res.data.results.filter((data: EventMessage) =>
+              !this.eventMessages.some((message) => message.eventMessageId === data.eventMessageId)
+            ),
+            ...this.eventMessages,
+          ];
+        } else {
+          this.eventMessages = [
+            ...this.eventMessages,
+            ...res.data.results.filter((data: EventMessage) =>
+              !this.eventMessages.some((message) => message.eventMessageId === data.eventMessageId)
+            ),
+          ];
+        }
         this.total = res.data.total;
+        this.cdr.detectChanges();
         setTimeout(()=> {
           this.isLoading = false;
         }, 1000);
@@ -232,6 +258,9 @@ export class MessageDetailsPage implements OnInit {
             this.eventMessages.find(x=>x.eventMessageId === tempId).eventMessageId = res.data.eventMessageId;
           }
           this.isLoading = false;
+          setTimeout(()=> {
+            this.onScrollNewMesage();
+          }, 500);
         }
         else{
           this.error = Array.isArray(res.message) ? res.message[0] : res.message;
@@ -269,7 +298,7 @@ export class MessageDetailsPage implements OnInit {
     }
   }
 
-  async initSupportTicketMessage() {
+  async initSupportTicketMessage(showNew = false) {
     try{
       const filter = [{
           apiNotation: "supportTicket.supportTicketCode",
@@ -279,6 +308,15 @@ export class MessageDetailsPage implements OnInit {
       ]
 
       this.isLoading = true;
+      if(showNew) {
+        this.newMessage = showNew;
+        setTimeout(()=> {
+          this.messageList.nativeElement.scrollTo({
+            top: -1,
+            behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
+          });
+        }, 1000);
+      }
       const res = await this.supportTicketService.getMessageByAdvanceSearch({
         order: { dateTimeSent: "DESC"},
         columnDef: filter,
@@ -290,13 +328,23 @@ export class MessageDetailsPage implements OnInit {
       ).toPromise();
       
       if(res.success){
-        this.supportTicketMessages = [
-          ...this.supportTicketMessages,
-          ...res.data.results.filter((data: SupportTicketMessage) =>
-            !this.supportTicketMessages.some((message) => message.supportTicketMessageId === data.supportTicketMessageId)
-          ),
-        ];
+        if(showNew) {
+          this.supportTicketMessages = [
+            ...res.data.results.filter((data: SupportTicketMessage) =>
+              !this.supportTicketMessages.some((message) => message.supportTicketMessageId === data.supportTicketMessageId)
+            ),
+            ...this.supportTicketMessages,
+          ];
+        } else {
+          this.supportTicketMessages = [
+            ...this.supportTicketMessages,
+            ...res.data.results.filter((data: SupportTicketMessage) =>
+              !this.supportTicketMessages.some((message) => message.supportTicketMessageId === data.supportTicketMessageId)
+            ),
+          ];
+        }
         this.total = res.data.total;
+        this.cdr.detectChanges();
         setTimeout(()=> {
           this.isLoading = false;
         }, 1000);
@@ -347,9 +395,15 @@ export class MessageDetailsPage implements OnInit {
         takeUntil(this.ngUnsubscribe),
         catchError(this.handleError('support-ticket-message', []))
       )
-      .subscribe(async (res: ApiResponse<EventMessage>) => {
+      .subscribe(async (res: ApiResponse<SupportTicketMessage>) => {
         if(res.success){
+          if(this.supportTicketMessages.some(x=>x.supportTicket === tempId)) {
+            this.supportTicketMessages.find(x=>x.supportTicket === tempId).supportTicket = res.data.supportTicket;
+          }
           this.isLoading = false;
+          setTimeout(()=> {
+            this.onScrollNewMesage();
+          }, 500);
         }
         else{
           this.error = Array.isArray(res.message) ? res.message[0] : res.message;
@@ -437,6 +491,14 @@ export class MessageDetailsPage implements OnInit {
   getTimeAgo(date) {
     const time = timeAgo(date);
     return !isNaN(Number(time));
+  }
+
+  onScrollNewMesage() {
+    this.messageList.nativeElement.scrollTo({
+      top: 0,
+      behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
+    });
+    this.newMessage = false;
   }
 
   close() {

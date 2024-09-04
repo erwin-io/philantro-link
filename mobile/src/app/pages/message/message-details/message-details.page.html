@@ -110,11 +110,18 @@
       </ng-template>
       
     </div>
+    <div class="new-message-toast-container" *ngIf="newMessage">
+      <!-- <div class="new-message-toast-content"></div> -->
+      <ion-button color="dark" shape="round" (click)="onScrollNewMesage()">
+        <ion-icon slot="start" name="arrow-down-circle-outline"></ion-icon>
+        New Message
+      </ion-button>
+    </div>
     <ng-container *ngIf="userConversation?.type === 'EVENTS'; else elseSupportTicket;">
       <ng-container *ngIf="userConversation?.event && ( userConversation?.event?.eventStatus !== 'CANCELLED' || userConversation?.event?.eventStatus !== 'COMPLETED'); else elseNoMessageControl">
         <div class="message-form">
           <ion-input [formControl]="messageControl" fill="outline" placeholder="Type your message"></ion-input>
-          <ion-fab-button button color="primary" (click)="messageControl.value && messageControl.value !== '' ? submit(messageControl.value) : false">
+          <ion-fab-button button color="primary" id="open-toast" (click)="messageControl.value && messageControl.value !== '' ? submit(messageControl.value) : false">
             <ion-icon name="send"></ion-icon>
           </ion-fab-button>
         </div>

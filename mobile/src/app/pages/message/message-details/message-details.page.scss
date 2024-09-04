@@ -21,6 +21,7 @@
                 flex-direction: row;
                 position: relative;
                 .message-item-text {
+                    max-width: -webkit-fill-available!important;
                     background: var(--ion-color-light);
                     padding: 15px;
                     border-radius: 20px 20px 20px 0;
@@ -103,6 +104,20 @@
             }
             &.disabled {
                 background-color: var(--ion-color-light)!important;;
+            }
+        }
+        .new-message-toast-container {
+            position: absolute;
+            width: 100%;
+            bottom: 80px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .new-message-toast-content {
+                flex-grow: 1;
+                width: 30%;
+                background-color: var(--ion-color-medium);
             }
         }
     }
