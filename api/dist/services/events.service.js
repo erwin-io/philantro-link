@@ -351,7 +351,7 @@ let EventsService = class EventsService {
             .createQueryBuilder("event")
             .leftJoinAndSelect("event.interesteds", "interested")
             .leftJoinAndSelect("event.thumbnailFile", "thumbnailFile")
-            .leftJoinAndSelect("respond.user", "user")
+            .leftJoinAndSelect("interested.user", "user")
             .select([
             "event.eventId",
             "event.eventCode",
@@ -927,7 +927,7 @@ let EventsService = class EventsService {
                 ((_a = event.user) === null || _a === void 0 ? void 0 : _a.userId) &&
                 (dto.status === events_constant_1.EVENT_STATUS.APPROVED ||
                     dto.status === events_constant_1.EVENT_STATUS.REJECTED)) {
-                const forClientTitle = events_constant_1.EVENT_STATUS.APPROVED
+                const forClientTitle = dto.status === events_constant_1.EVENT_STATUS.APPROVED
                     ? "Your event was approved!"
                     : "Your event was rejected";
                 const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, forClientTitle, event.eventName);

@@ -1,7 +1,7 @@
-import { UpdateUserResetPasswordDto } from "src/core/dto/auth/reset-password.dto";
+import { ProfileResetPasswordDto, UpdateUserPasswordDto } from "src/core/dto/auth/reset-password.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
-import { CreateUserDto } from "src/core/dto/user/users.create.dto";
-import { UpdateClientUserProfileDto, UpdateUserDto, UpdateUserProfileDto } from "src/core/dto/user/users.update.dto";
+import { CreateAdminUserDto, CreateClientUserDto } from "src/core/dto/user/users.create.dto";
+import { UpdateClientUserProfileDto, UpdateClientUserDto, UpdateAdminUserDto, UpdateUserProfileDto } from "src/core/dto/user/users.update.dto";
 import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
 import { Access } from "src/db/entities/Access";
 import { Notifications } from "src/db/entities/Notifications";
@@ -24,7 +24,8 @@ export declare class UsersService {
     }>;
     getUserById(userId: any): Promise<Users>;
     getUserByCode(userCode: any): Promise<Users>;
-    create(dto: CreateUserDto): Promise<Users>;
+    createClientUser(dto: CreateClientUserDto): Promise<Users>;
+    createAdminUser(dto: CreateAdminUserDto): Promise<Users>;
     updateAdminProfile(userCode: any, dto: UpdateUserProfileDto): Promise<Users>;
     updateClientProfile(userCode: any, dto: UpdateClientUserProfileDto): Promise<{
         totalUnreadNotif: number;
@@ -59,8 +60,10 @@ export declare class UsersService {
         access: Access;
     }>;
     updateProfilePicture(userCode: any, dto: UpdateProfilePictureDto): Promise<Users>;
-    update(userCode: any, dto: UpdateUserDto): Promise<Users>;
-    resetPassword(userCode: any, dto: UpdateUserResetPasswordDto): Promise<Users>;
+    updateClientUser(userCode: any, dto: UpdateClientUserDto): Promise<Users>;
+    updateAdminUser(userCode: any, dto: UpdateAdminUserDto): Promise<Users>;
+    profileResetPassword(userCode: any, dto: ProfileResetPasswordDto): Promise<Users>;
+    updateUserPassword(userCode: any, dto: UpdateUserPasswordDto): Promise<Users>;
     deleteUser(userCode: any): Promise<Users>;
     approveAccessRequest(userCode: any): Promise<Users>;
 }

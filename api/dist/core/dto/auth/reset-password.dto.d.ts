@@ -4,8 +4,12 @@ export declare class ResetPasswordSubmitDto {
 export declare class ResetVerifyDto extends ResetPasswordSubmitDto {
     otp: string;
 }
-export declare class UpdateUserResetPasswordDto {
+export declare class ProfileResetPasswordDto {
     currentPassword: string;
+    password: string;
+    confirmPassword: string;
+}
+export declare class UpdateUserPasswordDto {
     password: string;
     confirmPassword: string;
 }

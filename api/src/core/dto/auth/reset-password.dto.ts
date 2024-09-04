@@ -26,11 +26,22 @@ export class ResetVerifyDto extends ResetPasswordSubmitDto{
   otp: string;
 }
 
-export class UpdateUserResetPasswordDto {
+export class ProfileResetPasswordDto {
   @ApiProperty()
   @IsNotEmpty()
   currentPassword: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  password: string;
+
+  @ApiProperty()
+  @Match("password")
+  @IsNotEmpty()
+  confirmPassword: string;
+}
+
+export class UpdateUserPasswordDto {
   @ApiProperty()
   @IsNotEmpty()
   password: string;

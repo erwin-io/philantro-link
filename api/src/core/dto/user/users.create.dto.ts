@@ -17,7 +17,17 @@ import {
 import { DefaultUserDto } from "./user-base.dto";
 
 
-export class CreateUserDto extends DefaultUserDto {
+export class CreateClientUserDto extends DefaultUserDto {
+  @ApiProperty()
+  @Transform(({ obj, key }) => {
+    return obj[key].toString();
+  })
+  @IsNotEmpty()
+  password: string;
+}
+
+
+export class CreateAdminUserDto extends DefaultUserDto {
   @ApiProperty()
   @Transform(({ obj, key }) => {
     return obj[key].toString();
@@ -31,10 +41,4 @@ export class CreateUserDto extends DefaultUserDto {
     return obj[key]?.toString();
   })
   accessCode: string;
-  
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsIn(["ADMIN"])
-  @IsUppercase()
-  userType: "ADMIN";
 }

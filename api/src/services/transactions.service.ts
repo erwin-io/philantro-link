@@ -26,6 +26,8 @@ import {
   EVENT_TYPE,
 } from "src/common/constant/events.constant";
 import { USER_TYPE } from "src/common/constant/user-type.constant";
+import { Interested } from "src/db/entities/Interested";
+import { Responded } from "src/db/entities/Responded";
 
 @Injectable()
 export class TransactionsService {
@@ -52,6 +54,14 @@ export class TransactionsService {
         relations: {
           user: {
             userProfilePic: true,
+          },
+          event: {
+            thumbnailFile: true,
+            user: {
+              userProfilePic: {
+                file: true,
+              },
+            },
           },
         },
         skip,
@@ -426,8 +436,56 @@ export class TransactionsService {
                 },
                 relations: {
                   user: true,
+                  event: {
+                    user: true,
+                  },
                 },
               });
+
+              let [interested, responded] = await Promise.all([
+                entityManager.findOne(Interested, {
+                  where: {
+                    user: {
+                      userCode: transaction?.user?.userCode,
+                    },
+                    event: {
+                      thumbnailFile: true,
+                      eventCode: transaction?.event?.eventCode,
+                    },
+                  },
+                  relations: {},
+                }),
+                entityManager.findOne(Responded, {
+                  where: {
+                    user: {
+                      userCode: transaction?.user?.userCode,
+                    },
+                    event: {
+                      eventCode: transaction?.event?.eventCode,
+                    },
+                  },
+                  relations: {},
+                }),
+              ]);
+              if (
+                transaction?.user?.userCode !==
+                  transaction?.event?.user?.userCode &&
+                transaction?.user?.userType === USER_TYPE.CLIENT
+              ) {
+                if (!interested) {
+                  interested = new Interested();
+                  interested.event = transaction?.event;
+                  interested.user = transaction?.user;
+                  interested = await entityManager.save(Interested, interested);
+                }
+
+                if (!responded) {
+                  responded = new Responded();
+                  responded.event = transaction?.event;
+                  responded.user = transaction?.user;
+                  responded = await entityManager.save(Responded, responded);
+                } 
+              }
             } else if (
               getTransaction?.paymentData?.paid ||
               getTransaction?.paymentData?.payment_intent.status ===

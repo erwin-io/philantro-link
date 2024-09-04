@@ -1,5 +1,6 @@
 import {
   columnDefToTypeORMCondition,
+  compare,
   generateIndentityCode,
   getFullName,
   hash,
@@ -9,13 +10,22 @@ import { InjectRepository } from "@nestjs/typeorm";
 import moment from "moment";
 import { extname } from "path";
 import { ACCESS_ERROR_NOT_FOUND } from "src/common/constant/access.constant";
+import { LOGIN_ERROR_PASSWORD_INCORRECT } from "src/common/constant/auth-error.constant";
 import { USER_ERROR_USER_NOT_FOUND } from "src/common/constant/user-error.constant";
-import { UpdateUserResetPasswordDto } from "src/core/dto/auth/reset-password.dto";
+import { USER_TYPE } from "src/common/constant/user-type.constant";
+import {
+  ProfileResetPasswordDto,
+  UpdateUserPasswordDto,
+} from "src/core/dto/auth/reset-password.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
-import { CreateUserDto } from "src/core/dto/user/users.create.dto";
+import {
+  CreateAdminUserDto,
+  CreateClientUserDto,
+} from "src/core/dto/user/users.create.dto";
 import {
   UpdateClientUserProfileDto,
-  UpdateUserDto,
+  UpdateClientUserDto,
+  UpdateAdminUserDto,
   UpdateUserProfileDto,
 } from "src/core/dto/user/users.update.dto";
 import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
@@ -150,7 +160,7 @@ export class UsersService {
     return res;
   }
 
-  async create(dto: CreateUserDto) {
+  async createClientUser(dto: CreateClientUserDto) {
     return await this.userRepo.manager.transaction(async (entityManager) => {
       let user = new Users();
       user.userName = dto.email;
@@ -159,7 +169,36 @@ export class UsersService {
 
       user.name = dto.name ?? "";
       user.email = dto.email;
-      user.userType = dto.userType;
+      user.currentOtp = "0";
+      user.isVerifiedUser = true;
+      user.userType = USER_TYPE.CLIENT;
+      user = await entityManager.save(Users, user);
+      user.userCode = generateIndentityCode(user.userId);
+      user = await entityManager.save(Users, user);
+      user = await entityManager.findOne(Users, {
+        where: {
+          userCode: user.userCode,
+          active: true,
+        },
+        relations: {
+          access: true,
+        },
+      });
+      delete user.password;
+      return user;
+    });
+  }
+
+  async createAdminUser(dto: CreateAdminUserDto) {
+    return await this.userRepo.manager.transaction(async (entityManager) => {
+      let user = new Users();
+      user.userName = dto.email;
+      user.password = await hash(dto.password);
+      user.accessGranted = true;
+
+      user.name = dto.name ?? "";
+      user.email = dto.email;
+      user.userType = USER_TYPE.ADMIN;
       if (dto.accessCode) {
         const access = await entityManager.findOne(Access, {
           where: {
@@ -230,7 +269,7 @@ export class UsersService {
       user = await entityManager.save(Users, user);
 
       if (dto.userProfilePic) {
-        const newFileName: string = uuid();
+        const newGUID: string = uuid();
         let userProfilePic = await entityManager.findOne(UserProfilePic, {
           where: { userId: user.userId },
           relations: ["file"],
@@ -246,12 +285,10 @@ export class UsersService {
             console.log(ex);
           }
           const file = userProfilePic.file;
-          file.fileName = `${newFileName}${extname(
-            dto.userProfilePic.fileName
-          )}`;
+          file.fileName = dto.userProfilePic.fileName;
 
           const bucketFile = bucket.file(
-            `profile/${newFileName}${extname(dto.userProfilePic.fileName)}`
+            `profile/${newGUID}${extname(dto.userProfilePic.fileName)}`
           );
           const img = Buffer.from(dto.userProfilePic.data, "base64");
           await bucketFile.save(img).then(async (res) => {
@@ -263,6 +300,8 @@ export class UsersService {
             });
 
             file.url = url[0];
+            file.fileName = dto.userProfilePic.fileName;
+            file.guid = newGUID;
             userProfilePic.file = await entityManager.save(Files, file);
             user.userProfilePic = await entityManager.save(
               UserProfilePic,
@@ -273,11 +312,9 @@ export class UsersService {
           userProfilePic = new UserProfilePic();
           userProfilePic.user = user;
           const file = new Files();
-          file.fileName = `${newFileName}${extname(
-            dto.userProfilePic.fileName
-          )}`;
+          file.fileName = dto.userProfilePic.fileName;
           const bucketFile = bucket.file(
-            `profile/${newFileName}${extname(dto.userProfilePic.fileName)}`
+            `profile/${newGUID}${extname(dto.userProfilePic.fileName)}`
           );
           const img = Buffer.from(dto.userProfilePic.data, "base64");
           await bucketFile.save(img).then(async () => {
@@ -286,6 +323,8 @@ export class UsersService {
               expires: "03-09-2500",
             });
             file.url = url[0];
+            file.fileName = dto.userProfilePic.fileName;
+            file.guid = newGUID;
             userProfilePic.file = await entityManager.save(Files, file);
             user.userProfilePic = await entityManager.save(
               UserProfilePic,
@@ -433,7 +472,7 @@ export class UsersService {
       delete user.password;
       return {
         ...user,
-        totalUnreadNotif
+        totalUnreadNotif,
       };
     });
   }
@@ -530,7 +569,41 @@ export class UsersService {
     });
   }
 
-  async update(userCode, dto: UpdateUserDto) {
+  async updateClientUser(userCode, dto: UpdateClientUserDto) {
+    return await this.userRepo.manager.transaction(async (entityManager) => {
+      let user = await entityManager.findOne(Users, {
+        where: {
+          userCode,
+          active: true,
+        },
+        relations: {
+          access: true,
+        },
+      });
+
+      if (!user) {
+        throw Error(USER_ERROR_USER_NOT_FOUND);
+      }
+
+      user.name = dto.name;
+      user.email = dto.email;
+      user.userName = dto.email;
+      user = await entityManager.save(Users, user);
+      user = await entityManager.findOne(Users, {
+        where: {
+          userCode,
+          active: true,
+        },
+        relations: {
+          access: true,
+        },
+      });
+      delete user.password;
+      return user;
+    });
+  }
+
+  async updateAdminUser(userCode, dto: UpdateAdminUserDto) {
     return await this.userRepo.manager.transaction(async (entityManager) => {
       let user = await entityManager.findOne(Users, {
         where: {
@@ -577,7 +650,31 @@ export class UsersService {
     });
   }
 
-  async resetPassword(userCode, dto: UpdateUserResetPasswordDto) {
+  async profileResetPassword(userCode, dto: ProfileResetPasswordDto) {
+    return await this.userRepo.manager.transaction(async (entityManager) => {
+      let user = await entityManager.findOne(Users, {
+        where: {
+          userCode,
+          active: true,
+        },
+      });
+
+      if (!user) {
+        throw Error(USER_ERROR_USER_NOT_FOUND);
+      }
+      const passwordMatch = await compare(user.password, dto.password);
+      if (!passwordMatch) {
+        throw Error(LOGIN_ERROR_PASSWORD_INCORRECT);
+      }
+
+      user.password = await hash(dto.password);
+      user = await entityManager.save(Users, user);
+      delete user.password;
+      return user;
+    });
+  }
+
+  async updateUserPassword(userCode, dto: UpdateUserPasswordDto) {
     return await this.userRepo.manager.transaction(async (entityManager) => {
       let user = await entityManager.findOne(Users, {
         where: {

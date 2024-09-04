@@ -13,13 +13,20 @@ import {
   UPDATE_SUCCESS,
   DELETE_SUCCESS,
 } from "src/common/constant/api-response.constant";
-import { UpdateUserResetPasswordDto } from "src/core/dto/auth/reset-password.dto";
+import {
+  ProfileResetPasswordDto,
+  UpdateUserPasswordDto,
+} from "src/core/dto/auth/reset-password.dto";
 import { PaginationParamsDto } from "src/core/dto/pagination-params.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
-import { CreateUserDto } from "src/core/dto/user/users.create.dto";
+import {
+  CreateAdminUserDto,
+  CreateClientUserDto,
+} from "src/core/dto/user/users.create.dto";
 import {
   UpdateClientUserProfileDto,
-  UpdateUserDto,
+  UpdateClientUserDto,
+  UpdateAdminUserDto,
   UpdateUserProfileDto,
 } from "src/core/dto/user/users.update.dto";
 import { ApiResponseModel } from "src/core/models/api-response.model";
@@ -63,12 +70,28 @@ export class UsersController {
     }
   }
 
-  @Post("/")
+  @Post("/createClientUser")
   //   @UseGuards(JwtAuthGuard)
-  async create(@Body() createUserDto: CreateUserDto) {
+  async createClientUser(@Body() createUserDto: CreateClientUserDto) {
     const res: ApiResponseModel<Users> = {} as any;
     try {
-      res.data = await this.userService.create(createUserDto);
+      res.data = await this.userService.createClientUser(createUserDto);
+      res.success = true;
+      res.message = `User  ${SAVING_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Post("/createAdminUser")
+  //   @UseGuards(JwtAuthGuard)
+  async createAdminUser(@Body() createUserDto: CreateAdminUserDto) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.userService.createAdminUser(createUserDto);
       res.success = true;
       res.message = `User  ${SAVING_SUCCESS}`;
       return res;
@@ -117,15 +140,15 @@ export class UsersController {
     }
   }
 
-  @Put("/:userCode")
+  @Put("/updateClientUser/:userCode")
   //   @UseGuards(JwtAuthGuard)
-  async update(
+  async updateClientUser(
     @Param("userCode") userCode: string,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() dto: UpdateClientUserDto
   ) {
     const res: ApiResponseModel<Users> = {} as any;
     try {
-      res.data = await this.userService.update(userCode, updateUserDto);
+      res.data = await this.userService.updateClientUser(userCode, dto);
       res.success = true;
       res.message = `User ${UPDATE_SUCCESS}`;
       return res;
@@ -136,18 +159,53 @@ export class UsersController {
     }
   }
 
-  @Put("/:userCode/resetPassword")
+  @Put("/updateAdminUser/:userCode")
   //   @UseGuards(JwtAuthGuard)
-  async resetPassword(
+  async updateAdminUser(
     @Param("userCode") userCode: string,
-    @Body() updateUserResetPasswordDto: UpdateUserResetPasswordDto
+    @Body() dto: UpdateAdminUserDto
   ) {
     const res: ApiResponseModel<Users> = {} as any;
     try {
-      res.data = await this.userService.resetPassword(
-        userCode,
-        updateUserResetPasswordDto
-      );
+      res.data = await this.userService.updateAdminUser(userCode, dto);
+      res.success = true;
+      res.message = `User ${UPDATE_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Put("/profileResetPassword/:userCode")
+  //   @UseGuards(JwtAuthGuard)
+  async profileResetPassword(
+    @Param("userCode") userCode: string,
+    @Body() dto: ProfileResetPasswordDto
+  ) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.userService.profileResetPassword(userCode, dto);
+      res.success = true;
+      res.message = `User password ${UPDATE_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Put("/updateUserPassword/:userCode")
+  //   @UseGuards(JwtAuthGuard)
+  async updateUserPassword(
+    @Param("userCode") userCode: string,
+    @Body() dto: UpdateUserPasswordDto
+  ) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.userService.updateUserPassword(userCode, dto);
       res.success = true;
       res.message = `User password ${UPDATE_SUCCESS}`;
       return res;

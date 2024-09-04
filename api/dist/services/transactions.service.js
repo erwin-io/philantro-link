@@ -29,6 +29,8 @@ const utils_1 = require("../common/utils/utils");
 const Events_1 = require("../db/entities/Events");
 const events_constant_1 = require("../common/constant/events.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
+const Interested_1 = require("../db/entities/Interested");
+const Responded_1 = require("../db/entities/Responded");
 let TransactionsService = class TransactionsService {
     constructor(httpService, config, firebaseProvoder, transactionsRepo) {
         this.httpService = httpService;
@@ -46,6 +48,14 @@ let TransactionsService = class TransactionsService {
                 relations: {
                     user: {
                         userProfilePic: true,
+                    },
+                    event: {
+                        thumbnailFile: true,
+                        user: {
+                            userProfilePic: {
+                                file: true,
+                            },
+                        },
                     },
                 },
                 skip,
@@ -312,7 +322,7 @@ let TransactionsService = class TransactionsService {
     }
     async comleteTopUpPayment(transactionCode) {
         return await this.transactionsRepo.manager.transaction(async (entityManager) => {
-            var _a, _b, _c, _d, _e, _f, _g;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
             try {
                 const getTransaction = await this.getByCode(transactionCode);
                 if ((getTransaction &&
@@ -340,11 +350,55 @@ let TransactionsService = class TransactionsService {
                             },
                             relations: {
                                 user: true,
+                                event: {
+                                    user: true,
+                                },
                             },
                         });
+                        let [interested, responded] = await Promise.all([
+                            entityManager.findOne(Interested_1.Interested, {
+                                where: {
+                                    user: {
+                                        userCode: (_f = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _f === void 0 ? void 0 : _f.userCode,
+                                    },
+                                    event: {
+                                        thumbnailFile: true,
+                                        eventCode: (_g = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _g === void 0 ? void 0 : _g.eventCode,
+                                    },
+                                },
+                                relations: {},
+                            }),
+                            entityManager.findOne(Responded_1.Responded, {
+                                where: {
+                                    user: {
+                                        userCode: (_h = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _h === void 0 ? void 0 : _h.userCode,
+                                    },
+                                    event: {
+                                        eventCode: (_j = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _j === void 0 ? void 0 : _j.eventCode,
+                                    },
+                                },
+                                relations: {},
+                            }),
+                        ]);
+                        if (((_k = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _k === void 0 ? void 0 : _k.userCode) !==
+                            ((_m = (_l = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _l === void 0 ? void 0 : _l.user) === null || _m === void 0 ? void 0 : _m.userCode) &&
+                            ((_o = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _o === void 0 ? void 0 : _o.userType) === user_type_constant_1.USER_TYPE.CLIENT) {
+                            if (!interested) {
+                                interested = new Interested_1.Interested();
+                                interested.event = transaction === null || transaction === void 0 ? void 0 : transaction.event;
+                                interested.user = transaction === null || transaction === void 0 ? void 0 : transaction.user;
+                                interested = await entityManager.save(Interested_1.Interested, interested);
+                            }
+                            if (!responded) {
+                                responded = new Responded_1.Responded();
+                                responded.event = transaction === null || transaction === void 0 ? void 0 : transaction.event;
+                                responded.user = transaction === null || transaction === void 0 ? void 0 : transaction.user;
+                                responded = await entityManager.save(Responded_1.Responded, responded);
+                            }
+                        }
                     }
-                    else if (((_f = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _f === void 0 ? void 0 : _f.paid) ||
-                        ((_g = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _g === void 0 ? void 0 : _g.payment_intent.status) ===
+                    else if (((_p = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _p === void 0 ? void 0 : _p.paid) ||
+                        ((_q = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _q === void 0 ? void 0 : _q.payment_intent.status) ===
                             payment_constant_1.PAYMENT_LINK_STATUS.WAITING_PAYMENT) {
                         throw new common_1.HttpException("We're sorry, but your payment hasn't been confirmed or completed yet. Please wait a few moments and try again later.", common_1.HttpStatus.BAD_REQUEST);
                     }

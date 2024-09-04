@@ -18,7 +18,9 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const path_1 = require("path");
 const access_constant_1 = require("../common/constant/access.constant");
+const auth_error_constant_1 = require("../common/constant/auth-error.constant");
 const user_error_constant_1 = require("../common/constant/user-error.constant");
+const user_type_constant_1 = require("../common/constant/user-type.constant");
 const firebase_provider_1 = require("../core/provider/firebase/firebase-provider");
 const Access_1 = require("../db/entities/Access");
 const Files_1 = require("../db/entities/Files");
@@ -126,7 +128,35 @@ let UsersService = class UsersService {
         }
         return res;
     }
-    async create(dto) {
+    async createClientUser(dto) {
+        return await this.userRepo.manager.transaction(async (entityManager) => {
+            var _a;
+            let user = new Users_1.Users();
+            user.userName = dto.email;
+            user.password = await (0, utils_1.hash)(dto.password);
+            user.accessGranted = true;
+            user.name = (_a = dto.name) !== null && _a !== void 0 ? _a : "";
+            user.email = dto.email;
+            user.currentOtp = "0";
+            user.isVerifiedUser = true;
+            user.userType = user_type_constant_1.USER_TYPE.CLIENT;
+            user = await entityManager.save(Users_1.Users, user);
+            user.userCode = (0, utils_1.generateIndentityCode)(user.userId);
+            user = await entityManager.save(Users_1.Users, user);
+            user = await entityManager.findOne(Users_1.Users, {
+                where: {
+                    userCode: user.userCode,
+                    active: true,
+                },
+                relations: {
+                    access: true,
+                },
+            });
+            delete user.password;
+            return user;
+        });
+    }
+    async createAdminUser(dto) {
         return await this.userRepo.manager.transaction(async (entityManager) => {
             var _a, _b, _c;
             let user = new Users_1.Users();
@@ -135,7 +165,7 @@ let UsersService = class UsersService {
             user.accessGranted = true;
             user.name = (_a = dto.name) !== null && _a !== void 0 ? _a : "";
             user.email = dto.email;
-            user.userType = dto.userType;
+            user.userType = user_type_constant_1.USER_TYPE.ADMIN;
             if (dto.accessCode) {
                 const access = await entityManager.findOne(Access_1.Access, {
                     where: {
@@ -195,7 +225,7 @@ let UsersService = class UsersService {
             user.email = dto.email;
             user = await entityManager.save(Users_1.Users, user);
             if (dto.userProfilePic) {
-                const newFileName = (0, uuid_1.v4)();
+                const newGUID = (0, uuid_1.v4)();
                 let userProfilePic = await entityManager.findOne(UserProfilePic_1.UserProfilePic, {
                     where: { userId: user.userId },
                     relations: ["file"],
@@ -210,8 +240,8 @@ let UsersService = class UsersService {
                         console.log(ex);
                     }
                     const file = userProfilePic.file;
-                    file.fileName = `${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`;
-                    const bucketFile = bucket.file(`profile/${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
+                    file.fileName = dto.userProfilePic.fileName;
+                    const bucketFile = bucket.file(`profile/${newGUID}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
                     const img = Buffer.from(dto.userProfilePic.data, "base64");
                     await bucketFile.save(img).then(async (res) => {
                         console.log("res");
@@ -221,6 +251,8 @@ let UsersService = class UsersService {
                             expires: "03-09-2500",
                         });
                         file.url = url[0];
+                        file.fileName = dto.userProfilePic.fileName;
+                        file.guid = newGUID;
                         userProfilePic.file = await entityManager.save(Files_1.Files, file);
                         user.userProfilePic = await entityManager.save(UserProfilePic_1.UserProfilePic, userProfilePic);
                     });
@@ -229,8 +261,8 @@ let UsersService = class UsersService {
                     userProfilePic = new UserProfilePic_1.UserProfilePic();
                     userProfilePic.user = user;
                     const file = new Files_1.Files();
-                    file.fileName = `${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`;
-                    const bucketFile = bucket.file(`profile/${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
+                    file.fileName = dto.userProfilePic.fileName;
+                    const bucketFile = bucket.file(`profile/${newGUID}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
                     const img = Buffer.from(dto.userProfilePic.data, "base64");
                     await bucketFile.save(img).then(async () => {
                         const url = await bucketFile.getSignedUrl({
@@ -238,6 +270,8 @@ let UsersService = class UsersService {
                             expires: "03-09-2500",
                         });
                         file.url = url[0];
+                        file.fileName = dto.userProfilePic.fileName;
+                        file.guid = newGUID;
                         userProfilePic.file = await entityManager.save(Files_1.Files, file);
                         user.userProfilePic = await entityManager.save(UserProfilePic_1.UserProfilePic, userProfilePic);
                     });
@@ -439,7 +473,38 @@ let UsersService = class UsersService {
             });
         });
     }
-    async update(userCode, dto) {
+    async updateClientUser(userCode, dto) {
+        return await this.userRepo.manager.transaction(async (entityManager) => {
+            let user = await entityManager.findOne(Users_1.Users, {
+                where: {
+                    userCode,
+                    active: true,
+                },
+                relations: {
+                    access: true,
+                },
+            });
+            if (!user) {
+                throw Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
+            }
+            user.name = dto.name;
+            user.email = dto.email;
+            user.userName = dto.email;
+            user = await entityManager.save(Users_1.Users, user);
+            user = await entityManager.findOne(Users_1.Users, {
+                where: {
+                    userCode,
+                    active: true,
+                },
+                relations: {
+                    access: true,
+                },
+            });
+            delete user.password;
+            return user;
+        });
+    }
+    async updateAdminUser(userCode, dto) {
         return await this.userRepo.manager.transaction(async (entityManager) => {
             let user = await entityManager.findOne(Users_1.Users, {
                 where: {
@@ -482,7 +547,28 @@ let UsersService = class UsersService {
             return user;
         });
     }
-    async resetPassword(userCode, dto) {
+    async profileResetPassword(userCode, dto) {
+        return await this.userRepo.manager.transaction(async (entityManager) => {
+            let user = await entityManager.findOne(Users_1.Users, {
+                where: {
+                    userCode,
+                    active: true,
+                },
+            });
+            if (!user) {
+                throw Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
+            }
+            const passwordMatch = await (0, utils_1.compare)(user.password, dto.password);
+            if (!passwordMatch) {
+                throw Error(auth_error_constant_1.LOGIN_ERROR_PASSWORD_INCORRECT);
+            }
+            user.password = await (0, utils_1.hash)(dto.password);
+            user = await entityManager.save(Users_1.Users, user);
+            delete user.password;
+            return user;
+        });
+    }
+    async updateUserPassword(userCode, dto) {
         return await this.userRepo.manager.transaction(async (entityManager) => {
             let user = await entityManager.findOne(Users_1.Users, {
                 where: {

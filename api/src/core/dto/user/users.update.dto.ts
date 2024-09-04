@@ -16,7 +16,10 @@ import {
 } from "class-validator";
 import { DefaultUserDto } from "./user-base.dto";
 
-export class UpdateUserDto extends DefaultUserDto {
+export class UpdateClientUserDto extends DefaultUserDto {
+}
+
+export class UpdateAdminUserDto extends DefaultUserDto {
   @ApiProperty()
   @IsNotEmpty()
   @Transform(({ obj, key }) => {

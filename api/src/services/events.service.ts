@@ -416,7 +416,7 @@ export class EventsService {
       .createQueryBuilder("event")
       .leftJoinAndSelect("event.interesteds", "interested")
       .leftJoinAndSelect("event.thumbnailFile", "thumbnailFile")
-      .leftJoinAndSelect("respond.user", "user")
+      .leftJoinAndSelect("interested.user", "user")
       .select([
         "event.eventId",
         "event.eventCode",
@@ -1096,7 +1096,7 @@ export class EventsService {
         (dto.status === EVENT_STATUS.APPROVED ||
           dto.status === EVENT_STATUS.REJECTED)
       ) {
-        const forClientTitle = EVENT_STATUS.APPROVED
+        const forClientTitle = dto.status === EVENT_STATUS.APPROVED
           ? "Your event was approved!"
           : "Your event was rejected";
 

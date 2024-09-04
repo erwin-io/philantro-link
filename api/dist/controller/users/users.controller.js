@@ -52,10 +52,24 @@ let UsersController = class UsersController {
             return res;
         }
     }
-    async create(createUserDto) {
+    async createClientUser(createUserDto) {
         const res = {};
         try {
-            res.data = await this.userService.create(createUserDto);
+            res.data = await this.userService.createClientUser(createUserDto);
+            res.success = true;
+            res.message = `User  ${api_response_constant_1.SAVING_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async createAdminUser(createUserDto) {
+        const res = {};
+        try {
+            res.data = await this.userService.createAdminUser(createUserDto);
             res.success = true;
             res.message = `User  ${api_response_constant_1.SAVING_SUCCESS}`;
             return res;
@@ -94,10 +108,10 @@ let UsersController = class UsersController {
             return res;
         }
     }
-    async update(userCode, updateUserDto) {
+    async updateClientUser(userCode, dto) {
         const res = {};
         try {
-            res.data = await this.userService.update(userCode, updateUserDto);
+            res.data = await this.userService.updateClientUser(userCode, dto);
             res.success = true;
             res.message = `User ${api_response_constant_1.UPDATE_SUCCESS}`;
             return res;
@@ -108,10 +122,38 @@ let UsersController = class UsersController {
             return res;
         }
     }
-    async resetPassword(userCode, updateUserResetPasswordDto) {
+    async updateAdminUser(userCode, dto) {
         const res = {};
         try {
-            res.data = await this.userService.resetPassword(userCode, updateUserResetPasswordDto);
+            res.data = await this.userService.updateAdminUser(userCode, dto);
+            res.success = true;
+            res.message = `User ${api_response_constant_1.UPDATE_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async profileResetPassword(userCode, dto) {
+        const res = {};
+        try {
+            res.data = await this.userService.profileResetPassword(userCode, dto);
+            res.success = true;
+            res.message = `User password ${api_response_constant_1.UPDATE_SUCCESS}`;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
+    async updateUserPassword(userCode, dto) {
+        const res = {};
+        try {
+            res.data = await this.userService.updateUserPassword(userCode, dto);
             res.success = true;
             res.message = `User password ${api_response_constant_1.UPDATE_SUCCESS}`;
             return res;
@@ -179,12 +221,19 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getUserPagination", null);
 __decorate([
-    (0, common_1.Post)("/"),
+    (0, common_1.Post)("/createClientUser"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [users_create_dto_1.CreateUserDto]),
+    __metadata("design:paramtypes", [users_create_dto_1.CreateClientUserDto]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "create", null);
+], UsersController.prototype, "createClientUser", null);
+__decorate([
+    (0, common_1.Post)("/createAdminUser"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [users_create_dto_1.CreateAdminUserDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "createAdminUser", null);
 __decorate([
     (0, common_1.Put)("/updateAdminProfile/:userCode"),
     __param(0, (0, common_1.Param)("userCode")),
@@ -202,21 +251,37 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateClientProfile", null);
 __decorate([
-    (0, common_1.Put)("/:userCode"),
+    (0, common_1.Put)("/updateClientUser/:userCode"),
     __param(0, (0, common_1.Param)("userCode")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, users_update_dto_1.UpdateUserDto]),
+    __metadata("design:paramtypes", [String, users_update_dto_1.UpdateClientUserDto]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "update", null);
+], UsersController.prototype, "updateClientUser", null);
 __decorate([
-    (0, common_1.Put)("/:userCode/resetPassword"),
+    (0, common_1.Put)("/updateAdminUser/:userCode"),
     __param(0, (0, common_1.Param)("userCode")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, reset_password_dto_1.UpdateUserResetPasswordDto]),
+    __metadata("design:paramtypes", [String, users_update_dto_1.UpdateAdminUserDto]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "resetPassword", null);
+], UsersController.prototype, "updateAdminUser", null);
+__decorate([
+    (0, common_1.Put)("/profileResetPassword/:userCode"),
+    __param(0, (0, common_1.Param)("userCode")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, reset_password_dto_1.ProfileResetPasswordDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "profileResetPassword", null);
+__decorate([
+    (0, common_1.Put)("/updateUserPassword/:userCode"),
+    __param(0, (0, common_1.Param)("userCode")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, reset_password_dto_1.UpdateUserPasswordDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateUserPassword", null);
 __decorate([
     (0, common_1.Delete)("/:userCode"),
     __param(0, (0, common_1.Param)("userCode")),
