@@ -57,7 +57,16 @@ export class UpdateDonationEventDto extends DefaultEventDto {
   donationTargetAmount: string;
 }
 
-export class UpdateAssistanceEventDto extends DefaultEventDto {}
+export class UpdateAssistanceEventDto extends DefaultEventDto {
+  @ApiProperty({
+    isArray: true,
+    type: String
+  })
+  @IsNotEmpty({
+    message: "Not allowed, Assistance Items is required!"
+  })
+  eventAssistanceItems: string[] = []
+}
 
 export class UpdateEventInterestedDto {
   @ApiProperty()

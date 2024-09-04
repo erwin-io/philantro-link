@@ -9,6 +9,7 @@ export declare class UpdateDonationEventDto extends DefaultEventDto {
     donationTargetAmount: string;
 }
 export declare class UpdateAssistanceEventDto extends DefaultEventDto {
+    eventAssistanceItems: string[];
 }
 export declare class UpdateEventInterestedDto {
     userCode: string;

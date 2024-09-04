@@ -72,7 +72,21 @@ __decorate([
 ], UpdateDonationEventDto.prototype, "donationTargetAmount", void 0);
 exports.UpdateDonationEventDto = UpdateDonationEventDto;
 class UpdateAssistanceEventDto extends events_base_dto_1.DefaultEventDto {
+    constructor() {
+        super(...arguments);
+        this.eventAssistanceItems = [];
+    }
 }
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        isArray: true,
+        type: String
+    }),
+    (0, class_validator_1.IsNotEmpty)({
+        message: "Not allowed, Assistance Items is required!"
+    }),
+    __metadata("design:type", Array)
+], UpdateAssistanceEventDto.prototype, "eventAssistanceItems", void 0);
 exports.UpdateAssistanceEventDto = UpdateAssistanceEventDto;
 class UpdateEventInterestedDto {
 }

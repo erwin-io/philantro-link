@@ -599,6 +599,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
+            event.eventAssistanceItems = dto.eventAssistanceItems;
             const dateTime = await entityManager
                 .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
                 .then((res) => {
@@ -813,6 +814,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
+            event.eventAssistanceItems = dto.eventAssistanceItems;
             const timestamp = await entityManager
                 .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
                 .then((res) => {
