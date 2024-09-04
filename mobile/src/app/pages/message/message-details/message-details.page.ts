@@ -59,8 +59,6 @@ export class MessageDetailsPage implements OnInit {
       
       this.pageIndex = 0;
       this.pageSize = 10;
-      this.eventMessages = [];
-      this.supportTicketMessages = [];
       if(res.type === "EVENTS" || res.type === "MESSAGE") {
         await Promise.all([
           this.initEventMessage(),

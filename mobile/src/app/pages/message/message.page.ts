@@ -110,7 +110,7 @@ export class MessagePage implements OnInit {
       this.isLoading = showProgress;
       const [paginated, _unReadMessage, _unReadNotif] = await Promise.all([
         this.userConversationService.getByAdvanceSearch({
-        order: { userConversationId: "DESC" },
+        order: { dateTime: "DESC" },
         columnDef: [{
           apiNotation: "fromUser.userId",
           filter: this.currentUser?.userId,

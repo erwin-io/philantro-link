@@ -16,5 +16,6 @@ export class UserConversation {
     supportTicket: SupportTicket;
     unReadMessage: number = 0;
     totalUnreadNotif: number = 0;
+    dateTime?: Date;
   }
   
