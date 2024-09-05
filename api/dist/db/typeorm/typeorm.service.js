@@ -54,11 +54,13 @@ let TypeOrmConfigService = class TypeOrmConfigService {
                 Responded_1.Responded,
                 SupportTicket_1.SupportTicket,
                 SupportTicketMessage_1.SupportTicketMessage,
-                UserConversation_1.UserConversation
+                UserConversation_1.UserConversation,
             ],
             synchronize: false,
             ssl: ssl.toLocaleLowerCase().includes("true"),
-            extra: {},
+            extra: {
+                timezone: "GMT",
+            },
         };
         if (config.ssl) {
             config.extra.ssl = {

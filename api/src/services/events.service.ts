@@ -513,11 +513,11 @@ export class EventsService {
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
-      const dateTime = moment(
-        new Date(dto.dateTime),
-        DateConstant.DATE_LANGUAGE
-      ).toISOString();
-      event.dateTime = new Date(dateTime);
+      // const dateTime = moment(
+      //   new Date(dto.dateTime),
+      //   DateConstant.DATE_LANGUAGE
+      // ).toISOString();
+      event.dateTime = new Date(dto.dateTime);
       const user = await entityManager.findOne(Users, {
         where: {
           userCode: dto.userCode,
@@ -767,6 +767,7 @@ export class EventsService {
           Select "UserId" as "userId"
           from dbo."Users" WHERE "UserType" = 'CLIENT' 
           AND "Active" = true
+          AND "UserId" <> ${user?.userId}
           AND round(
           (earth_distance(
                   ll_to_earth(
@@ -782,11 +783,11 @@ export class EventsService {
             .map((x) => "'" + x + "'")
             .join(
               ","
-            )}]::character varying[] && "HelpNotifPreferences" AND "Active" = true
+            )}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${user?.userId}
         )
-        SELECT "userId" from nearby 
+        SELECT "userId" from nearby WHERE "userId" <> ${user?.userId}
         UNION 
-        SELECT "userId" from specific_user WHERE "userId" NOT IN (SELECT "userId" from nearby)`;
+        SELECT "userId" from specific_user WHERE "userId" <> ${user?.userId} AND  "userId" NOT IN (SELECT "userId" from nearby)`;
 
       const clientUserIds = await entityManager
         .query(getClientUserIds)
@@ -862,6 +863,7 @@ export class EventsService {
           return res[0]["timestamp"];
         });
       event.dateTimeUpdate = timestamp;
+      event.dateTime = new Date(dto.dateTime);
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -1032,7 +1034,7 @@ export class EventsService {
       }
       if (
         (dto.status === EVENT_STATUS.INPROGRESS &&
-          event.eventStatus === EVENT_STATUS.PENDING) ||
+          event.eventStatus === EVENT_STATUS.PENDING ) ||
         (dto.status === EVENT_STATUS.COMPLETED &&
           event.eventStatus === EVENT_STATUS.PENDING)
       ) {
@@ -1057,13 +1059,24 @@ export class EventsService {
       }
       if (
         dto.status === EVENT_STATUS.INPROGRESS &&
-        event?.eventType !== EVENT_TYPE.ASSISTANCE
+        event?.eventType !== EVENT_TYPE.ASSISTANCE && event?.eventType !== EVENT_TYPE.DONATION
       ) {
         event.inProgress = true;
         event.eventStatus = EVENT_STATUS.APPROVED;
       } else if (event?.eventType !== EVENT_TYPE.ASSISTANCE) {
         event.eventStatus = dto.status;
         event.inProgress = false;
+      }
+
+      
+      if (
+        dto.status === EVENT_STATUS.APPROVED &&
+        event?.eventType === EVENT_TYPE.DONATION
+      ) {
+        event.inProgress = true;
+        event.eventStatus = EVENT_STATUS.APPROVED;
+      } else {
+        event.eventStatus = dto.status;
       }
       const timestamp = await entityManager
         .query(CONST_QUERYCURRENT_TIMESTAMP)

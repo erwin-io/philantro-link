@@ -11,14 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const moment_1 = __importDefault(require("moment"));
 const notifications_constant_1 = require("../common/constant/notifications.constant");
 const user_error_constant_1 = require("../common/constant/user-error.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
@@ -29,7 +25,6 @@ const Users_1 = require("../db/entities/Users");
 const typeorm_2 = require("typeorm");
 const one_signal_notification_service_1 = require("./one-signal-notification.service");
 const events_constant_1 = require("../common/constant/events.constant");
-const date_constant_1 = require("../common/constant/date.constant");
 const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const Interested_1 = require("../db/entities/Interested");
 const Responded_1 = require("../db/entities/Responded");
@@ -445,8 +440,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
-            const dateTime = (0, moment_1.default)(new Date(dto.dateTime), date_constant_1.DateConstant.DATE_LANGUAGE).toISOString();
-            event.dateTime = new Date(dateTime);
+            event.dateTime = new Date(dto.dateTime);
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,
@@ -646,6 +640,7 @@ let EventsService = class EventsService {
           Select "UserId" as "userId"
           from dbo."Users" WHERE "UserType" = 'CLIENT' 
           AND "Active" = true
+          AND "UserId" <> ${user === null || user === void 0 ? void 0 : user.userId}
           AND round(
           (earth_distance(
                   ll_to_earth(
@@ -659,11 +654,11 @@ let EventsService = class EventsService {
           FROM dbo."Users"
           WHERE ARRAY[${dto.eventAssistanceItems
                 .map((x) => "'" + x + "'")
-                .join(",")}]::character varying[] && "HelpNotifPreferences" AND "Active" = true
+                .join(",")}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${user === null || user === void 0 ? void 0 : user.userId}
         )
-        SELECT "userId" from nearby 
+        SELECT "userId" from nearby WHERE "userId" <> ${user === null || user === void 0 ? void 0 : user.userId}
         UNION 
-        SELECT "userId" from specific_user WHERE "userId" NOT IN (SELECT "userId" from nearby)`;
+        SELECT "userId" from specific_user WHERE "userId" <> ${user === null || user === void 0 ? void 0 : user.userId} AND  "userId" NOT IN (SELECT "userId" from nearby)`;
             const clientUserIds = await entityManager
                 .query(getClientUserIds)
                 .then((res) => {
@@ -713,6 +708,7 @@ let EventsService = class EventsService {
                 return res[0]["timestamp"];
             });
             event.dateTimeUpdate = timestamp;
+            event.dateTime = new Date(dto.dateTime);
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -892,13 +888,21 @@ let EventsService = class EventsService {
                 event.eventStatus = dto.status;
             }
             if (dto.status === events_constant_1.EVENT_STATUS.INPROGRESS &&
-                (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE) {
+                (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE && (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.DONATION) {
                 event.inProgress = true;
                 event.eventStatus = events_constant_1.EVENT_STATUS.APPROVED;
             }
             else if ((event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE) {
                 event.eventStatus = dto.status;
                 event.inProgress = false;
+            }
+            if (dto.status === events_constant_1.EVENT_STATUS.APPROVED &&
+                (event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.DONATION) {
+                event.inProgress = true;
+                event.eventStatus = events_constant_1.EVENT_STATUS.APPROVED;
+            }
+            else {
+                event.eventStatus = dto.status;
             }
             const timestamp = await entityManager
                 .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)

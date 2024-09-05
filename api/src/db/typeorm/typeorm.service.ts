@@ -48,11 +48,13 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         Responded,
         SupportTicket,
         SupportTicketMessage,
-        UserConversation
+        UserConversation,
       ],
       synchronize: false, // never use TRUE in production!
       ssl: ssl.toLocaleLowerCase().includes("true"),
-      extra: {},
+      extra: {
+        timezone: "GMT", // or use "UTC" if you prefer UTC normalization
+      },
     };
     if (config.ssl) {
       config.extra.ssl = {
