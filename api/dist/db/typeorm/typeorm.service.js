@@ -59,7 +59,7 @@ let TypeOrmConfigService = class TypeOrmConfigService {
             synchronize: false,
             ssl: ssl.toLocaleLowerCase().includes("true"),
             extra: {
-                timezone: "GMT",
+                timezone: "UTC",
             },
         };
         if (config.ssl) {

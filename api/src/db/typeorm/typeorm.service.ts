@@ -53,7 +53,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       synchronize: false, // never use TRUE in production!
       ssl: ssl.toLocaleLowerCase().includes("true"),
       extra: {
-        timezone: "GMT", // or use "UTC" if you prefer UTC normalization
+        timezone: "UTC", // or use "UTC" if you prefer UTC normalization
       },
     };
     if (config.ssl) {
