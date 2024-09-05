@@ -440,10 +440,8 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
-            const dateTime = await entityManager
-                .query(`select '${dto.dateTime} UTC'::TIMESTAMPTZ as "dateTime" `)
-                .then((res) => {
-                return res[0].dateTime;
+            const dateTime = new Date(dto.dateTime).toLocaleString('en-PH', {
+                timeZone: 'Asia/Manila'
             });
             event.dateTime = new Date(dateTime);
             const user = await entityManager.findOne(Users_1.Users, {
@@ -712,12 +710,10 @@ let EventsService = class EventsService {
                 .then((res) => {
                 return res[0].timestamp;
             });
-            const dateTime = await entityManager
-                .query(`select '${dto.dateTime} UTC'::TIMESTAMPTZ as "dateTime" `)
-                .then((res) => {
-                return res[0].dateTime;
-            });
             event.dateTimeUpdate = timestamp;
+            const dateTime = new Date(dto.dateTime).toLocaleString('en-PH', {
+                timeZone: 'Asia/Manila'
+            });
             event.dateTime = new Date(dateTime);
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
