@@ -441,7 +441,7 @@ let EventsService = class EventsService {
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
             const dateTime = await entityManager
-                .query(`select '${dto.dateTime}'::TIMESTAMPTZ as dateTime`)
+                .query(`select '${dto.dateTime}'::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -523,7 +523,7 @@ let EventsService = class EventsService {
             event.transferAccountNumber = dto.transferAccountNumber;
             event.transferAccountName = dto.transferAccountName;
             const dateTime = await entityManager
-                .query(`select now()::TIMESTAMPTZ as dateTime`)
+                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -602,7 +602,7 @@ let EventsService = class EventsService {
             event.eventLocMap = dto.eventLocMap;
             event.eventAssistanceItems = dto.eventAssistanceItems;
             const dateTime = await entityManager
-                .query(`select now()::TIMESTAMPTZ as dateTime`)
+                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -713,7 +713,7 @@ let EventsService = class EventsService {
                 return res[0].timestamp;
             });
             const dateTime = await entityManager
-                .query(`select '${dto.dateTime}'::TIMESTAMPTZ as dateTime`)
+                .query(`select '${dto.dateTime}'::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -773,7 +773,7 @@ let EventsService = class EventsService {
             event.transferAccountNumber = dto.transferAccountNumber;
             event.transferAccountName = dto.transferAccountName;
             const timestamp = await entityManager
-                .query(`select now()::TIMESTAMPTZ as dateTime`)
+                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -824,7 +824,7 @@ let EventsService = class EventsService {
             event.eventLocMap = dto.eventLocMap;
             event.eventAssistanceItems = dto.eventAssistanceItems;
             const timestamp = await entityManager
-                .query(`select now()::TIMESTAMPTZ as dateTime`)
+                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -916,7 +916,7 @@ let EventsService = class EventsService {
                 event.eventStatus = dto.status;
             }
             const timestamp = await entityManager
-                .query(`select now()::TIMESTAMPTZ as dateTime`)
+                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
                 .then((res) => {
                 return res[0].dateTime;
             });

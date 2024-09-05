@@ -518,7 +518,7 @@ export class EventsService {
       //   DateConstant.DATE_LANGUAGE
       // ).toISOString();
       const dateTime = await entityManager
-      .query(`select '${dto.dateTime}'::TIMESTAMPTZ as dateTime`)
+      .query(`select '${dto.dateTime}'::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -629,7 +629,7 @@ export class EventsService {
       //     return res[0]["timestamp"];
       //   });
       const dateTime = await entityManager
-      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -738,7 +738,7 @@ export class EventsService {
       //   });
 
       const dateTime = await entityManager
-      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -886,7 +886,7 @@ export class EventsService {
       });
       
       const dateTime = await entityManager
-      .query(`select '${dto.dateTime}'::TIMESTAMPTZ as dateTime`)
+      .query(`select '${dto.dateTime}'::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -957,7 +957,7 @@ export class EventsService {
       //   });
         
       const timestamp = await entityManager
-      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -1014,7 +1014,7 @@ export class EventsService {
       //   });
       
       const timestamp = await entityManager
-      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -1126,7 +1126,7 @@ export class EventsService {
       //   });
       
       const timestamp = await entityManager
-      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
       .then((res) => {
         return res[0].dateTime;
       })
