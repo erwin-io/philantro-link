@@ -9,13 +9,13 @@
           <fieldset [disabled]="isProcessing" class="fieldset">
             <h4>Login</h4>
               <mat-form-field appearance="outline">
-                  <mat-label>Username</mat-label>
+                  <mat-label>Username/Email</mat-label>
                   <input
                   matInput
-                  placeholder="Username"
+                  placeholder="Username/Email"
                   formControlName="userName">
                   <mat-error *ngIf="logInForm.controls.userName.errors !== (null || undefined)">{{
-                      (logInForm.controls.userName.errors && logInForm.controls.userName.errors['required'] ? 'Please enter your mobile number' : '')
+                      (logInForm.controls.userName.errors && logInForm.controls.userName.errors['required'] ? 'Please enter your username or email' : '')
                   }}</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
