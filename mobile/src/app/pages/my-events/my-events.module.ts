@@ -10,6 +10,7 @@ import { MyEventsPage } from './my-events.page';
 import { VerticalCardsModule } from 'src/app/shared/vertical-cards/vertical-cards.module';
 import { InterestedEventsComponent } from './interested-events/interested-events.component';
 import { JoinedEventsComponent } from './joined-events/joined-events.component';
+import { ArchivedEventsComponent } from './archived-events/archived-events.component';
 
 @NgModule({
   imports: [
@@ -19,6 +20,6 @@ import { JoinedEventsComponent } from './joined-events/joined-events.component';
     MyEventsPageRoutingModule,
     VerticalCardsModule
   ],
-  declarations: [MyEventsPage, JoinedEventsComponent, InterestedEventsComponent],
+  declarations: [MyEventsPage, JoinedEventsComponent, InterestedEventsComponent, ArchivedEventsComponent],
 })
 export class MyEventsPageModule {}

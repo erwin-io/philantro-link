@@ -4,7 +4,7 @@ ion-content {
     .tools {
         display: flex;
         flex-direction: row;
-        gap: 10px;
+        gap: 7px;
         overflow: auto;
         padding: 16px 0 0;
         scroll-behavior: smooth;
@@ -12,6 +12,8 @@ ion-content {
             --box-shadow:none;
             --background: #EFE9FF!important;
             --color: #000;
+            --padding-start: 15px;
+            --padding-end: 15px;
             &:first-child {
                 margin-left: 16px!important;
             }

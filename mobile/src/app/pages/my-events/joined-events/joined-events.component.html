@@ -17,7 +17,7 @@
   </ion-refresher>
   <ion-list class="event-list" *ngIf="events.length > 0; else noRecordsTemplate">
     <ng-container *ngFor="let item of events">
-      <ion-item (click)="onOpenTicket(item)" [detail]="true" [button]="true" class="ion-no-padding">
+      <ion-item (click)="onOpenEvent(item)" [detail]="true" [button]="true" class="ion-no-padding">
         <ion-avatar aria-hidden="true" slot="start">
           <img alt="" [src]="item?.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.eventType)"/>
         </ion-avatar>

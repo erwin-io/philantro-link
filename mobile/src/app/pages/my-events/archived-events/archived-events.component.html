@@ -5,7 +5,7 @@
         <ion-icon name="arrow-back-outline" style="font-size: 1.8rem!important;"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="ion-text-center">Interested Events</ion-title>
+    <ion-title class="ion-text-center">Archived Events</ion-title>
     <div slot="end" style="width: 48px"></div>
   </ion-toolbar>
 </ion-header>
@@ -17,7 +17,7 @@
   </ion-refresher>
   <ion-list class="event-list" *ngIf="events.length > 0; else noRecordsTemplate">
     <ng-container *ngFor="let item of events">
-      <ion-item (click)="onOpenEvent(item)" [detail]="true" [button]="true" class="ion-no-padding">
+      <ion-item (click)="onOpenEvent(item)" [button]="true" class="ion-no-padding">
         <ion-avatar aria-hidden="true" slot="start">
           <img alt="" [src]="item?.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.eventType)"/>
         </ion-avatar>
@@ -26,6 +26,10 @@
             <strong>{{item.eventName}}</strong>
           </h2>
           <h3 class="sub-title">{{ item.eventDesc}}</h3>
+          <ion-text [color]="
+          item?.eventStatus === 'COMPLETED' ? 'dark' : '' ||
+          item?.eventStatus === 'CANCELLED' ? 'danger' : ''
+          "><p>{{item?.eventStatus}}</p></ion-text>
         </ion-label>
         <ion-note slot="end">
           <h5 >{{ item.eventType}}</h5>
@@ -40,11 +44,11 @@
   </ion-button>
 
   <ng-template #noRecordsTemplate>
-    <div>
+    <div >
       <div style="background-color: #8469c726;display: flex;flex-direction: column;align-items: center;padding-bottom: 20px;border-radius: 10px; position: relative;text-align: center;" >
         <img style="width: 250px;height: max-content;" src="../../../../assets/img/empty-placeholder.png" alt="">
         <div >
-          <h2>No interested events to show</h2>
+          <h2>No archived events to show</h2>
         </div>
       </div>
     </div>

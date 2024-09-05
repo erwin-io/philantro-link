@@ -442,11 +442,13 @@ export class EventDetailsComponent  implements OnInit {
     }
   }
 
-  getDonationPercentage(event: Events) {
-    if(event && !isNaN(Number(event?.raisedDonation)) && !isNaN(Number(event?.donationTargetAmount))) {
-      // return (100 * Number(event?.raisedDonation)) / Number(event?.donationTargetAmount);
-      const percent = ((Number(event?.raisedDonation) / Number(event?.donationTargetAmount)) * 100);
-      return percent > 0.5 ? percent / 100 : percent;
+  getDonationPercentage(event: Events, wholeValue = false) {
+    if(wholeValue && event && !isNaN(Number(event?.raisedDonation)) && !isNaN(Number(event?.donationTargetAmount))) {
+      const percent = (Number(event?.raisedDonation) / Number(event?.donationTargetAmount)) * 100;
+      return percent.toFixed(2); // Format to two decimal places if needed
+    } else if(event && !isNaN(Number(event?.raisedDonation)) && !isNaN(Number(event?.donationTargetAmount))) {
+      const percent = (Number(event?.raisedDonation) / Number(event?.donationTargetAmount));
+      return percent;
     } else {
       return 0;
     }

@@ -41,7 +41,7 @@
       <div class="vertical-cards-donation-value">
         <p><span>{{event?.raisedDonation | currency: 'PHP'}}</span>/<span>{{event?.donationTargetAmount | currency: 'PHP'}}</span></p>
         <ion-text color="primary">
-          <b>{{getDonationPercentage(event) | percent}}</b>
+          <b>{{getDonationPercentage(event, true)}}%</b>
         </ion-text>
       </div>
       <ion-progress-bar [value]="getDonationPercentage(event)" ></ion-progress-bar>

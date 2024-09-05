@@ -92,7 +92,7 @@ export class InterestedEventsComponent implements OnInit {
     }
   }
 
-  async onOpenTicket(event: Events) {
+  async onOpenEvent(event: Events) {
     let modal: HTMLIonModalElement = null;
     modal = await this.modalCtrl.create({
       component: EventDetailsComponent,

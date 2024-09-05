@@ -17,7 +17,7 @@ export const environment = {
   oneSignalAppId: 'f466c8d5-af8a-4281-97b6-3ea14453173c',
   // apiBaseUrl: 'http://localhost:3000/api/v1',
   // apiBaseUrl: 'http://192.168.208.46:3000/api/v1',
-  apiBaseUrl: 'http://192.168.254.182:3000/api/v1',
+  apiBaseUrl: 'https://philantro-link-api.vercel.app/api/v1',
 };
 
 /*

@@ -17,6 +17,7 @@ import { EventTypePickerComponent } from 'src/app/shared/event-type-picker/event
 import { JoinedEventsComponent } from './joined-events/joined-events.component';
 import { InterestedEventsComponent } from './interested-events/interested-events.component';
 import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
+import { ArchivedEventsComponent } from './archived-events/archived-events.component';
 
 @Component({
   selector: 'app-my-events',
@@ -71,6 +72,10 @@ export class MyEventsPage implements OnInit {
         apiNotation: "user.userCode",
         filter: this.currentUser?.userCode,
         type: "precise"
+      } as any, {
+        apiNotation: "eventStatus",
+        filter: ["PENDING", "APPROVED", "INPROGRESS"],
+        type: "in"
       } as any],
       pageIndex: this.pageIndex,
       pageSize: this.pageSize
@@ -159,6 +164,25 @@ export class MyEventsPage implements OnInit {
     let modal: HTMLIonModalElement = null;
     modal = await this.modalCtrl.create({
       component: InterestedEventsComponent,
+      cssClass: 'modal-fullscreen',
+      backdropDismiss: false,
+      canDismiss: true,
+      enterAnimation: this.animationService.pushLeftAnimation,
+      leaveAnimation: this.animationService.leavePushLeftAnimation,
+      componentProps: { modal },
+    });
+    modal.present();
+    this.statusBarService.show();
+    this.statusBarService.modifyStatusBar(Style.Dark, '#311B92');
+    modal.onDidDismiss().then(res=> {
+      this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
+    });
+  }
+
+  async openArchivedEvents() {
+    let modal: HTMLIonModalElement = null;
+    modal = await this.modalCtrl.create({
+      component: ArchivedEventsComponent,
       cssClass: 'modal-fullscreen',
       backdropDismiss: false,
       canDismiss: true,

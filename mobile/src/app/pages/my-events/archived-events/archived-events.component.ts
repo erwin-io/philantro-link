@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Style } from '@capacitor/status-bar';
 import { IonRefresher, ModalController, AlertController } from '@ionic/angular';
 import { Events } from 'src/app/model/events.model';
-import { SupportTicket } from 'src/app/model/support-ticket.model';
 import { Users } from 'src/app/model/users';
 import { AnimationService } from 'src/app/services/animation.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -15,11 +14,11 @@ import { EventDetailsComponent } from 'src/app/shared/event-details/event-detail
 import { getEventCardDefaultImage } from 'src/app/shared/utility/utility';
 
 @Component({
-  selector: 'app-joined-events',
-  templateUrl: './joined-events.component.html',
-  styleUrls: ['./joined-events.component.scss'],
+  selector: 'app-archived-events',
+  templateUrl: './archived-events.component.html',
+  styleUrls: ['./archived-events.component.scss'],
 })
-export class JoinedEventsComponent implements OnInit {
+export class ArchivedEventsComponent  implements OnInit {
   modal: HTMLIonModalElement;
   currentUser: Users;
   events: Events[] = [];
@@ -66,9 +65,17 @@ export class JoinedEventsComponent implements OnInit {
         this.events = [];
       }
       this.isLoading = showProgress;
-      this.eventsService.getPageJoinedEvents({
+      this.eventsService.getByAdvanceSearch({
         order: { dateTimeUpdate: "DESC", eventId: "ASC",  },
-        userCode: this.currentUser?.userCode,
+        columnDef: [{
+          apiNotation: "user.userCode",
+          filter: this.currentUser?.userCode,
+          type: "precise"
+        } as any, {
+          apiNotation: "eventStatus",
+          filter: ["COMPLETED", "CANCELLED"],
+          type: "in"
+        } as any],
         pageIndex: this.pageIndex,
         pageSize: this.pageSize
       }).subscribe(res =>{
