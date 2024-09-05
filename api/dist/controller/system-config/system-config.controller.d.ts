@@ -5,6 +5,7 @@ import { SystemConfigService } from "src/services/system-config.service";
 export declare class SystemConfigController {
     private readonly systemConfigService;
     constructor(systemConfigService: SystemConfigService);
+    getServerDate(date: any): Promise<ApiResponseModel<any>>;
     getAll(): Promise<ApiResponseModel<SystemConfig[]>>;
     find(key: string): Promise<ApiResponseModel<SystemConfig>>;
     update(dto: UpdateSystemConfigDto): Promise<ApiResponseModel<SystemConfig>>;

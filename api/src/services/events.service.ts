@@ -513,11 +513,11 @@ export class EventsService {
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
-      // const dateTime = moment(
-      //   new Date(dto.dateTime),
-      //   DateConstant.DATE_LANGUAGE
-      // ).toISOString();
-      event.dateTime = new Date(dto.dateTime);
+      const dateTime = moment(
+        new Date(dto.dateTime),
+        DateConstant.DATE_LANGUAGE
+      ).toISOString();
+      event.dateTime = new Date(dateTime);
       const user = await entityManager.findOne(Users, {
         where: {
           userCode: dto.userCode,

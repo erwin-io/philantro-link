@@ -11,10 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const moment_1 = __importDefault(require("moment"));
 const notifications_constant_1 = require("../common/constant/notifications.constant");
 const user_error_constant_1 = require("../common/constant/user-error.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
@@ -25,6 +29,7 @@ const Users_1 = require("../db/entities/Users");
 const typeorm_2 = require("typeorm");
 const one_signal_notification_service_1 = require("./one-signal-notification.service");
 const events_constant_1 = require("../common/constant/events.constant");
+const date_constant_1 = require("../common/constant/date.constant");
 const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const Interested_1 = require("../db/entities/Interested");
 const Responded_1 = require("../db/entities/Responded");
@@ -440,7 +445,8 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
-            event.dateTime = new Date(dto.dateTime);
+            const dateTime = (0, moment_1.default)(new Date(dto.dateTime), date_constant_1.DateConstant.DATE_LANGUAGE).toISOString();
+            event.dateTime = new Date(dateTime);
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,

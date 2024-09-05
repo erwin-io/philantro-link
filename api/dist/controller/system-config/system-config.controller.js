@@ -22,6 +22,19 @@ let SystemConfigController = class SystemConfigController {
     constructor(systemConfigService) {
         this.systemConfigService = systemConfigService;
     }
+    async getServerDate(date) {
+        const res = {};
+        try {
+            res.data = await this.systemConfigService.getServerDate(date);
+            res.success = true;
+            return res;
+        }
+        catch (e) {
+            res.success = false;
+            res.message = e.message !== undefined ? e.message : e;
+            return res;
+        }
+    }
     async getAll() {
         const res = {};
         try {
@@ -63,6 +76,18 @@ let SystemConfigController = class SystemConfigController {
         }
     }
 };
+__decorate([
+    (0, common_1.Get)("/getServerDate"),
+    (0, swagger_1.ApiQuery)({
+        name: "date",
+        required: false,
+        description: "Date",
+    }),
+    __param(0, (0, common_1.Query)("date")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SystemConfigController.prototype, "getServerDate", null);
 __decorate([
     (0, common_1.Get)(""),
     __metadata("design:type", Function),

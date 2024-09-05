@@ -11,4 +11,9 @@ export declare class SystemConfigService {
         value: any;
     }): Promise<SystemConfig>;
     find(key: any): Promise<SystemConfig>;
+    getServerDate(date: any): Promise<{
+        date1: any;
+        date2: any;
+        dateTime: string;
+    }>;
 }

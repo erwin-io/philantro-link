@@ -10,8 +10,9 @@ import {
   Get,
   Param,
   Put,
+  Query,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiQuery, ApiTags } from "@nestjs/swagger";
 import { ApiResponseModel } from "src/core/models/api-response.model";
 import fs from "fs";
 import moment from "moment";
@@ -33,6 +34,27 @@ import { UPDATE_SUCCESS } from "src/common/constant/api-response.constant";
 export class SystemConfigController {
   constructor(private readonly systemConfigService: SystemConfigService) {}
 
+
+  @Get("/getServerDate")
+  //   @UseGuards(JwtAuthGuard)
+  @ApiQuery({
+    name: "date",
+    required: false,
+    description: "Date",
+  })
+  async getServerDate(@Query("date") date) {
+    const res: ApiResponseModel<any> = {} as any;
+    try {
+      res.data = await this.systemConfigService.getServerDate(date);
+      res.success = true;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+  
   @Get("")
   //   @UseGuards(JwtAuthGuard)
   async getAll() {
