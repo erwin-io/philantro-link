@@ -1,11 +1,11 @@
 <ion-content class="">
   <div class="profile ion-padding">
-    <div class="image" >
-      <!-- <img src="../../../assets/img/person.png"> -->
+    <div class="image ion-activatable" (click)="onShowChangeProfilePicMenu()">
       <img
         src="{{currentUser?.userProfilePic && currentUser?.userProfilePic?.file?.url ? currentUser?.userProfilePic?.file?.url : '../../../assets/img/person.png'}}"
         (error)="profilePicErrorHandler($event)"
         [style]="isSubmitting ? 'opacity: 0.2' : 'opacity: 1'" id="profilePicture">
+        <ion-ripple-effect></ion-ripple-effect>
     </div>
     <div class="name">
       <h1>{{currentUser?.name}}</h1>

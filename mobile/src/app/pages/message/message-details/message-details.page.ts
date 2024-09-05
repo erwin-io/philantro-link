@@ -64,16 +64,12 @@ export class MessageDetailsPage implements OnInit {
       if(this.pageLoaded) {
         this.pageIndex = 0;
         this.pageSize = 30;
-        if(res && res.type && res.type === "EVENTS" || res.type === "MESSAGE") {
+        if(res && res.type && (res.type === "EVENTS" || res.type === "MESSAGE")) {
           await Promise.all([
             this.initEventMessage(true),
-            this.markAsRead()
-          ]);
-        } else if(res && res.type && (res.type === "SUPPORT_TICKET")) {
-          await Promise.all([
             this.initSupportTicketMessage(true),
             this.markAsRead()
-          ])
+          ]);
         }
       }
       })
@@ -499,6 +495,7 @@ export class MessageDetailsPage implements OnInit {
       behavior: 'smooth' // This makes the scroll smooth; remove it for an instant scroll
     });
     this.newMessage = false;
+    this.cdr.detectChanges();
   }
 
   close() {

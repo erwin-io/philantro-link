@@ -2,29 +2,111 @@ ion-content {
     display: flex;
     flex-direction: column;
     .message-menu {
-        padding: 0 16px;
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        overflow: auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      overflow: auto;
+      box-sizing: border-box;
+      position: fixed;
+      z-index: 9999;
+      background: #fff;
+      width: 100%;
+      position: relative;
+      ion-button {
+        width: 50%!important;
         box-sizing: border-box;
-        position: fixed;
-        z-index: 9999;
-        background: #fff;
-        ion-button {
-            width: 50%!important;
-            box-sizing: border-box;
-            --box-shadow:none;
-            --background: #EFE9FF!important;
-            --color: #000;
-            &.active {
-                --color: #fff;
-                --background: var(--ion-color-secondary)!important;
-            }
+        --box-shadow:none;
+        --background: #EFE9FF!important;
+        --color: #000;
+        .message-menu-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          
         }
+        &.active {
+            --color: #fff;
+            --background: var(--ion-color-secondary)!important;
+        }
+        .message-menu-label {
+          margin-left: 10px;
+        }
+        .message-menu-badge {
+          border-radius: 100%;
+          width: 25px;
+          height: 25px;
+          background: red;
+          color: #fff;
+          font-size: smaller;
+        }
+        ion-icon {
+          min-width: 20px!important;
+          max-width: 20px!important;
+          min-height: 20px!important;
+          max-height: 20px!important;
+        }
+      }
+      @media screen and (max-width: 430px) {
+        ion-button {
+          --padding-start: 12px;
+          --padding-end: 12px;
+        }
+        .message-menu-label {
+          font-size: 80%!important;
+        }
+        ion-icon {
+          min-width: 15px!important;
+          max-width: 15px!important;
+          min-height: 15px!important;
+          max-height: 15px!important;
+        }
+      }
+      @media screen and (max-width: 350px) {
+        ion-button {
+          .message-menu-wrapper {
+            flex-direction: column;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .message-menu-label {
+            font-size: 80%!important;
+            display: none;
+          }
+          .message-menu-badge {
+            position: absolute;
+            margin-top: -9px;
+            margin-right: -30px;
+          }
+          ion-icon {
+            min-width: 24px!important;
+            max-width: 24px!important;
+            min-height: 24px!important;
+            max-height: 24px!important;
+          }
+        }
+      }
+      @media screen and (max-width: 400px) {
+        // .message-menu-label {
+        //     font-size: 80%!important;
+        // }
+      }
+      @media screen and (max-width: 320px) {
+        .message-menu-label {
+            display: none;
+        }
+      }
+
+      .message-menu-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
     }
     .message-list {
-      margin-top: 44px!important;
+      margin-top: 20px!important;
         ion-avatar {
             width: 55px;
             height: 55px;

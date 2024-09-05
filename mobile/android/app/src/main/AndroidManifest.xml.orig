@@ -13,11 +13,7 @@
         <provider android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true" android:name="androidx.core.content.FileProvider">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
-
-        <!-- OneSignal Initialization -->
-        <meta-data
-            android:name="com.onesignal.NotificationOpened.DEFAULT"
-            android:value="DISABLE" />
+        <meta-data android:name="com.onesignal.NotificationOpened.DEFAULT" android:value="DISABLE" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />

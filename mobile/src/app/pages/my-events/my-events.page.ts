@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { DeviceInfo } from '@capacitor/device';
 import { Style } from '@capacitor/status-bar';
@@ -16,6 +16,7 @@ import { EventDetailsComponent } from 'src/app/shared/event-details/event-detail
 import { EventTypePickerComponent } from 'src/app/shared/event-type-picker/event-type-picker.component';
 import { JoinedEventsComponent } from './joined-events/joined-events.component';
 import { InterestedEventsComponent } from './interested-events/interested-events.component';
+import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
 
 @Component({
   selector: 'app-my-events',
@@ -29,21 +30,37 @@ export class MyEventsPage implements OnInit {
   pageIndex = 0;
   pageSize = 10;
   isLoading = false;
+  pageLoaded = false;
   geolocationPosition: GeolocationPosition;
   @ViewChild(IonRefresher)ionRefresher: IonRefresher;
   constructor(
+    private cdr: ChangeDetectorRef,
     private alertController: AlertController,
     private eventsService: EventsService, 
     private geoLocationService: GeoLocationService, 
     private statusBarService: StatusBarService, 
     private storageService: StorageService,
     private modalCtrl: ModalController,
-    private animationService: AnimationService,) { 
+    private animationService: AnimationService,
+    private oneSignalNotificationService: OneSignalNotificationService,) { 
       this.currentUser = this.storageService.getLoginProfile();
+      this.oneSignalNotificationService.data$.subscribe(async (res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE'; referenceId; })=> {
+        if(this.pageLoaded && res.type === "EVENTS") {
+          const eventsRes = await this.eventsService.getByCode(res.referenceId).toPromise();
+          if(eventsRes && eventsRes.success && eventsRes.data) {
+            const index = this.events.findIndex(x=>x.eventCode === res.referenceId);
+            if(this.events[index]) {
+              this.events[index] = eventsRes.data;
+            }
+            this.cdr.detectChanges();
+          }
+        }
+      })
     }
 
   async ngOnInit() {
-    this.initEvents(true);
+    await this.initEvents(true);
+    this.pageLoaded = true;
   }
 
   async initEvents(showProgress = false) {

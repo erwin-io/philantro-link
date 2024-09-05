@@ -30,8 +30,6 @@ import { UserConversation } from '../model/user-conversation.model';
   providedIn: 'root'
 })
 export class OneSignalNotificationService {
-
-
   private data = new BehaviorSubject({});
   data$ = this.data.asObservable();
 

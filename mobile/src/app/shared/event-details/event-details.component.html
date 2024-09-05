@@ -6,7 +6,7 @@
       </ion-button>
     </ion-buttons>
     <ion-title class="ion-text-center">Details</ion-title>
-    <ion-buttons slot="end" *ngIf="event?.eventStatus === 'PENDING' || event?.eventStatus === 'APPROVED'; else elseNoHeaderOptions">
+    <ion-buttons slot="end" *ngIf="currentUser?.userCode === event?.user?.userCode && (event?.eventStatus === 'PENDING' || event?.eventStatus === 'APPROVED'); else elseNoHeaderOptions">
       <ion-button (click)="openOptions()" color="light" mode="md">
         <ion-icon name="ellipsis-vertical" style="font-size: 1.8rem!important;"></ion-icon>
       </ion-button>

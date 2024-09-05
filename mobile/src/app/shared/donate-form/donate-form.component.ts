@@ -6,6 +6,7 @@ import { AlertOptions } from '@ionic/core';
 import { Events } from 'src/app/model/events.model';
 import { Transactions } from 'src/app/model/transactions.model';
 import { Users } from 'src/app/model/users';
+import { EventsService } from 'src/app/services/events.service';
 import { TransactionsService } from 'src/app/services/transactions.service';
 
 
@@ -33,6 +34,7 @@ export class DonateFormComponent  implements OnInit {
   };
   constructor(
     private transactionsService: TransactionsService,
+    private eventsService: EventsService,
     private alertController: AlertController
   ) { }
 
@@ -105,6 +107,7 @@ export class DonateFormComponent  implements OnInit {
               buttons: [{
                 text: 'OK',
                 handler: ()=> {
+                  this.eventsService.sendUpdates(res.data);
                   this.modal.dismiss(res?.data, "ok");
                 }
               }],

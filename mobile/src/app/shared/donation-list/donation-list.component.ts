@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { ActionSheetController, AlertController, IonRefresher, ModalController } from '@ionic/angular';
 import { Transactions } from 'src/app/model/transactions.model';
 import { Users } from 'src/app/model/users';
@@ -33,6 +33,7 @@ export class DonationListComponent implements OnInit {
   error: any;
   @ViewChild(IonRefresher)ionRefresher: IonRefresher;
   constructor(
+    private cdr: ChangeDetectorRef,
     private statusBarService: StatusBarService,
     private modalCtrl: ModalController,
     private storageService: StorageService,
@@ -87,6 +88,7 @@ export class DonationListComponent implements OnInit {
 
       if(event) {
         this.event.raisedDonation = event?.data?.raisedDonation;
+        this.event.visitorUserDonation = event?.data?.visitorUserDonation;
       }
 
       let unReadMessage = 0;
@@ -102,6 +104,7 @@ export class DonationListComponent implements OnInit {
       const totalUnreadNotif = Number(unReadMessage) + Number(unReadNotif);
       this.storageService.saveTotalUnreadNotif(totalUnreadNotif);
       this.isLoading = false;
+      this.cdr.detectChanges();
       if(this.ionRefresher) {
         this.ionRefresher.complete();
       }

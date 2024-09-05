@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -44,6 +44,7 @@ export class AccountSettingsComponent implements OnInit {
   isLoadingProfile = false;
   protected ngUnsubscribe: Subject<void> = new Subject<void>();
   constructor(
+    private cdr: ChangeDetectorRef,
     private modalCtrl: ModalController,
     private actionSheetController: ActionSheetController,
     private appconfig: AppConfigService,
@@ -125,8 +126,11 @@ export class AccountSettingsComponent implements OnInit {
                 };
                 this.isEditMode = false;
                 this.storageService.saveTotalUnreadNotif(res.data["totalUnreadNotif"]);
-                this.currentUser = res.data;
+                this.currentUser.email = res.data.email;
+                this.currentUser.name = res.data.name;
+                this.currentUser.helpNotifPreferences = res.data.helpNotifPreferences;
                 this.storageService.saveLoginProfile(this.currentUser);
+                this.cdr.detectChanges();
               } else {
                 await this.pageLoaderService.close();
                 this.ngUnsubscribe.complete();

@@ -19,7 +19,7 @@
     <ng-container *ngFor="let item of events">
       <ion-item (click)="onOpenTicket(item)" [detail]="true" [button]="true" class="ion-no-padding">
         <ion-avatar aria-hidden="true" slot="start">
-          <img alt="" [src]="item?.thumbnailFile?.url" (error)="imageErrorHandler($event)"/>
+          <img alt="" [src]="item?.thumbnailFile?.url" (error)="imageErrorHandler($event, item?.eventType)"/>
         </ion-avatar>
         <ion-label >
           <h2 class="desc">

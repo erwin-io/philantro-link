@@ -20,7 +20,7 @@ export class GeoLocationService implements IServices {
   }
 
   async getCurrentPosition() {
-    return this.tempPosition;
+    // return this.tempPosition; PLEASE COMMENT WHEN USING PRODUCTION
      return await Geolocation.getCurrentPosition({
       timeout: 4000,
       enableHighAccuracy: true,
@@ -36,8 +36,7 @@ export class GeoLocationService implements IServices {
 
     try {
       const watchId = await Geolocation.watchPosition(options, (position) => {
-        position = this.tempPosition;
-        // position = position;
+        // position = this.tempPosition; PLEASE COMMENT WHEN USING PRODUCTION
         if(position && position?.coords && position?.coords?.latitude && position?.coords?.longitude) {
           console.log('New position:', position.coords.latitude, position.coords.longitude);
           this.data.next(position);

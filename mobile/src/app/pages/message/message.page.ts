@@ -24,6 +24,7 @@ import { SupportTicketDetailsComponent } from 'src/app/shared/support-ticket-det
 import { SupportTicketService } from 'src/app/services/support-ticket.service';
 import { SupportTicket } from 'src/app/model/support-ticket.model';
 import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-message',
@@ -62,7 +63,7 @@ export class MessagePage implements OnInit {
     this.currentUser = this.storageService.getLoginProfile();
     this.oneSignalNotificationService.data$.subscribe(async (res: { type: 'EVENTS' | 'SUPPORT_TICKET' | 'MESSAGE'; referenceId; })=> {
       if(this.pageLoaded) {
-        if(res.type === "EVENTS" || res.type === "MESSAGE") {
+        if(this.active === "CHAT" && (res.type === "EVENTS" || res.type === "MESSAGE")) {
           const userConversationRes = await this.userConversationService.getById(res.referenceId).toPromise();
           if(userConversationRes && userConversationRes.success && userConversationRes.data) {
             this.userConversations.find(x=>x.userConversationId === res.referenceId).dateTime = userConversationRes.data.dateTime;
@@ -141,17 +142,14 @@ export class MessagePage implements OnInit {
         this.total = paginated.data.total;
       }
 
-      let unReadMessage = 0;
-      let unReadNotif = 0;
-
-      if(_unReadMessage.data) {
-        unReadMessage = !isNaN(Number(_unReadMessage.data)) ? Number(_unReadMessage.data) : 0;
+      if(_unReadMessage.success) {
+        this.totalUnreadMessage = !isNaN(Number(_unReadMessage.data)) ? Number(_unReadMessage.data) : 0;
       }
 
-      if(_unReadNotif.data) {
-        unReadNotif = !isNaN(Number(_unReadNotif.data)) ? Number(_unReadNotif.data) : 0;
+      if(_unReadNotif.success) {
+        this.totalUnreadNotification = !isNaN(Number(_unReadNotif.data)) ? Number(_unReadNotif.data) : 0;
       }
-      const totalUnreadNotif = Number(unReadMessage) + Number(unReadNotif);
+      const totalUnreadNotif = Number(this.totalUnreadMessage) + Number(this.totalUnreadNotification);
       this.storageService.saveTotalUnreadNotif(totalUnreadNotif);
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -193,18 +191,15 @@ export class MessagePage implements OnInit {
         this.notifications = [ ...this.notifications, ...paginated.data.results ];
         this.total = paginated.data.total;
       }
-
-      let unReadNotif = 0;
-      let unReadMessage = 0;
-
-      if(_unReadNotif.data) {
-        unReadNotif = !isNaN(Number(_unReadNotif.data)) ? Number(_unReadNotif.data) : 0;
+      
+      if(_unReadMessage.success) {
+        this.totalUnreadMessage = !isNaN(Number(_unReadMessage.data)) ? Number(_unReadMessage.data) : 0;
       }
 
-      if(_unReadMessage.data) {
-        unReadMessage = !isNaN(Number(_unReadMessage.data)) ? Number(_unReadMessage.data) : 0;
+      if(_unReadNotif.success) {
+        this.totalUnreadNotification = !isNaN(Number(_unReadNotif.data)) ? Number(_unReadNotif.data) : 0;
       }
-      const totalUnreadNotif = Number(unReadNotif) + Number(unReadMessage);
+      const totalUnreadNotif = Number(this.totalUnreadMessage) + Number(this.totalUnreadNotification);
       this.storageService.saveTotalUnreadNotif(totalUnreadNotif);
 
       this.isLoading = false;
@@ -295,10 +290,12 @@ export class MessagePage implements OnInit {
         this.statusBarService.show();
         this.statusBarService.modifyStatusBar(Style.Dark, '#311B92');
         modal.onDidDismiss().then((res: {data: SupportTicket; role})=> {
+          console.log(res);
           this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
         });
         this.pageLoaderService.close();
         this.markNotifAsRead(notifications);
+        this.cdr.detectChanges();
       } else {
         await this.presentAlert({
           header: 'Try again!',
@@ -311,25 +308,32 @@ export class MessagePage implements OnInit {
 
   async markNotifAsRead(notifDetails: { notificationId: string }) {
     try{
-      this.notificationService.marAsRead(notifDetails.notificationId)
-        .subscribe(async res => {
-          if (res.success) {
-            this.notifications.filter(x=>x.notificationId === notifDetails.notificationId)[0].isRead = true;
-            this.storageService.saveTotalUnreadNotif(res.data.totalUnreadNotif);
-          } else {
-            await this.presentAlert({
-              header: 'Try again!',
-              message: Array.isArray(res.message) ? res.message[0] : res.message,
-              buttons: ['OK']
-            });
-          }
-        }, async (err) => {
-          await this.presentAlert({
-            header: 'Try again!',
-            message: Array.isArray(err.message) ? err.message[0] : err.message,
-            buttons: ['OK']
-          });
+      const [marAsRead, getUnreadByMessage, getUnreadNotif] = await Promise.all([
+        this.notificationService.marAsRead(notifDetails.notificationId).toPromise(),
+        this.userConversationService.getUnreadByUser(this.currentUser?.userId).toPromise(),
+        this.notificationService.getUnreadByUser(this.currentUser?.userId).toPromise()
+      ]);
+      
+      if (marAsRead.success) {
+        this.notifications.filter(x=>x.notificationId === notifDetails.notificationId)[0].isRead = true;
+        this.storageService.saveTotalUnreadNotif(marAsRead.data.totalUnreadNotif);
+      } else {
+        await this.presentAlert({
+          header: 'Try again!',
+          message: Array.isArray(marAsRead.message) ? marAsRead.message[0] : marAsRead.message,
+          buttons: ['OK']
         });
+        return;
+      }
+      
+      if (getUnreadByMessage.success) {
+        this.totalUnreadMessage = getUnreadByMessage.data;
+      }
+      
+      if (getUnreadNotif.success) {
+        this.totalUnreadNotification = getUnreadNotif.data;
+      }
+      this.cdr.detectChanges();
     } catch (e){
       await this.presentAlert({
         header: 'Try again!',

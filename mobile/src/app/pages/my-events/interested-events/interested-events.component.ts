@@ -52,8 +52,8 @@ export class InterestedEventsComponent implements OnInit {
     }
   }
 
-  imageErrorHandler(event) {
-    event.target.src = getEventCardDefaultImage(null);
+  imageErrorHandler(event, type: "CHARITY" | "VOLUNTEER" | "DONATION" | "ASSISTANCE") {
+    event.target.src = getEventCardDefaultImage(type);
   }
 
   ionViewWillEnter(){

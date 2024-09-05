@@ -16,6 +16,12 @@ ion-header {
     }
   }
 }
+ion-avatar {
+  min-width: 35px!important;
+  max-width: 35px!important;
+  min-height: 35px!important;
+  max-height: 35px!important;
+}
 ion-content {
   --color: #fff;
   ::ng-deep {
@@ -81,5 +87,8 @@ ion-content {
         }
       }
     }
+  }
+  [load-more] {
+    width: 100%;
   }
 }

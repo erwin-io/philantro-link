@@ -9,7 +9,7 @@ import { Events } from '../model/events.model';
 import { ModalController } from '@ionic/angular';
 import { EventDetailsComponent } from '../shared/event-details/event-details.component';
 import { AnimationService } from './animation.service';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -17,9 +17,15 @@ import { tap, catchError } from 'rxjs/operators';
 })
 export class EventsService implements IServices {
 
+  private data = new BehaviorSubject({});
+  data$ = this.data.asObservable();
   constructor(
     private http: HttpClient,
     private appconfig: AppConfigService) { }
+
+  sendUpdates(data: Events) {
+    this.data.next(data);
+  }
 
   getByAdvanceSearch(params: {
     order: any;

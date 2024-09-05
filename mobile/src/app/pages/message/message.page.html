@@ -10,13 +10,19 @@
     </ion-refresher-content>
   </ion-refresher>
   <div class="message-menu">
-    <ion-button shape="round" [ngClass]="{ 'active' : active === 'CHAT' }" (click)="changeTab('CHAT');">
-      <ion-icon slot="start" name="chatbubble-ellipses-outline"></ion-icon>
-      Message
+    <ion-button shape="round" expand="block" [ngClass]="{ 'active' : active === 'CHAT' }" (click)="changeTab('CHAT');">
+      <div class="message-menu-wrapper">
+        <ion-icon slot="start" name="chatbubble-ellipses-outline"></ion-icon>
+        <p class="message-menu-label">Message</p>
+        <span class="message-menu-badge" *ngIf="totalUnreadMessage > 0">{{totalUnreadMessage > 99 ? '99+' : totalUnreadMessage}}</span>
+      </div>
     </ion-button>
-    <ion-button shape="round" [ngClass]="{ 'active' : active === 'NOTIFICATIONS' }"  (click)="changeTab('NOTIFICATIONS');">
-      <ion-icon slot="start" name="notifications-outline"></ion-icon>
-      Notifications
+    <ion-button shape="round" expand="block" [ngClass]="{ 'active' : active === 'NOTIFICATIONS' }"  (click)="changeTab('NOTIFICATIONS');">
+      <div class="message-menu-wrapper">
+        <ion-icon slot="start" name="notifications-outline"></ion-icon>
+        <p class="message-menu-label">Notifications</p>
+        <span class="message-menu-badge" *ngIf="totalUnreadNotification > 0">{{totalUnreadNotification > 99 ? '99+' : totalUnreadNotification}}</span>
+      </div>
     </ion-button>
   </div>
   <ng-container *ngIf="active === 'CHAT'">

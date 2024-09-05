@@ -11,7 +11,7 @@ import { AnimationService } from 'src/app/services/animation.service';
 import { LocationPickerComponent } from 'src/app/shared/location-picker/location-picker.component';
 import { GeoLocationService } from 'src/app/services/geo-location.service';
 import { Events } from 'src/app/model/events.model';
-import { getEventCardDefaultImage } from 'src/app/shared/utility/utility';
+import { getEventCardDefaultImage, getPersonDefaultImage } from 'src/app/shared/utility/utility';
 import { Subject, takeUntil, catchError, Observable, of, Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { EventDetailsComponent } from 'src/app/shared/event-details/event-details.component';
@@ -242,6 +242,10 @@ export class HomePage implements OnInit, AfterViewInit {
 
   imageErrorHandler(event, type) {
     event.target.src = getEventCardDefaultImage(type);
+  }
+
+  profilePicErrorHandler(event) {
+    event.target.src = getPersonDefaultImage(null);
   }
 
   handleError<T>(operation = 'operation', result?: any) {

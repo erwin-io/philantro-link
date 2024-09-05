@@ -20,6 +20,8 @@ import { ResetPasswordComponent } from '../../shared/reset-password/reset-passwo
 import { Capacitor } from '@capacitor/core';
 import { HelpSupportComponent } from 'src/app/shared/help-support/help-support.component';
 import { MyDonationComponent } from 'src/app/shared/my-donation/my-donation.component';
+import { base64ToBlob, createDataURL, getFileExtension, getPersonDefaultImage, isBase64, readAsBase64 } from 'src/app/shared/utility/utility';
+import { PageLoaderService } from 'src/app/services/page-loader.service';
 
 @Component({
   selector: 'app-account',
@@ -38,6 +40,7 @@ export class AccountPage implements OnInit {
     private userService: UserService,
     private animationService: AnimationService,
     private storageService: StorageService,
+    private pageLoaderService: PageLoaderService,
     private alertController: AlertController,
     private statusBarService: StatusBarService
   ) {
@@ -73,6 +76,7 @@ export class AccountPage implements OnInit {
     this.statusBarService.show();
     this.statusBarService.modifyStatusBar(Style.Dark, '#311B92');
     modal.onWillDismiss().then(()=> {
+      this.currentUser = this.storageService.getLoginProfile();
       this.statusBarService.modifyStatusBar(Style.Light, '#ffffff');
     })
   }
@@ -161,6 +165,7 @@ export class AccountPage implements OnInit {
 
   async onShowChangeProfilePicMenu() {
     const actionSheet = await this.actionSheetController.create({
+      header: 'Need a refresh? Tap here to change your profile picture.',
       cssClass: 'sched-card-action-sheet',
       buttons: [
         {
@@ -173,16 +178,29 @@ export class AccountPage implements OnInit {
               source: CameraSource.Camera, // Camera, Photos or Prompt!
             });
             if (image) {
-              const base64Data = await this.readAsBase64(image);
-              this.profilePicSource = base64Data;
-              await this.saveProfilePicture(
-                {
-                  userId: this.currentUser.userId,
-                  userProfilePic: {
-                    fileName: `profile-sample-name.${image.format}`,
-                    data: base64Data,
-                  }
-                });
+                
+              const data = await readAsBase64(image, this.platform.is('hybrid'));
+              const mimeType = data.toString().match(/data:(.*?);base64/)?.[1] || '';
+              const blob = await base64ToBlob(this.platform.is('hybrid') ? data : data.toString().split(',')[1] as any , this.platform.is('hybrid') ? `image/${image.format}` : mimeType);
+              if(blob.size > 4 * 1024 * 1024) {
+                this.presentAlert({
+                  header: 'Try Again!',
+                  subHeader: 'There was an error when uploading your image, please try again!',
+                  message: "Image size exceeds the limit of 4MB.",
+                  cssClass: 'alert-danger',
+                  buttons: ['OK'],
+                })
+              } else {
+                const fileExtension = this.platform.is('hybrid') ? image.format : getFileExtension(data);
+                this.profilePicSource = this.platform.is('hybrid') ? createDataURL(data as any, fileExtension) : data as any;
+                await this.saveProfilePicture(
+                  {
+                    userProfilePic: {
+                      fileName: `profile-sample-name.${image.format}`,
+                      data: isBase64(data.toString()) ? data : data.toString().split(',')[1]
+                    }
+                  });
+              }
             }
             actionSheet.dismiss();
           },
@@ -197,16 +215,29 @@ export class AccountPage implements OnInit {
               source: CameraSource.Photos, // Camera, Photos or Prompt!
             });
             if (image) {
-              const base64Data = await this.readAsBase64(image);
-              this.profilePicSource = base64Data;
-              await this.saveProfilePicture(
-                {
-                  userId: this.currentUser.userId,
-                  userProfilePic: {
-                    fileName: `profile-sample-name.${image.format}`,
-                    data: base64Data,
-                  }
-                });
+                
+              const data = await readAsBase64(image, this.platform.is('hybrid'));
+              const mimeType = data.toString().match(/data:(.*?);base64/)?.[1] || '';
+              const blob = await base64ToBlob(this.platform.is('hybrid') ? data : data.toString().split(',')[1] as any , this.platform.is('hybrid') ? `image/${image.format}` : mimeType);
+              if(blob.size > 4 * 1024 * 1024) {
+                this.presentAlert({
+                  header: 'Try Again!',
+                  subHeader: 'There was an error when uploading your image, please try again!',
+                  message: "Image size exceeds the limit of 4MB.",
+                  cssClass: 'alert-danger',
+                  buttons: ['OK'],
+                })
+              } else {
+                const fileExtension = this.platform.is('hybrid') ? image.format : getFileExtension(data);
+                this.profilePicSource = this.platform.is('hybrid') ? createDataURL(data as any, fileExtension) : data as any;;
+                await this.saveProfilePicture(
+                  {
+                    userProfilePic: {
+                      fileName: `profile-sample-name.${image.format}`,
+                      data: isBase64(data.toString()) ? data : data.toString().split(',')[1]
+                    }
+                  });
+              }
             }
             actionSheet.dismiss();
           },
@@ -225,33 +256,37 @@ export class AccountPage implements OnInit {
   async saveProfilePicture(params) {
     try {
       this.isSubmitting = true;
-      // this.userService.updateProfilePicture(this.currentUser.userCode, params).subscribe(
-      //   async (res) => {
-      //     if (res.success) {
-      //       this.isSubmitting = false;
-      //       this.currentUser.userProfilePic = res.data.userProfilePic;
-      //       this.storageService.saveLoginProfile(this.currentUser);
-      //     } else {
-      //       this.isSubmitting = false;
-      //       await this.presentAlert({
-      //         header: 'Try again!',
-      //         message: Array.isArray(res.message)
-      //           ? res.message[0]
-      //           : res.message,
-      //         buttons: ['OK'],
-      //       });
-      //     }
-      //   },
-      //   async (err) => {
-      //     this.isSubmitting = false;
-      //     await this.presentAlert({
-      //       header: 'Try again!',
-      //       message: Array.isArray(err.message) ? err.message[0] : err.message,
-      //       buttons: ['OK'],
-      //     });
-      //   }
-      // );
+      await this.pageLoaderService.open('Processing please wait...');
+      this.userService.updateProfilePicture(this.currentUser.userCode, params).subscribe(
+        async (res) => {
+          this.pageLoaderService.close();
+          if (res.success) {
+            this.isSubmitting = false;
+            this.currentUser.userProfilePic = res.data.userProfilePic;
+            this.storageService.saveLoginProfile(this.currentUser);
+          } else {
+            this.isSubmitting = false;
+            await this.presentAlert({
+              header: 'Try again!',
+              message: Array.isArray(res.message)
+                ? res.message[0]
+                : res.message,
+              buttons: ['OK'],
+            });
+          }
+        },
+        async (err) => {
+          this.pageLoaderService.close();
+          this.isSubmitting = false;
+          await this.presentAlert({
+            header: 'Try again!',
+            message: Array.isArray(err.message) ? err.message[0] : err.message,
+            buttons: ['OK'],
+          });
+        }
+      );
     } catch (e) {
+      this.pageLoaderService.close();
       this.isSubmitting = false;
       await this.presentAlert({
         header: 'Try again!',
@@ -261,39 +296,12 @@ export class AccountPage implements OnInit {
     }
   }
 
-  async readAsBase64(photo: Photo) {
-    if (this.platform.is('hybrid')) {
-      const file = await Filesystem.readFile({
-        path: photo.path,
-      });
-
-      return file.data;
-    } else {
-      // Fetch the photo, read as a blob, then convert to base64 format
-      const response = await fetch(photo.webPath);
-      const blob = await response.blob();
-
-      const base64 = (await this.convertBlobToBase64(blob)) as string;
-      return base64.split(',')[1];
-    }
-  }
-
-  convertBlobToBase64 = (blob: Blob) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        resolve(reader.result);
-      };
-      reader.readAsDataURL(blob);
-    });
-
   async presentAlert(options: any) {
     const alert = await this.alertController.create(options);
     return await alert.present();
   }
 
   profilePicErrorHandler(event) {
-    return '../../../assets/img/person.png';
+    event.target.src = getPersonDefaultImage(null);
   }
 }

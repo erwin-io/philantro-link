@@ -2,7 +2,14 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button routerLink="/account">
-          <ion-icon name="person-circle-outline" style="font-size: 1.8rem!important;"></ion-icon>
+          <!-- <ion-icon name="person-circle-outline" style="font-size: 1.8rem!important;"></ion-icon> -->
+          <!-- <img [src]="currentUser?.userProfilePic?.file?.url" alt="Person Icon" style="height: 1.8rem; width: 1.8rem;" /> -->
+          <ion-avatar slot="start">
+            <img
+              alt="{{currentUser?.name}}" 
+              src="{{currentUser?.userProfilePic && currentUser?.userProfilePic?.file?.url ? currentUser?.userProfilePic?.file?.url : '../../../assets/img/person.png'}}"
+              (error)="profilePicErrorHandler($event)" id="profilePicture">
+          </ion-avatar>
         </ion-button>
       </ion-buttons>
       <ion-title class="ion-text-center">Home</ion-title>
@@ -68,7 +75,10 @@
       <ion-content class="ion-padding">
         <ng-container *ngIf="(!searchKey || searchKey === ''); else showSearchResults">
           <ng-container *ngIf="allDisplayedEvents.nonHelpEvents.length > 0">
-            <ion-text color="dark">Suggested Events</ion-text>
+            <div style="display: flex;flex-direction: row;justify-content: space-between;">
+              <ion-text color="dark">Suggested Events</ion-text>
+              <ion-text color="primary" routerLink="/home">See more</ion-text>
+            </div>
             <ion-list class="search-result">
               <ion-item [button]="true" *ngFor="let item of allDisplayedEvents.nonHelpEvents | slice:0:3" (click)="openEvent(item?.eventCode)">
                 <ion-avatar slot="start">
@@ -85,11 +95,13 @@
                 </ion-label>
               </ion-item>
             </ion-list>
-            <ion-text color="primary" routerLink="/home">See more</ion-text>
             <br>
           </ng-container>
           <ng-container *ngIf="allDisplayedEvents.help.length > 0">
-            <ion-text color="dark">Need help nearby</ion-text>
+            <div style="display: flex;flex-direction: row;justify-content: space-between;">
+              <ion-text color="dark">Need help nearby</ion-text>
+              <ion-text color="primary" routerLink="/home/help">See more</ion-text>
+            </div>
             <ion-list class="search-result">
               <ion-item [button]="true" *ngFor="let item of allDisplayedEvents.help | slice:0:3" (click)="openEvent(item?.eventCode)">
                 <ion-avatar slot="start">
@@ -106,7 +118,6 @@
                 </ion-label>
               </ion-item>
             </ion-list>
-            <ion-text color="primary" routerLink="/home/help">See more</ion-text>
           </ng-container>
         </ng-container>
 
@@ -134,7 +145,7 @@
                 </ion-item>
               </ion-list>
 
-              <ion-button fill="clear" *ngIf="!isSearching && searchResultsTotal > searchResults.length" (click)="loadMore()">
+              <ion-button load-more fill="clear" *ngIf="!isSearching && searchResultsTotal > searchResults.length" (click)="loadMore()">
                 <ion-icon slot="start" name="chevron-down-outline"></ion-icon>
                 Load more
               </ion-button>

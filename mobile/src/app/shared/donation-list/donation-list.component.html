@@ -39,7 +39,7 @@
           </ion-avatar>
           <ion-label >
             <h3 class="desc">
-              <strong>{{item?.user.name}}</strong>
+              <strong>{{item?.user?.userCode === currentUser?.userCode ? 'You' : item?.user.name}}</strong>
             </h3>
             <h4 class="sub-title">{{ item?.dateTime | date:'EEE, MMM d, y AT h a'}}</h4>
           </ion-label>
@@ -67,7 +67,7 @@
   </ng-template>
 </ion-content>
 <ion-footer>
-  <ion-toolbar mode="md">
+  <ion-toolbar mode="md" *ngIf="currentUser?.userCode !== event?.user?.userCode">
     <ion-button [style.height.px]="45" mode="md" expand="full" shape="round" color="primary" (click)="onDonate()">
       Donate
     </ion-button>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { ActionSheetController, AlertController, IonRefresher, ModalController, ToastController } from '@ionic/angular';
@@ -18,6 +18,8 @@ import { PageLoaderService } from 'src/app/services/page-loader.service';
 import { Style } from '@capacitor/status-bar';
 import { StatusBarService } from 'src/app/services/status-bar.service';
 import { DonationListComponent } from '../donation-list/donation-list.component';
+import { OneSignalNotificationService } from 'src/app/services/one-signal-notification.service';
+import { Transactions } from 'src/app/model/transactions.model';
 
 @Component({
   selector: 'app-event-details',
@@ -36,6 +38,7 @@ export class EventDetailsComponent  implements OnInit {
   @ViewChild(IonRefresher)ionRefresher: IonRefresher;
   @ViewChild('openImage') openImage: ElementRef<HTMLImageElement>;
   constructor(
+    private cdr: ChangeDetectorRef,
     private eventsService: EventsService,
     private storageService: StorageService,
     private animationService: AnimationService,
@@ -45,8 +48,20 @@ export class EventDetailsComponent  implements OnInit {
     private actionSheetController: ActionSheetController,
     private toastController: ToastController,
     private statusBarService: StatusBarService, 
+    private oneSignalNotificationService: OneSignalNotificationService, 
   ) {
     this.currentUser = this.storageService.getLoginProfile();
+    this.eventsService.data$.subscribe(async (res: Transactions)=> {
+      console.log(res);
+      if(res.transactionId && res.transactionId !== "" && res.transactionCode && res.transactionCode !== "") {
+        const resEvent = await this.eventsService.getByCode(this.eventCode, this.currentUser?.userCode).toPromise();
+        this.event.raisedDonation = resEvent.data.raisedDonation;
+        this.event.visitorUserDonation = resEvent.data.visitorUserDonation;
+        this.event.responded = resEvent.data.responded;
+        this.event.interested = resEvent.data.interested;
+        this.cdr.detectChanges();
+      }
+    });
    }
 
   async ngOnInit() {
@@ -128,6 +143,7 @@ export class EventDetailsComponent  implements OnInit {
                   layout: 'stacked',
                 });
                 toast.present();
+                this.eventsService.sendUpdates(res.data);
             
               }, (err)=> {
                 this.isLoading = false;
@@ -191,6 +207,7 @@ export class EventDetailsComponent  implements OnInit {
                   layout: 'stacked',
                 });
                 toast.present();
+                this.eventsService.sendUpdates(res.data);
               }, (err)=> {
                 this.isLoading = false;
                 this.showError = true;
@@ -253,6 +270,7 @@ export class EventDetailsComponent  implements OnInit {
               });
               modal.present();
               modal.onDidDismiss().then(res=> {
+                console.log(res);
               });
             },
           },
@@ -369,6 +387,7 @@ export class EventDetailsComponent  implements OnInit {
                         this.isProcessing = false;
                         this.isLoading = false;
                         this.doRefresh();
+                        this.eventsService.sendUpdates(res.data);
                       }
                     }]
                   });
