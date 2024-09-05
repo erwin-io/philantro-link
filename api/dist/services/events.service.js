@@ -445,7 +445,7 @@ let EventsService = class EventsService {
                 .then((res) => {
                 return res[0].dateTime;
             });
-            event.dateTime = dateTime;
+            event.dateTime = new Date(dateTime);
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,
@@ -718,7 +718,7 @@ let EventsService = class EventsService {
                 return res[0].dateTime;
             });
             event.dateTimeUpdate = timestamp;
-            event.dateTime = dateTime;
+            event.dateTime = new Date(dateTime);
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
