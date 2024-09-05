@@ -5,14 +5,14 @@
   <img id="banner" src="../assets/img/banner-white.png">
   <span id="title">{{title}}</span>
   <span class="toolbar-item-spacer"></span>
-  <button mat-icon-button matTooltip="Notifications" (click)="notification.toggle();getNotifCount()">
+  <!-- <button mat-icon-button matTooltip="Notifications" (click)="notification.toggle();getNotifCount()">
       <mat-icon *ngIf="unReadNotificationCount > 0; else noBadgeNotifIcon" matBadge="{{
         (unReadNotificationCount > 99 ? '99+' : unReadNotificationCount)
       }}" matBadgeColor="warn">notifications</mat-icon>
       <ng-template #noBadgeNotifIcon>
         <mat-icon matBadgeColor="warn">notifications</mat-icon>
       </ng-template>
-  </button>
+  </button> -->
   <button class="profile-mat-menu" mat-icon-button matTooltip="My Account" [matMenuTriggerFor]="userAccountMenu">
     <mat-icon *ngIf="!profileLoaded">account_circle</mat-icon>
     <img [hidden]="!profileLoaded" style="width: 50px;height: 50px;" (load)="profileLoaded = true" (error)="profileLoaded = false" [src]="profile?.userProfilePic?.file?.url">
