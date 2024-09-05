@@ -21,7 +21,7 @@ import { Notifications } from "src/db/entities/Notifications";
 import { Users } from "src/db/entities/Users";
 import { UserConversation } from "src/db/entities/UserConversation";
 import { USER_CONVERSATION_TYPE } from "src/common/constant/user-conversation.constant";
-
+import * as moment from "moment-timezone";
 @Injectable()
 export class EventMessageService {
   constructor(
@@ -167,11 +167,7 @@ export class EventMessageService {
           }
           eventMessage.toUser = toUser;
 
-          const timestamp = await entityManager
-            .query(CONST_QUERYCURRENT_TIMESTAMP)
-            .then((res) => {
-              return res[0]["timestamp"];
-            });
+          const timestamp = moment.tz("Asia/Manila").toDate();
           eventMessage.dateTimeSent = timestamp;
           eventMessage = await entityManager.save(EventMessage, eventMessage);
 

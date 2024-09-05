@@ -1,7 +1,6 @@
 import { type } from "os";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import moment from "moment";
 import { USER_ERROR_USER_NOT_FOUND } from "src/common/constant/user-error.constant";
 import { USER_TYPE } from "src/common/constant/user-type.constant";
 import {
@@ -34,6 +33,7 @@ import { Notifications } from "src/db/entities/Notifications";
 import { UserConversation } from "src/db/entities/UserConversation";
 import { USER_CONVERSATION_TYPE } from "src/common/constant/user-conversation.constant";
 import { toPromise } from "../common/utils/utils";
+import * as moment from "moment-timezone";
 
 @Injectable()
 export class SupportTicketService {
@@ -145,11 +145,9 @@ export class SupportTicketService {
         supportTicket.type = dto.type;
         supportTicket.title = dto.title;
         supportTicket.description = dto.description;
-        const dateTimeSent = moment(
-          new Date(dto.dateTimeSent),
-          DateConstant.DATE_LANGUAGE
-        ).toISOString();
-        supportTicket.dateTimeSent = new Date(dateTimeSent);
+        supportTicket.dateTimeSent = moment
+          .tz(dto.dateTimeSent, "Asia/Manila")
+          .toDate();
         const user = await entityManager.findOne(Users, {
           where: {
             userCode: dto.userCode,
@@ -389,12 +387,8 @@ export class SupportTicketService {
       async (entityManager) => {
         let supportTicketMessage = new SupportTicketMessage();
         supportTicketMessage.message = dto.message;
-        const dateTimeSent = await entityManager
-          .query(CONST_QUERYCURRENT_TIMESTAMP)
-          .then((res) => {
-            return res[0]["timestamp"];
-          });
-        supportTicketMessage.dateTimeSent = new Date(dateTimeSent);
+        const dateTimeSent = moment.tz("Asia/Manila").toDate();
+        supportTicketMessage.dateTimeSent = dateTimeSent;
         const supportTicket = await entityManager.findOne(SupportTicket, {
           where: {
             supportTicketCode: dto.supportTicketCode,
@@ -463,7 +457,7 @@ export class SupportTicketService {
             userConversation.referenceId = supportTicket?.supportTicketCode;
             userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
           }
-          userConversation.dateTime = new Date(dateTimeSent);
+          userConversation.dateTime = dateTimeSent;
           userConversation.title = supportTicket?.title;
           userConversation.description = `You: ${supportTicketMessage?.message}`;
           userConversation = await entityManager.save(
@@ -489,7 +483,7 @@ export class SupportTicketService {
             userConversation.type = USER_CONVERSATION_TYPE.SUPPORT_TICKET;
           }
 
-          userConversation.dateTime = new Date(dateTimeSent);
+          userConversation.dateTime = dateTimeSent;
           userConversation.title = supportTicket?.title;
           userConversation.description = `${supportTicket?.assignedAdminUser?.name}: ${supportTicketMessage?.message}`;
           userConversation = await entityManager.save(

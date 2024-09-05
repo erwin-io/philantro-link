@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -11,14 +34,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SupportTicketService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const moment_1 = __importDefault(require("moment"));
 const user_error_constant_1 = require("../common/constant/user-error.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
 const utils_1 = require("../common/utils/utils");
@@ -27,13 +46,12 @@ const Users_1 = require("../db/entities/Users");
 const typeorm_2 = require("typeorm");
 const one_signal_notification_service_1 = require("./one-signal-notification.service");
 const support_ticket_constant_1 = require("../common/constant/support-ticket.constant");
-const date_constant_1 = require("../common/constant/date.constant");
 const SupportTicketMessage_1 = require("../db/entities/SupportTicketMessage");
-const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const notifications_constant_1 = require("../common/constant/notifications.constant");
 const Notifications_1 = require("../db/entities/Notifications");
 const UserConversation_1 = require("../db/entities/UserConversation");
 const user_conversation_constant_1 = require("../common/constant/user-conversation.constant");
+const moment = __importStar(require("moment-timezone"));
 let SupportTicketService = class SupportTicketService {
     constructor(supportTicketRepo, supportTicketMessageRepo, userConversationRepo, oneSignalNotificationService) {
         this.supportTicketRepo = supportTicketRepo;
@@ -128,8 +146,9 @@ let SupportTicketService = class SupportTicketService {
             supportTicket.type = dto.type;
             supportTicket.title = dto.title;
             supportTicket.description = dto.description;
-            const dateTimeSent = (0, moment_1.default)(new Date(dto.dateTimeSent), date_constant_1.DateConstant.DATE_LANGUAGE).toISOString();
-            supportTicket.dateTimeSent = new Date(dateTimeSent);
+            supportTicket.dateTimeSent = moment
+                .tz(dto.dateTimeSent, "Asia/Manila")
+                .toDate();
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,
@@ -334,12 +353,8 @@ let SupportTicketService = class SupportTicketService {
             var _a, _b, _c, _d, _e, _f, _g;
             let supportTicketMessage = new SupportTicketMessage_1.SupportTicketMessage();
             supportTicketMessage.message = dto.message;
-            const dateTimeSent = await entityManager
-                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
-                .then((res) => {
-                return res[0]["timestamp"];
-            });
-            supportTicketMessage.dateTimeSent = new Date(dateTimeSent);
+            const dateTimeSent = moment.tz("Asia/Manila").toDate();
+            supportTicketMessage.dateTimeSent = dateTimeSent;
             const supportTicket = await entityManager.findOne(SupportTicket_1.SupportTicket, {
                 where: {
                     supportTicketCode: dto.supportTicketCode,
@@ -401,7 +416,7 @@ let SupportTicketService = class SupportTicketService {
                     userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
                     userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
                 }
-                userConversation.dateTime = new Date(dateTimeSent);
+                userConversation.dateTime = dateTimeSent;
                 userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
                 userConversation.description = `You: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
@@ -422,7 +437,7 @@ let SupportTicketService = class SupportTicketService {
                     userConversation.referenceId = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode;
                     userConversation.type = user_conversation_constant_1.USER_CONVERSATION_TYPE.SUPPORT_TICKET;
                 }
-                userConversation.dateTime = new Date(dateTimeSent);
+                userConversation.dateTime = dateTimeSent;
                 userConversation.title = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.title;
                 userConversation.description = `${(_c = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.assignedAdminUser) === null || _c === void 0 ? void 0 : _c.name}: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);

@@ -541,12 +541,7 @@ let EventsService = class EventsService {
             event.transferType = dto.transferType;
             event.transferAccountNumber = dto.transferAccountNumber;
             event.transferAccountName = dto.transferAccountName;
-            const dateTime = await entityManager
-                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-                .then((res) => {
-                return res[0].dateTime;
-            });
-            event.dateTime = dateTime;
+            event.dateTime = moment.tz('Asia/Manila').toDate();
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,
@@ -620,12 +615,7 @@ let EventsService = class EventsService {
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
             event.eventAssistanceItems = dto.eventAssistanceItems;
-            const dateTime = await entityManager
-                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-                .then((res) => {
-                return res[0].dateTime;
-            });
-            event.dateTime = dateTime;
+            event.dateTime = moment.tz('Asia/Manila').toDate();
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,
@@ -726,12 +716,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
-            const timestamp = await entityManager
-                .query(` select now()::TIMESTAMPTZ as timestamp`)
-                .then((res) => {
-                return res[0].timestamp;
-            });
-            event.dateTimeUpdate = timestamp;
+            event.dateTimeUpdate = moment.tz('Asia/Manila').toDate();
             event.dateTime = moment.tz(dto.dateTime, 'Asia/Manila').toDate();
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
@@ -786,12 +771,7 @@ let EventsService = class EventsService {
             event.transferType = dto.transferType;
             event.transferAccountNumber = dto.transferAccountNumber;
             event.transferAccountName = dto.transferAccountName;
-            const timestamp = await entityManager
-                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-                .then((res) => {
-                return res[0].dateTime;
-            });
-            event.dateTimeUpdate = timestamp;
+            event.dateTimeUpdate = moment.tz('Asia/Manila').toDate();
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -837,13 +817,7 @@ let EventsService = class EventsService {
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
             event.eventAssistanceItems = dto.eventAssistanceItems;
-            const timestamp = await entityManager
-                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-                .then((res) => {
-                return res[0].dateTime;
-            });
-            event.dateTimeUpdate = timestamp;
-            event.dateTimeUpdate = timestamp;
+            event.dateTimeUpdate = moment.tz('Asia/Manila').toDate();
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -930,13 +904,7 @@ let EventsService = class EventsService {
             else {
                 event.eventStatus = dto.status;
             }
-            const timestamp = await entityManager
-                .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-                .then((res) => {
-                return res[0].dateTime;
-            });
-            event.dateTimeUpdate = timestamp;
-            event.dateTimeUpdate = timestamp;
+            event.dateTimeUpdate = moment.tz('Asia/Manila').toDate();
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -1047,6 +1015,7 @@ let EventsService = class EventsService {
                     const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, pushNotifTitle, pushNotifDesc);
                     const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_c = event.user) === null || _c === void 0 ? void 0 : _c.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event === null || event === void 0 ? void 0 : event.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
                     console.log(pushNotif);
+                    event.dateTimeUpdate = moment.tz('Asia/Manila').toDate();
                 }
                 else {
                     interested = await entityManager.findOne(Interested_1.Interested, {
@@ -1068,12 +1037,6 @@ let EventsService = class EventsService {
                             : 0;
                 }
             }
-            const dateTime = await entityManager
-                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
-                .then((res) => {
-                return res[0]["timestamp"];
-            });
-            event.dateTimeUpdate = dateTime;
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -1164,6 +1127,7 @@ let EventsService = class EventsService {
                     const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, pushNotifTitle, pushNotifDesc);
                     const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_c = event.user) === null || _c === void 0 ? void 0 : _c.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event === null || event === void 0 ? void 0 : event.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
                     console.log(pushNotif);
+                    event.dateTimeUpdate = moment.tz('Asia/Manila').toDate();
                 }
                 else {
                     responded = await entityManager.findOne(Responded_1.Responded, {

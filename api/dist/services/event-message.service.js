@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -22,12 +45,12 @@ const one_signal_notification_service_1 = require("./one-signal-notification.ser
 const utils_1 = require("../common/utils/utils");
 const Events_1 = require("../db/entities/Events");
 const events_constant_1 = require("../common/constant/events.constant");
-const timestamp_constant_1 = require("../common/constant/timestamp.constant");
 const notifications_constant_1 = require("../common/constant/notifications.constant");
 const Notifications_1 = require("../db/entities/Notifications");
 const Users_1 = require("../db/entities/Users");
 const UserConversation_1 = require("../db/entities/UserConversation");
 const user_conversation_constant_1 = require("../common/constant/user-conversation.constant");
+const moment = __importStar(require("moment-timezone"));
 let EventMessageService = class EventMessageService {
     constructor(eventMessageRepo, oneSignalNotificationService) {
         this.eventMessageRepo = eventMessageRepo;
@@ -167,11 +190,7 @@ let EventMessageService = class EventMessageService {
                     throw new Error(`Recipient ${user_error_constant_1.USER_ERROR_USER_NOT_FOUND}`);
                 }
                 eventMessage.toUser = toUser;
-                const timestamp = await entityManager
-                    .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
-                    .then((res) => {
-                    return res[0]["timestamp"];
-                });
+                const timestamp = moment.tz("Asia/Manila").toDate();
                 eventMessage.dateTimeSent = timestamp;
                 eventMessage = await entityManager.save(EventMessage_1.EventMessage, eventMessage);
                 eventMessage = await entityManager.findOne(EventMessage_1.EventMessage, {

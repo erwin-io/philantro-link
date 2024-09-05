@@ -31,6 +31,7 @@ import { Responded } from "src/db/entities/Responded";
 import { Notifications } from "src/db/entities/Notifications";
 import { NOTIF_TYPE } from "src/common/constant/notifications.constant";
 import { OneSignalNotificationService } from "./one-signal-notification.service";
+import * as moment from "moment-timezone";
 
 @Injectable()
 export class TransactionsService {
@@ -204,11 +205,7 @@ export class TransactionsService {
       async (entityManager) => {
         try {
           let transactions = new Transactions();
-          const timestamp = await entityManager
-            .query(CONST_QUERYCURRENT_TIMESTAMP)
-            .then((res) => {
-              return res[0]["timestamp"];
-            });
+          const timestamp = moment.tz("Asia/Manila").toDate();
           transactions.dateTime = timestamp;
           transactions.amount = amount;
           const event = await entityManager.findOne(Events, {
