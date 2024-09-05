@@ -513,11 +513,16 @@ export class EventsService {
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
-      const dateTime = moment(
-        new Date(dto.dateTime),
-        DateConstant.DATE_LANGUAGE
-      ).toISOString();
-      event.dateTime = new Date(dateTime);
+      // const dateTime = moment(
+      //   new Date(dto.dateTime),
+      //   DateConstant.DATE_LANGUAGE
+      // ).toISOString();
+      const dateTime = await entityManager
+      .query(`select '${dto.dateTime}'::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
+      event.dateTime = dateTime;
       const user = await entityManager.findOne(Users, {
         where: {
           userCode: dto.userCode,
@@ -618,11 +623,16 @@ export class EventsService {
       event.transferType = dto.transferType;
       event.transferAccountNumber = dto.transferAccountNumber;
       event.transferAccountName = dto.transferAccountName;
+      // const dateTime = await entityManager
+      //   .query(CONST_QUERYCURRENT_TIMESTAMP)
+      //   .then((res) => {
+      //     return res[0]["timestamp"];
+      //   });
       const dateTime = await entityManager
-        .query(CONST_QUERYCURRENT_TIMESTAMP)
-        .then((res) => {
-          return res[0]["timestamp"];
-        });
+      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
       event.dateTime = dateTime;
       const user = await entityManager.findOne(Users, {
         where: {
@@ -721,11 +731,17 @@ export class EventsService {
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
       event.eventAssistanceItems = dto.eventAssistanceItems;
+      // const dateTime = await entityManager
+      //   .query(CONST_QUERYCURRENT_TIMESTAMP)
+      //   .then((res) => {
+      //     return res[0]["timestamp"];
+      //   });
+
       const dateTime = await entityManager
-        .query(CONST_QUERYCURRENT_TIMESTAMP)
-        .then((res) => {
-          return res[0]["timestamp"];
-        });
+      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
       event.dateTime = dateTime;
       const user = await entityManager.findOne(Users, {
         where: {
@@ -857,13 +873,25 @@ export class EventsService {
       event.eventDesc = dto.eventDesc;
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
+      // const timestamp = await entityManager
+      //   .query(CONST_QUERYCURRENT_TIMESTAMP)
+      //   .then((res) => {
+      //     return res[0]["timestamp"];
+      //   });
+      
       const timestamp = await entityManager
-        .query(CONST_QUERYCURRENT_TIMESTAMP)
-        .then((res) => {
-          return res[0]["timestamp"];
-        });
-      event.dateTimeUpdate = timestamp;
-      event.dateTime = new Date(dto.dateTime);
+      .query(` select now()::TIMESTAMPTZ as timestamp`)
+      .then((res) => {
+        return res[0].timestamp;
+      });
+      
+      const dateTime = await entityManager
+      .query(`select '${dto.dateTime}'::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
+      event.dateTimeUpdate = timestamp
+      event.dateTime = dateTime;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -922,11 +950,17 @@ export class EventsService {
       event.transferType = dto.transferType;
       event.transferAccountNumber = dto.transferAccountNumber;
       event.transferAccountName = dto.transferAccountName;
+      // const timestamp = await entityManager
+      //   .query(CONST_QUERYCURRENT_TIMESTAMP)
+      //   .then((res) => {
+      //     return res[0]["timestamp"];
+      //   });
+        
       const timestamp = await entityManager
-        .query(CONST_QUERYCURRENT_TIMESTAMP)
-        .then((res) => {
-          return res[0]["timestamp"];
-        });
+      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
       event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
@@ -973,11 +1007,18 @@ export class EventsService {
       event.eventLocName = dto.eventLocName;
       event.eventLocMap = dto.eventLocMap;
       event.eventAssistanceItems = dto.eventAssistanceItems;
+      // const timestamp = await entityManager
+      //   .query(CONST_QUERYCURRENT_TIMESTAMP)
+      //   .then((res) => {
+      //     return res[0]["timestamp"];
+      //   });
+      
       const timestamp = await entityManager
-        .query(CONST_QUERYCURRENT_TIMESTAMP)
-        .then((res) => {
-          return res[0]["timestamp"];
-        });
+      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
+      event.dateTimeUpdate = timestamp;
       event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
@@ -1078,11 +1119,18 @@ export class EventsService {
       } else {
         event.eventStatus = dto.status;
       }
+      // const timestamp = await entityManager
+      //   .query(CONST_QUERYCURRENT_TIMESTAMP)
+      //   .then((res) => {
+      //     return res[0]["timestamp"];
+      //   });
+      
       const timestamp = await entityManager
-        .query(CONST_QUERYCURRENT_TIMESTAMP)
-        .then((res) => {
-          return res[0]["timestamp"];
-        });
+      .query(`select now()::TIMESTAMPTZ as dateTime`)
+      .then((res) => {
+        return res[0].dateTime;
+      })
+      event.dateTimeUpdate = timestamp;
       event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
