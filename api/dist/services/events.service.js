@@ -441,7 +441,7 @@ let EventsService = class EventsService {
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
             const dateTime = await entityManager
-                .query(`select '${dto.dateTime}'::TIMESTAMPTZ as "dateTime"`)
+                .query(`select ('${dto.dateTime}') AT TIME ZONE 'Asia/Manila' as "dateTime" `)
                 .then((res) => {
                 return res[0].dateTime;
             });
@@ -713,7 +713,7 @@ let EventsService = class EventsService {
                 return res[0].timestamp;
             });
             const dateTime = await entityManager
-                .query(`select '${dto.dateTime}'::TIMESTAMPTZ as "dateTime"`)
+                .query(`select ('${dto.dateTime}') AT TIME ZONE 'Asia/Manila' as "dateTime" `)
                 .then((res) => {
                 return res[0].dateTime;
             });
