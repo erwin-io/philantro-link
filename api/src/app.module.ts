@@ -48,7 +48,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
     EventMessageModule,
     UserConversationModule
   ],
-  providers: [AppService, MessageService, EmailService],
+  providers: [AppService],
   controllers: [],
 })
 export class AppModule {}

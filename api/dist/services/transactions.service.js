@@ -31,12 +31,16 @@ const events_constant_1 = require("../common/constant/events.constant");
 const user_type_constant_1 = require("../common/constant/user-type.constant");
 const Interested_1 = require("../db/entities/Interested");
 const Responded_1 = require("../db/entities/Responded");
+const Notifications_1 = require("../db/entities/Notifications");
+const notifications_constant_1 = require("../common/constant/notifications.constant");
+const one_signal_notification_service_1 = require("./one-signal-notification.service");
 let TransactionsService = class TransactionsService {
-    constructor(httpService, config, firebaseProvoder, transactionsRepo) {
+    constructor(httpService, config, firebaseProvoder, transactionsRepo, oneSignalNotificationService) {
         this.httpService = httpService;
         this.config = config;
         this.firebaseProvoder = firebaseProvoder;
         this.transactionsRepo = transactionsRepo;
+        this.oneSignalNotificationService = oneSignalNotificationService;
     }
     async getPagination({ pageSize, pageIndex, order, columnDef }) {
         const skip = Number(pageIndex) > 0 ? Number(pageIndex) * Number(pageSize) : 0;
@@ -322,7 +326,7 @@ let TransactionsService = class TransactionsService {
     }
     async comleteTopUpPayment(transactionCode) {
         return await this.transactionsRepo.manager.transaction(async (entityManager) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
             try {
                 const getTransaction = await this.getByCode(transactionCode);
                 if ((getTransaction &&
@@ -334,13 +338,20 @@ let TransactionsService = class TransactionsService {
                         where: {
                             transactionCode,
                         },
+                        relations: {
+                            user: true,
+                            event: {
+                                user: true,
+                            },
+                        },
                     });
                     if (!transaction) {
                         throw new common_1.HttpException("We apologize, but we couldn't locate your payment in our database. Kindly wait for a moment and attempt the transaction again shortly.", common_1.HttpStatus.BAD_REQUEST);
                     }
-                    if (((_d = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _d === void 0 ? void 0 : _d.paid) ||
-                        ((_e = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _e === void 0 ? void 0 : _e.payment_intent.status) ===
-                            payment_constant_1.PAYMENT_LINK_STATUS.SUCCEEDED) {
+                    if (!transaction.isCompleted &&
+                        (((_d = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _d === void 0 ? void 0 : _d.paid) ||
+                            ((_e = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _e === void 0 ? void 0 : _e.payment_intent.status) ===
+                                payment_constant_1.PAYMENT_LINK_STATUS.SUCCEEDED)) {
                         transaction.isCompleted = true;
                         transaction.status = payment_constant_1.PAYMENT_STATUS.COMPLETED;
                         transaction = await entityManager.save(Transactions_1.Transactions, transaction);
@@ -355,7 +366,7 @@ let TransactionsService = class TransactionsService {
                                 },
                             },
                         });
-                        let [interested, responded] = await Promise.all([
+                        let [interested, responded, donatedCount] = await Promise.all([
                             entityManager.findOne(Interested_1.Interested, {
                                 where: {
                                     user: {
@@ -379,10 +390,23 @@ let TransactionsService = class TransactionsService {
                                 },
                                 relations: {},
                             }),
+                            this.transactionsRepo
+                                .createQueryBuilder("transaction")
+                                .select("COUNT(DISTINCT(transaction.UserId))", "distinctUserCount")
+                                .where("transaction.EventId = :eventId", {
+                                eventId: (_k = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _k === void 0 ? void 0 : _k.eventId,
+                            })
+                                .andWhere("transaction.Status = :status", {
+                                status: "COMPLETED",
+                            })
+                                .andWhere("transaction.IsCompleted = :isCompleted", {
+                                isCompleted: true,
+                            })
+                                .getRawOne(),
                         ]);
-                        if (((_k = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _k === void 0 ? void 0 : _k.userCode) !==
-                            ((_m = (_l = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _l === void 0 ? void 0 : _l.user) === null || _m === void 0 ? void 0 : _m.userCode) &&
-                            ((_o = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _o === void 0 ? void 0 : _o.userType) === user_type_constant_1.USER_TYPE.CLIENT) {
+                        if (((_l = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _l === void 0 ? void 0 : _l.userCode) !==
+                            ((_o = (_m = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _m === void 0 ? void 0 : _m.user) === null || _o === void 0 ? void 0 : _o.userCode) &&
+                            ((_p = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _p === void 0 ? void 0 : _p.userType) === user_type_constant_1.USER_TYPE.CLIENT) {
                             if (!interested) {
                                 interested = new Interested_1.Interested();
                                 interested.event = transaction === null || transaction === void 0 ? void 0 : transaction.event;
@@ -395,10 +419,25 @@ let TransactionsService = class TransactionsService {
                                 responded.user = transaction === null || transaction === void 0 ? void 0 : transaction.user;
                                 responded = await entityManager.save(Responded_1.Responded, responded);
                             }
+                            donatedCount =
+                                donatedCount &&
+                                    donatedCount["distinctUserCount"] &&
+                                    !isNaN(Number(donatedCount["distinctUserCount"]))
+                                    ? Number(donatedCount["distinctUserCount"])
+                                    : 0;
+                            const pushNotifTitle = donatedCount <= 0
+                                ? `${(_q = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _q === void 0 ? void 0 : _q.name} donated at your event.`
+                                : `${(_r = transaction === null || transaction === void 0 ? void 0 : transaction.user) === null || _r === void 0 ? void 0 : _r.name} and ${donatedCount > 1
+                                    ? donatedCount + " others donated at your event."
+                                    : donatedCount + " other donated at your event."}`;
+                            const pushNotifDesc = (_s = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _s === void 0 ? void 0 : _s.eventName;
+                            const clientNotifications = await this.logNotification([(_u = (_t = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _t === void 0 ? void 0 : _t.user) === null || _u === void 0 ? void 0 : _u.userId], transaction === null || transaction === void 0 ? void 0 : transaction.event, entityManager, pushNotifTitle, pushNotifDesc);
+                            const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_w = (_v = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _v === void 0 ? void 0 : _v.user) === null || _w === void 0 ? void 0 : _w.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, (_x = transaction === null || transaction === void 0 ? void 0 : transaction.event) === null || _x === void 0 ? void 0 : _x.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
+                            console.log(pushNotif);
                         }
                     }
-                    else if (((_p = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _p === void 0 ? void 0 : _p.paid) ||
-                        ((_q = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _q === void 0 ? void 0 : _q.payment_intent.status) ===
+                    else if ((!transaction.isCompleted && ((_y = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _y === void 0 ? void 0 : _y.paid)) ||
+                        ((_z = getTransaction === null || getTransaction === void 0 ? void 0 : getTransaction.paymentData) === null || _z === void 0 ? void 0 : _z.payment_intent.status) ===
                             payment_constant_1.PAYMENT_LINK_STATUS.WAITING_PAYMENT) {
                         throw new common_1.HttpException("We're sorry, but your payment hasn't been confirmed or completed yet. Please wait a few moments and try again later.", common_1.HttpStatus.BAD_REQUEST);
                     }
@@ -486,6 +525,37 @@ let TransactionsService = class TransactionsService {
             throw ex;
         }
     }
+    async logNotification(userIds, data, entityManager, title, description) {
+        const notifications = [];
+        const users = await entityManager.find(Users_1.Users, {
+            where: {
+                userId: (0, typeorm_2.In)(userIds),
+            },
+        });
+        for (const user of users) {
+            notifications.push({
+                title,
+                description,
+                type: notifications_constant_1.NOTIF_TYPE.EVENTS.toString(),
+                referenceId: data.eventCode.toString(),
+                isRead: false,
+                user: user,
+            });
+        }
+        const res = await entityManager.save(Notifications_1.Notifications, notifications);
+        return await entityManager.find(Notifications_1.Notifications, {
+            where: {
+                notificationId: (0, typeorm_2.In)(res.map((x) => x.notificationId)),
+                referenceId: data.eventCode,
+                user: {
+                    userId: (0, typeorm_2.In)(userIds),
+                },
+            },
+            relations: {
+                user: true,
+            },
+        });
+    }
 };
 TransactionsService = __decorate([
     (0, common_1.Injectable)(),
@@ -493,7 +563,8 @@ TransactionsService = __decorate([
     __metadata("design:paramtypes", [axios_1.HttpService,
         config_1.ConfigService,
         firebase_provider_1.FirebaseProvider,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        one_signal_notification_service_1.OneSignalNotificationService])
 ], TransactionsService);
 exports.TransactionsService = TransactionsService;
 //# sourceMappingURL=transactions.service.js.map

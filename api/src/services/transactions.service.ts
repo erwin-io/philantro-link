@@ -6,7 +6,7 @@ import url from "url";
 import querystring from "querystring";
 import { InjectRepository } from "@nestjs/typeorm";
 import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
-import { Repository } from "typeorm";
+import { EntityManager, In, Repository } from "typeorm";
 import { Transactions } from "src/db/entities/Transactions";
 import {
   PAYMENT_LINK_STATUS,
@@ -28,6 +28,9 @@ import {
 import { USER_TYPE } from "src/common/constant/user-type.constant";
 import { Interested } from "src/db/entities/Interested";
 import { Responded } from "src/db/entities/Responded";
+import { Notifications } from "src/db/entities/Notifications";
+import { NOTIF_TYPE } from "src/common/constant/notifications.constant";
+import { OneSignalNotificationService } from "./one-signal-notification.service";
 
 @Injectable()
 export class TransactionsService {
@@ -36,7 +39,8 @@ export class TransactionsService {
     private readonly config: ConfigService,
     private firebaseProvoder: FirebaseProvider,
     @InjectRepository(Transactions)
-    private readonly transactionsRepo: Repository<Transactions>
+    private readonly transactionsRepo: Repository<Transactions>,
+    private oneSignalNotificationService: OneSignalNotificationService
   ) {}
 
   async getPagination({ pageSize, pageIndex, order, columnDef }) {
@@ -415,6 +419,12 @@ export class TransactionsService {
               where: {
                 transactionCode,
               },
+              relations: {
+                user: true,
+                event: {
+                  user: true,
+                },
+              },
             });
             if (!transaction) {
               throw new HttpException(
@@ -423,9 +433,10 @@ export class TransactionsService {
               );
             }
             if (
-              getTransaction?.paymentData?.paid ||
-              getTransaction?.paymentData?.payment_intent.status ===
-                PAYMENT_LINK_STATUS.SUCCEEDED
+              !transaction.isCompleted &&
+              (getTransaction?.paymentData?.paid ||
+                getTransaction?.paymentData?.payment_intent.status ===
+                  PAYMENT_LINK_STATUS.SUCCEEDED)
             ) {
               transaction.isCompleted = true;
               transaction.status = PAYMENT_STATUS.COMPLETED;
@@ -442,7 +453,7 @@ export class TransactionsService {
                 },
               });
 
-              let [interested, responded] = await Promise.all([
+              let [interested, responded, donatedCount] = await Promise.all([
                 entityManager.findOne(Interested, {
                   where: {
                     user: {
@@ -466,6 +477,22 @@ export class TransactionsService {
                   },
                   relations: {},
                 }),
+                this.transactionsRepo
+                  .createQueryBuilder("transaction")
+                  .select(
+                    "COUNT(DISTINCT(transaction.UserId))",
+                    "distinctUserCount"
+                  )
+                  .where("transaction.EventId = :eventId", {
+                    eventId: transaction?.event?.eventId,
+                  })
+                  .andWhere("transaction.Status = :status", {
+                    status: "COMPLETED",
+                  })
+                  .andWhere("transaction.IsCompleted = :isCompleted", {
+                    isCompleted: true,
+                  })
+                  .getRawOne(),
               ]);
               if (
                 transaction?.user?.userCode !==
@@ -484,10 +511,47 @@ export class TransactionsService {
                   responded.event = transaction?.event;
                   responded.user = transaction?.user;
                   responded = await entityManager.save(Responded, responded);
-                } 
+                }
+
+                donatedCount =
+                  donatedCount &&
+                  donatedCount["distinctUserCount"] &&
+                  !isNaN(Number(donatedCount["distinctUserCount"]))
+                    ? Number(donatedCount["distinctUserCount"])
+                    : 0;
+                const pushNotifTitle =
+                  donatedCount <= 0
+                    ? `${transaction?.user?.name} donated at your event.`
+                    : `${transaction?.user?.name} and ${
+                        donatedCount > 1
+                          ? donatedCount + " others donated at your event."
+                          : donatedCount + " other donated at your event."
+                      }`;
+
+                const pushNotifDesc = transaction?.event?.eventName;
+                const clientNotifications: Notifications[] =
+                  await this.logNotification(
+                    [transaction?.event?.user?.userId],
+                    transaction?.event,
+                    entityManager,
+                    pushNotifTitle,
+                    pushNotifDesc
+                  );
+
+                const pushNotif =
+                  await this.oneSignalNotificationService.sendToExternalUser(
+                    transaction?.event?.user?.userName,
+                    NOTIF_TYPE.EVENTS,
+                    transaction?.event?.eventCode,
+                    clientNotifications,
+                    pushNotifTitle,
+                    pushNotifDesc
+                  );
+
+                console.log(pushNotif);
               }
             } else if (
-              getTransaction?.paymentData?.paid ||
+              (!transaction.isCompleted && getTransaction?.paymentData?.paid) ||
               getTransaction?.paymentData?.payment_intent.status ===
                 PAYMENT_LINK_STATUS.WAITING_PAYMENT
             ) {
@@ -597,5 +661,49 @@ export class TransactionsService {
     } catch (ex) {
       throw ex;
     }
+  }
+
+  async logNotification(
+    userIds: string[],
+    data: Events,
+    entityManager: EntityManager,
+    title: string,
+    description: string
+  ) {
+    const notifications: Notifications[] = [];
+
+    const users = await entityManager.find(Users, {
+      where: {
+        userId: In(userIds),
+      },
+    });
+
+    for (const user of users) {
+      notifications.push({
+        title,
+        description,
+        type: NOTIF_TYPE.EVENTS.toString(),
+        referenceId: data.eventCode.toString(),
+        isRead: false,
+        user: user,
+      } as Notifications);
+    }
+    const res: Notifications[] = await entityManager.save(
+      Notifications,
+      notifications
+    );
+
+    return await entityManager.find(Notifications, {
+      where: {
+        notificationId: In(res.map((x) => x.notificationId)),
+        referenceId: data.eventCode,
+        user: {
+          userId: In(userIds),
+        },
+      },
+      relations: {
+        user: true,
+      },
+    });
   }
 }

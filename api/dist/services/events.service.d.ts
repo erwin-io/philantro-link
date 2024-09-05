@@ -18,10 +18,9 @@ export declare class EventsService {
     private readonly eventRepo;
     private readonly userConversationRepo;
     private readonly notificationsRepo;
-    private readonly transactionsRepo;
     private firebaseProvoder;
     private oneSignalNotificationService;
-    constructor(eventRepo: Repository<Events>, userConversationRepo: Repository<UserConversation>, notificationsRepo: Repository<Notifications>, transactionsRepo: Repository<Transactions>, firebaseProvoder: FirebaseProvider, oneSignalNotificationService: OneSignalNotificationService);
+    constructor(eventRepo: Repository<Events>, userConversationRepo: Repository<UserConversation>, notificationsRepo: Repository<Notifications>, firebaseProvoder: FirebaseProvider, oneSignalNotificationService: OneSignalNotificationService);
     getPagination({ pageSize, pageIndex, order, columnDef }: {
         pageSize: any;
         pageIndex: any;

@@ -298,23 +298,23 @@ export class SupportTicketService {
           throw Error(SUPPORT_TICKET_ERROR_NOT_FOUND);
         }
         const title =
-          (SUPPORT_TICKET_STATUS.ACTIVE
+          (supportTicket?.status === SUPPORT_TICKET_STATUS.ACTIVE
             ? `Your ticket #${supportTicket?.supportTicketCode} is now active.`
             : "") ||
-          (SUPPORT_TICKET_STATUS.COMPLETED
+          (supportTicket?.status === SUPPORT_TICKET_STATUS.COMPLETED
             ? `Your ticket #${supportTicket?.supportTicketCode} has been completed.`
             : "") ||
-          (SUPPORT_TICKET_STATUS.ACTIVE
+          (supportTicket?.status === SUPPORT_TICKET_STATUS.CLOSED
             ? `Your ticket #${supportTicket?.supportTicketCode} has been closed.`
             : "");
         const desc =
-          (SUPPORT_TICKET_STATUS.ACTIVE
+          (supportTicket?.status === SUPPORT_TICKET_STATUS.ACTIVE
             ? `Your ticket #${supportTicket?.supportTicketCode} is now active. Our support team is currently working on resolving your issue.`
             : "") ||
-          (SUPPORT_TICKET_STATUS.COMPLETED
+          (supportTicket?.status === SUPPORT_TICKET_STATUS.COMPLETED
             ? `Your ticket #${supportTicket?.supportTicketCode} has been completed. Please review the resolution and let us know if you need further assistance.`
             : "") ||
-          (SUPPORT_TICKET_STATUS.ACTIVE
+          (supportTicket?.status === SUPPORT_TICKET_STATUS.CLOSED
             ? `Your ticket #${supportTicket?.supportTicketCode} has been closed. Thank you for your feedback. We’re here if you need anything else.`
             : "");
         const clientNotifications: Notifications[] = await this.logNotification(
@@ -552,7 +552,7 @@ export class SupportTicketService {
           success: boolean;
         } = await this.oneSignalNotificationService.sendToExternalUser(
           toUser?.userName,
-          NOTIF_TYPE.EVENTS,
+          NOTIF_TYPE.MESSAGE,
           supportTicketMessage.supportTicketMessageId,
           [],
           fromUser?.name,

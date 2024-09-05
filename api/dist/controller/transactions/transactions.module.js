@@ -14,6 +14,10 @@ const axios_1 = require("@nestjs/axios");
 const Transactions_1 = require("../../db/entities/Transactions");
 const typeorm_1 = require("@nestjs/typeorm");
 const firebase_provider_module_1 = require("../../core/provider/firebase/firebase-provider.module");
+const one_signal_notification_service_1 = require("../../services/one-signal-notification.service");
+const Events_1 = require("../../db/entities/Events");
+const Notifications_1 = require("../../db/entities/Notifications");
+const UserConversation_1 = require("../../db/entities/UserConversation");
 let TransactionsModule = class TransactionsModule {
 };
 TransactionsModule = __decorate([
@@ -21,11 +25,16 @@ TransactionsModule = __decorate([
         imports: [
             firebase_provider_module_1.FirebaseProviderModule,
             axios_1.HttpModule,
-            typeorm_1.TypeOrmModule.forFeature([Transactions_1.Transactions]),
+            typeorm_1.TypeOrmModule.forFeature([
+                Events_1.Events,
+                UserConversation_1.UserConversation,
+                Notifications_1.Notifications,
+                Transactions_1.Transactions,
+            ]),
         ],
         controllers: [transactions_controller_1.TransactionsController],
-        providers: [transactions_service_1.TransactionsService],
-        exports: [transactions_service_1.TransactionsService],
+        providers: [transactions_service_1.TransactionsService, one_signal_notification_service_1.OneSignalNotificationService],
+        exports: [transactions_service_1.TransactionsService, one_signal_notification_service_1.OneSignalNotificationService],
     })
 ], TransactionsModule);
 exports.TransactionsModule = TransactionsModule;

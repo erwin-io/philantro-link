@@ -488,7 +488,7 @@ export class UsersService {
         throw Error(USER_ERROR_USER_NOT_FOUND);
       }
       if (dto.userProfilePic) {
-        const newFileName: string = uuid();
+        const newGUID: string = uuid();
         let userProfilePic = await entityManager.findOne(UserProfilePic, {
           where: { userId: user.userId },
           relations: ["file"],
@@ -507,12 +507,11 @@ export class UsersService {
             console.log(ex);
           }
           const file = userProfilePic.file;
-          file.fileName = `${newFileName}${extname(
-            dto.userProfilePic.fileName
-          )}`;
+          file.fileName = dto.userProfilePic.fileName;
+          file.guid = newGUID;
 
           const bucketFile = bucket.file(
-            `profile/${newFileName}${extname(dto.userProfilePic.fileName)}`
+            `profile/${newGUID}${extname(dto.userProfilePic.fileName)}`
           );
           const img = Buffer.from(dto.userProfilePic.data, "base64");
           await bucketFile.save(img).then(async (res) => {
@@ -534,11 +533,10 @@ export class UsersService {
           userProfilePic = new UserProfilePic();
           userProfilePic.user = user;
           const file = new Files();
-          file.fileName = `${newFileName}${extname(
-            dto.userProfilePic.fileName
-          )}`;
+          file.fileName = dto.userProfilePic.fileName;
+          file.guid = newGUID;
           const bucketFile = bucket.file(
-            `profile/${newFileName}${extname(dto.userProfilePic.fileName)}`
+            `profile/${newGUID}${extname(dto.userProfilePic.fileName)}`
           );
           const img = Buffer.from(dto.userProfilePic.data, "base64");
           await bucketFile.save(img).then(async () => {

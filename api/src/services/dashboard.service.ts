@@ -189,6 +189,7 @@ export class DashboardService {
         COALESCE(SUM("Amount"),0) as total
         FROM dbo."Transactions" 
         WHERE "Status" = 'COMPLETED'
+        AND "IsCompleted" = true
         GROUP BY "EventId"
 
       ),

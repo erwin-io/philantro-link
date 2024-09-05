@@ -60,8 +60,6 @@ export class EventsService {
     private readonly userConversationRepo: Repository<UserConversation>,
     @InjectRepository(Notifications)
     private readonly notificationsRepo: Repository<Notifications>,
-    @InjectRepository(Transactions)
-    private readonly transactionsRepo: Repository<Transactions>,
     private firebaseProvoder: FirebaseProvider,
     private oneSignalNotificationService: OneSignalNotificationService
   ) {}
@@ -144,6 +142,7 @@ export class EventsService {
         COALESCE(SUM("Amount"),0) as total
         FROM dbo."Transactions" 
         WHERE "Status" = 'COMPLETED'
+        AND "IsCompleted" = true
         GROUP BY "EventId"
 
       ) select rec."eventId", 
@@ -235,7 +234,7 @@ export class EventsService {
         }),
       this.eventRepo
         .query(
-          `SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "EventId" = ${result.eventId}`
+          `SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "IsCompleted" = true AND "EventId" = ${result.eventId}`
         )
         .then((res) => {
           return res[0] ? res[0]["sum"] ?? 0 : 0;
@@ -317,7 +316,7 @@ export class EventsService {
             toUser: true,
           },
         }),
-        this.transactionsRepo.find({
+        this.eventRepo.manager.find(Transactions, {
           where: {
             event: {
               eventCode: result?.eventCode,
@@ -325,6 +324,8 @@ export class EventsService {
             user: {
               userCode: currentUserCode,
             },
+            isCompleted: true,
+            status: "COMPLETED"
           },
         }),
       ]);
@@ -1135,7 +1136,7 @@ export class EventsService {
 
   async updateEventInterested(eventCode, dto: UpdateEventInterestedDto) {
     return await this.eventRepo.manager.transaction(async (entityManager) => {
-      const event = await entityManager.findOne(Events, {
+      let event = await entityManager.findOne(Events, {
         where: {
           eventCode,
         },
@@ -1195,6 +1196,28 @@ export class EventsService {
             interestedCount && !isNaN(Number(interestedCount))
               ? Number(interestedCount) + 1
               : 1;
+
+          const totalOthers = Number(interestedCount) > 0 ? interestedCount - 1 : 0;
+          const pushNotifTitle = interestedCount > 1 ? `${user?.name} and ${totalOthers > 1 ? totalOthers + ' others are interested in your event.' : totalOthers + ' other are interested in your event.'}` : `${user?.name} is interested in your event.`;
+          const pushNotifDesc = event?.eventName;
+          const clientNotifications: Notifications[] = await this.logNotification(
+            [event.user?.userId],
+            event,
+            entityManager,
+            pushNotifTitle,
+            pushNotifDesc
+          );
+  
+          const pushNotif =
+            await this.oneSignalNotificationService.sendToExternalUser(
+              event.user?.userName,
+              NOTIF_TYPE.EVENTS,
+              event?.eventCode,
+              clientNotifications,
+              pushNotifTitle,
+              pushNotifDesc
+            );
+          console.log(pushNotif);
         } else {
           interested = await entityManager.findOne(Interested, {
             where: {
@@ -1215,6 +1238,29 @@ export class EventsService {
               : 0;
         }
       }
+      const dateTime = await entityManager
+        .query(CONST_QUERYCURRENT_TIMESTAMP)
+        .then((res) => {
+          return res[0]["timestamp"];
+        });
+      event.dateTimeUpdate = dateTime;
+      event = await entityManager.save(Events, event);
+      event = await entityManager.findOne(Events, {
+        where: {
+          eventCode,
+        },
+        relations: {
+          user: {
+            userProfilePic: {
+              file: true,
+            },
+          },
+          eventImages: {
+            file: true,
+          },
+          thumbnailFile: true,
+        },
+      });
       delete event.user?.password;
       delete event.user?.password;
       return {
@@ -1226,7 +1272,7 @@ export class EventsService {
 
   async updateEventResponded(eventCode, dto: UpdateEventRespondedDto) {
     return await this.eventRepo.manager.transaction(async (entityManager) => {
-      const event = await entityManager.findOne(Events, {
+      let event = await entityManager.findOne(Events, {
         where: {
           eventCode,
         },
@@ -1284,6 +1330,28 @@ export class EventsService {
             respondedCount && !isNaN(Number(respondedCount))
               ? Number(respondedCount) + 1
               : 1;
+
+          const totalOthers = Number(respondedCount) > 0 ? respondedCount - 1 : 0;
+          const pushNotifTitle = respondedCount > 1 ? `${user?.name} and ${totalOthers > 1 ? totalOthers + ' others responded for your event.' : totalOthers + ' other responded for your event.'}` : `${user?.name} responded for your event.`;
+          const pushNotifDesc = event?.eventName;
+          const clientNotifications: Notifications[] = await this.logNotification(
+            [event.user?.userId],
+            event,
+            entityManager,
+            pushNotifTitle,
+            pushNotifDesc
+          );
+  
+          const pushNotif =
+            await this.oneSignalNotificationService.sendToExternalUser(
+              event.user?.userName,
+              NOTIF_TYPE.EVENTS,
+              event?.eventCode,
+              clientNotifications,
+              pushNotifTitle,
+              pushNotifDesc
+            );
+          console.log(pushNotif);
         } else {
           responded = await entityManager.findOne(Responded, {
             where: {
@@ -1303,6 +1371,29 @@ export class EventsService {
               : 0;
         }
       }
+      const dateTime = await entityManager
+        .query(CONST_QUERYCURRENT_TIMESTAMP)
+        .then((res) => {
+          return res[0]["timestamp"];
+        });
+      event.dateTimeUpdate = dateTime;
+      event = await entityManager.save(Events, event);
+      event = await entityManager.findOne(Events, {
+        where: {
+          eventCode,
+        },
+        relations: {
+          user: {
+            userProfilePic: {
+              file: true,
+            },
+          },
+          eventImages: {
+            file: true,
+          },
+          thumbnailFile: true,
+        },
+      });
       delete event.user?.password;
       delete event.user?.password;
       return {
@@ -1508,6 +1599,7 @@ export class EventsService {
 
     return await entityManager.find(Notifications, {
       where: {
+        notificationId: In(res.map(x=> x.notificationId)),
         referenceId: data.eventCode,
         user: {
           userId: In(userIds),

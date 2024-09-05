@@ -43,11 +43,10 @@ const EventMessage_1 = require("../db/entities/EventMessage");
 const UserConversation_1 = require("../db/entities/UserConversation");
 const Transactions_1 = require("../db/entities/Transactions");
 let EventsService = class EventsService {
-    constructor(eventRepo, userConversationRepo, notificationsRepo, transactionsRepo, firebaseProvoder, oneSignalNotificationService) {
+    constructor(eventRepo, userConversationRepo, notificationsRepo, firebaseProvoder, oneSignalNotificationService) {
         this.eventRepo = eventRepo;
         this.userConversationRepo = userConversationRepo;
         this.notificationsRepo = notificationsRepo;
-        this.transactionsRepo = transactionsRepo;
         this.firebaseProvoder = firebaseProvoder;
         this.oneSignalNotificationService = oneSignalNotificationService;
     }
@@ -119,6 +118,7 @@ let EventsService = class EventsService {
         COALESCE(SUM("Amount"),0) as total
         FROM dbo."Transactions" 
         WHERE "Status" = 'COMPLETED'
+        AND "IsCompleted" = true
         GROUP BY "EventId"
 
       ) select rec."eventId", 
@@ -193,7 +193,7 @@ let EventsService = class EventsService {
                 return res[0] ? (_a = res[0]["count"]) !== null && _a !== void 0 ? _a : 0 : 0;
             }),
             this.eventRepo
-                .query(`SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "EventId" = ${result.eventId}`)
+                .query(`SELECT SUM("Amount") FROM dbo."Transactions" WHERE "Status" = 'COMPLETED' AND "IsCompleted" = true AND "EventId" = ${result.eventId}`)
                 .then((res) => {
                 var _a;
                 return res[0] ? (_a = res[0]["sum"]) !== null && _a !== void 0 ? _a : 0 : 0;
@@ -267,7 +267,7 @@ let EventsService = class EventsService {
                         toUser: true,
                     },
                 }),
-                this.transactionsRepo.find({
+                this.eventRepo.manager.find(Transactions_1.Transactions, {
                     where: {
                         event: {
                             eventCode: result === null || result === void 0 ? void 0 : result.eventCode,
@@ -275,6 +275,8 @@ let EventsService = class EventsService {
                         user: {
                             userCode: currentUserCode,
                         },
+                        isCompleted: true,
+                        status: "COMPLETED"
                     },
                 }),
             ]);
@@ -947,8 +949,8 @@ let EventsService = class EventsService {
     }
     async updateEventInterested(eventCode, dto) {
         return await this.eventRepo.manager.transaction(async (entityManager) => {
-            var _a, _b, _c;
-            const event = await entityManager.findOne(Events_1.Events, {
+            var _a, _b, _c, _d, _e;
+            let event = await entityManager.findOne(Events_1.Events, {
                 where: {
                     eventCode,
                 },
@@ -1004,6 +1006,12 @@ let EventsService = class EventsService {
                         interestedCount && !isNaN(Number(interestedCount))
                             ? Number(interestedCount) + 1
                             : 1;
+                    const totalOthers = Number(interestedCount) > 0 ? interestedCount - 1 : 0;
+                    const pushNotifTitle = interestedCount > 1 ? `${user === null || user === void 0 ? void 0 : user.name} and ${totalOthers > 1 ? totalOthers + ' others are interested in your event.' : totalOthers + ' other are interested in your event.'}` : `${user === null || user === void 0 ? void 0 : user.name} is interested in your event.`;
+                    const pushNotifDesc = event === null || event === void 0 ? void 0 : event.eventName;
+                    const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, pushNotifTitle, pushNotifDesc);
+                    const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_c = event.user) === null || _c === void 0 ? void 0 : _c.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event === null || event === void 0 ? void 0 : event.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
+                    console.log(pushNotif);
                 }
                 else {
                     interested = await entityManager.findOne(Interested_1.Interested, {
@@ -1025,15 +1033,38 @@ let EventsService = class EventsService {
                             : 0;
                 }
             }
-            (_b = event.user) === null || _b === void 0 ? true : delete _b.password;
-            (_c = event.user) === null || _c === void 0 ? true : delete _c.password;
+            const dateTime = await entityManager
+                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
+                .then((res) => {
+                return res[0]["timestamp"];
+            });
+            event.dateTimeUpdate = dateTime;
+            event = await entityManager.save(Events_1.Events, event);
+            event = await entityManager.findOne(Events_1.Events, {
+                where: {
+                    eventCode,
+                },
+                relations: {
+                    user: {
+                        userProfilePic: {
+                            file: true,
+                        },
+                    },
+                    eventImages: {
+                        file: true,
+                    },
+                    thumbnailFile: true,
+                },
+            });
+            (_d = event.user) === null || _d === void 0 ? true : delete _d.password;
+            (_e = event.user) === null || _e === void 0 ? true : delete _e.password;
             return Object.assign(Object.assign({}, event), { interested: interestedCount });
         });
     }
     async updateEventResponded(eventCode, dto) {
         return await this.eventRepo.manager.transaction(async (entityManager) => {
-            var _a, _b, _c;
-            const event = await entityManager.findOne(Events_1.Events, {
+            var _a, _b, _c, _d, _e;
+            let event = await entityManager.findOne(Events_1.Events, {
                 where: {
                     eventCode,
                 },
@@ -1088,6 +1119,12 @@ let EventsService = class EventsService {
                         respondedCount && !isNaN(Number(respondedCount))
                             ? Number(respondedCount) + 1
                             : 1;
+                    const totalOthers = Number(respondedCount) > 0 ? respondedCount - 1 : 0;
+                    const pushNotifTitle = respondedCount > 1 ? `${user === null || user === void 0 ? void 0 : user.name} and ${totalOthers > 1 ? totalOthers + ' others responded for your event.' : totalOthers + ' other responded for your event.'}` : `${user === null || user === void 0 ? void 0 : user.name} responded for your event.`;
+                    const pushNotifDesc = event === null || event === void 0 ? void 0 : event.eventName;
+                    const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, pushNotifTitle, pushNotifDesc);
+                    const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_c = event.user) === null || _c === void 0 ? void 0 : _c.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event === null || event === void 0 ? void 0 : event.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
+                    console.log(pushNotif);
                 }
                 else {
                     responded = await entityManager.findOne(Responded_1.Responded, {
@@ -1108,8 +1145,31 @@ let EventsService = class EventsService {
                             : 0;
                 }
             }
-            (_b = event.user) === null || _b === void 0 ? true : delete _b.password;
-            (_c = event.user) === null || _c === void 0 ? true : delete _c.password;
+            const dateTime = await entityManager
+                .query(timestamp_constant_1.CONST_QUERYCURRENT_TIMESTAMP)
+                .then((res) => {
+                return res[0]["timestamp"];
+            });
+            event.dateTimeUpdate = dateTime;
+            event = await entityManager.save(Events_1.Events, event);
+            event = await entityManager.findOne(Events_1.Events, {
+                where: {
+                    eventCode,
+                },
+                relations: {
+                    user: {
+                        userProfilePic: {
+                            file: true,
+                        },
+                    },
+                    eventImages: {
+                        file: true,
+                    },
+                    thumbnailFile: true,
+                },
+            });
+            (_d = event.user) === null || _d === void 0 ? true : delete _d.password;
+            (_e = event.user) === null || _e === void 0 ? true : delete _e.password;
             return Object.assign(Object.assign({}, event), { responded: respondedCount });
         });
     }
@@ -1285,6 +1345,7 @@ let EventsService = class EventsService {
         const res = await entityManager.save(Notifications_1.Notifications, notifications);
         return await entityManager.find(Notifications_1.Notifications, {
             where: {
+                notificationId: (0, typeorm_2.In)(res.map(x => x.notificationId)),
                 referenceId: data.eventCode,
                 user: {
                     userId: (0, typeorm_2.In)(userIds),
@@ -1301,9 +1362,7 @@ EventsService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(Events_1.Events)),
     __param(1, (0, typeorm_1.InjectRepository)(UserConversation_1.UserConversation)),
     __param(2, (0, typeorm_1.InjectRepository)(Notifications_1.Notifications)),
-    __param(3, (0, typeorm_1.InjectRepository)(Transactions_1.Transactions)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         firebase_provider_1.FirebaseProvider,

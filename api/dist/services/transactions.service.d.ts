@@ -1,16 +1,19 @@
 import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import { FirebaseProvider } from "src/core/provider/firebase/firebase-provider";
-import { Repository } from "typeorm";
+import { EntityManager, Repository } from "typeorm";
 import { Transactions } from "src/db/entities/Transactions";
 import { Users } from "src/db/entities/Users";
 import { Events } from "src/db/entities/Events";
+import { Notifications } from "src/db/entities/Notifications";
+import { OneSignalNotificationService } from "./one-signal-notification.service";
 export declare class TransactionsService {
     private readonly httpService;
     private readonly config;
     private firebaseProvoder;
     private readonly transactionsRepo;
-    constructor(httpService: HttpService, config: ConfigService, firebaseProvoder: FirebaseProvider, transactionsRepo: Repository<Transactions>);
+    private oneSignalNotificationService;
+    constructor(httpService: HttpService, config: ConfigService, firebaseProvoder: FirebaseProvider, transactionsRepo: Repository<Transactions>, oneSignalNotificationService: OneSignalNotificationService);
     getPagination({ pageSize, pageIndex, order, columnDef }: {
         pageSize: any;
         pageIndex: any;
@@ -106,4 +109,5 @@ export declare class TransactionsService {
         paid: boolean;
         payment_intent?: undefined;
     }>;
+    logNotification(userIds: string[], data: Events, entityManager: EntityManager, title: string, description: string): Promise<Notifications[]>;
 }

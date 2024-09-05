@@ -409,7 +409,7 @@ let UsersService = class UsersService {
                 throw Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
             }
             if (dto.userProfilePic) {
-                const newFileName = (0, uuid_1.v4)();
+                const newGUID = (0, uuid_1.v4)();
                 let userProfilePic = await entityManager.findOne(UserProfilePic_1.UserProfilePic, {
                     where: { userId: user.userId },
                     relations: ["file"],
@@ -427,8 +427,9 @@ let UsersService = class UsersService {
                         console.log(ex);
                     }
                     const file = userProfilePic.file;
-                    file.fileName = `${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`;
-                    const bucketFile = bucket.file(`profile/${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
+                    file.fileName = dto.userProfilePic.fileName;
+                    file.guid = newGUID;
+                    const bucketFile = bucket.file(`profile/${newGUID}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
                     const img = Buffer.from(dto.userProfilePic.data, "base64");
                     await bucketFile.save(img).then(async (res) => {
                         console.log("res");
@@ -446,8 +447,9 @@ let UsersService = class UsersService {
                     userProfilePic = new UserProfilePic_1.UserProfilePic();
                     userProfilePic.user = user;
                     const file = new Files_1.Files();
-                    file.fileName = `${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`;
-                    const bucketFile = bucket.file(`profile/${newFileName}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
+                    file.fileName = dto.userProfilePic.fileName;
+                    file.guid = newGUID;
+                    const bucketFile = bucket.file(`profile/${newGUID}${(0, path_1.extname)(dto.userProfilePic.fileName)}`);
                     const img = Buffer.from(dto.userProfilePic.data, "base64");
                     await bucketFile.save(img).then(async () => {
                         const url = await bucketFile.getSignedUrl({

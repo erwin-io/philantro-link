@@ -5,15 +5,23 @@ import { HttpModule } from "@nestjs/axios";
 import { Transactions } from "src/db/entities/Transactions";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { FirebaseProviderModule } from "src/core/provider/firebase/firebase-provider.module";
+import { OneSignalNotificationService } from "src/services/one-signal-notification.service";
+import { Events } from "src/db/entities/Events";
+import { Notifications } from "src/db/entities/Notifications";
+import { UserConversation } from "src/db/entities/UserConversation";
 
 @Module({
   imports: [
     FirebaseProviderModule,
     HttpModule,
-    TypeOrmModule.forFeature([Transactions]),
+    TypeOrmModule.forFeature([
+      Events,
+      UserConversation,
+      Notifications,
+      Transactions,]),
   ],
   controllers: [TransactionsController],
-  providers: [TransactionsService],
-  exports: [TransactionsService],
+  providers: [TransactionsService, OneSignalNotificationService],
+  exports: [TransactionsService, OneSignalNotificationService],
 })
 export class TransactionsModule {}

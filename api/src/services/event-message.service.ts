@@ -275,7 +275,7 @@ export class EventMessageService {
             await Promise.all([
               this.oneSignalNotificationService.sendToExternalUser(
                 eventMessage.toUser?.userName,
-                NOTIF_TYPE.EVENTS,
+                NOTIF_TYPE.MESSAGE,
                 userConversation?.userConversationId,
                 [],
                 userConversation.title,

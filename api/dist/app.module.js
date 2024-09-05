@@ -49,8 +49,6 @@ const events_module_1 = require("./controller/events/events.module");
 const transactions_module_1 = require("./controller/transactions/transactions.module");
 const payment_done_module_1 = require("./controller/payment-done/payment-done.module");
 const support_ticket_module_1 = require("./controller/support-ticket/support-ticket.module");
-const message_service_1 = require("./services/message.service");
-const email_service_1 = require("./services/email.service");
 const event_message_module_1 = require("./controller/event-message/event-message.module");
 const user_conversation_module_1 = require("./controller/user-conversation/user-conversation.module");
 const envFilePath = (0, utils_1.getEnvPath)(`${__dirname}/common/envs`);
@@ -82,7 +80,7 @@ AppModule = __decorate([
             event_message_module_1.EventMessageModule,
             user_conversation_module_1.UserConversationModule
         ],
-        providers: [app_service_1.AppService, message_service_1.MessageService, email_service_1.EmailService],
+        providers: [app_service_1.AppService],
         controllers: [],
     })
 ], AppModule);

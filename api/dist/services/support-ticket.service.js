@@ -271,22 +271,22 @@ let SupportTicketService = class SupportTicketService {
             if (!supportTicket) {
                 throw Error(support_ticket_constant_1.SUPPORT_TICKET_ERROR_NOT_FOUND);
             }
-            const title = (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+            const title = ((supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.status) === support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
                 ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} is now active.`
                 : "") ||
-                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.COMPLETED
+                ((supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.status) === support_ticket_constant_1.SUPPORT_TICKET_STATUS.COMPLETED
                     ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been completed.`
                     : "") ||
-                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+                ((supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.status) === support_ticket_constant_1.SUPPORT_TICKET_STATUS.CLOSED
                     ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been closed.`
                     : "");
-            const desc = (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+            const desc = ((supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.status) === support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
                 ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} is now active. Our support team is currently working on resolving your issue.`
                 : "") ||
-                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.COMPLETED
+                ((supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.status) === support_ticket_constant_1.SUPPORT_TICKET_STATUS.COMPLETED
                     ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been completed. Please review the resolution and let us know if you need further assistance.`
                     : "") ||
-                (support_ticket_constant_1.SUPPORT_TICKET_STATUS.ACTIVE
+                ((supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.status) === support_ticket_constant_1.SUPPORT_TICKET_STATUS.CLOSED
                     ? `Your ticket #${supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.supportTicketCode} has been closed. Thank you for your feedback. We’re here if you need anything else.`
                     : "");
             const clientNotifications = await this.logNotification([(_a = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _a === void 0 ? void 0 : _a.userId], supportTicket, entityManager, title, desc);
@@ -469,7 +469,7 @@ let SupportTicketService = class SupportTicketService {
                 userConversation.description = `${(_f = supportTicket === null || supportTicket === void 0 ? void 0 : supportTicket.user) === null || _f === void 0 ? void 0 : _f.name}: ${supportTicketMessage === null || supportTicketMessage === void 0 ? void 0 : supportTicketMessage.message}`;
                 userConversation = await entityManager.save(UserConversation_1.UserConversation, userConversation);
             }
-            const postMessage = await this.oneSignalNotificationService.sendToExternalUser(toUser === null || toUser === void 0 ? void 0 : toUser.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, supportTicketMessage.supportTicketMessageId, [], fromUser === null || fromUser === void 0 ? void 0 : fromUser.name, supportTicketMessage.message);
+            const postMessage = await this.oneSignalNotificationService.sendToExternalUser(toUser === null || toUser === void 0 ? void 0 : toUser.userName, notifications_constant_1.NOTIF_TYPE.MESSAGE, supportTicketMessage.supportTicketMessageId, [], fromUser === null || fromUser === void 0 ? void 0 : fromUser.name, supportTicketMessage.message);
             console.log(postMessage);
             (_g = supportTicketMessage.fromUser) === null || _g === void 0 ? true : delete _g.password;
             return supportTicketMessage;

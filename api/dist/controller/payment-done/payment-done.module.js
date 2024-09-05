@@ -14,6 +14,7 @@ const Transactions_1 = require("../../db/entities/Transactions");
 const axios_1 = require("@nestjs/axios");
 const typeorm_1 = require("@nestjs/typeorm");
 const firebase_provider_module_1 = require("../../core/provider/firebase/firebase-provider.module");
+const one_signal_notification_service_1 = require("../../services/one-signal-notification.service");
 let PaymentDoneModule = class PaymentDoneModule {
 };
 PaymentDoneModule = __decorate([
@@ -24,7 +25,7 @@ PaymentDoneModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([Transactions_1.Transactions]),
         ],
         controllers: [payment_done_controller_1.PaymentDoneController],
-        providers: [transactions_service_1.TransactionsService],
+        providers: [transactions_service_1.TransactionsService, one_signal_notification_service_1.OneSignalNotificationService],
     })
 ], PaymentDoneModule);
 exports.PaymentDoneModule = PaymentDoneModule;
