@@ -518,7 +518,7 @@ export class EventsService {
       //   DateConstant.DATE_LANGUAGE
       // ).toISOString();
       const dateTime = await entityManager
-      .query(`select ('${dto.dateTime}') AT TIME ZONE 'Asia/Manila' as "dateTime" `)
+      .query(`select '${dto.dateTime} UTC'::TIMESTAMPTZ as "dateTime" `)
       .then((res) => {
         return res[0].dateTime;
       })
@@ -886,7 +886,7 @@ export class EventsService {
       });
       
       const dateTime = await entityManager
-      .query(`select ('${dto.dateTime}') AT TIME ZONE 'Asia/Manila' as "dateTime" `)
+      .query(`select '${dto.dateTime} UTC'::TIMESTAMPTZ as "dateTime" `)
       .then((res) => {
         return res[0].dateTime;
       })
