@@ -89,10 +89,22 @@ export class EditEventFormComponent implements OnInit {
     this.isLoading = true;
     this.eventsService.getByCode(this.eventCode, this.currentUser?.userCode).subscribe(res=> {
       this.event = res.data;
+      if(this.event?.eventType === "DONATION" && this.event?.inProgress) {
+        // this.donationTargetAmount.disable();
+        // this.dateTime.disable();
+        // this.eventLocMap.disable();
+        // this.eventLocName.disable();
+      }
       this.eventName.markAsDirty();
       this.eventDesc.markAsDirty();
+      this.dateTime.setValue(moment(this.event?.dateTime).format("MMM DD YYYY h:mm A"));
+      this.dateTime.markAsDirty();
+      this.eventLocName.setValue(this.event?.eventLocName);
+      this.eventLocName.markAsDirty();
       this.eventLocMap.setValue(this.event?.eventLocMap);
+      this.eventLocMap.markAsDirty();
       this.eventAssistanceItems.setValue(this.event?.eventAssistanceItems as any);
+      this.eventAssistanceItems.markAsDirty();
       this.event.dateTime = moment(this.event.dateTime).format("MMM DD YYYY h:mm A");
       this.eventThumbnails = this.event?.eventImages.map((x,i)=> {
         return {
@@ -283,7 +295,8 @@ export class EditEventFormComponent implements OnInit {
       enterAnimation: this.animationService.pushLeftAnimation,
       leaveAnimation: this.animationService.leavePushLeftAnimation,
       componentProps: { 
-        modal
+        modal,
+        datePreferedStart: new Date(this.dateTime.value).toISOString()
        },
     });
     modal.present();

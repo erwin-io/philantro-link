@@ -39,10 +39,11 @@
           fill="outline" 
           placeholder="Enter Amount"
           [ngModel]="event?.donationTargetAmount"
-          [disabled]="isSubmitting"
+          [disabled]="isSubmitting || (event?.eventType === 'DONATION' && event?.inProgress)"
           [formControl]="donationTargetAmount"
           type="Number"
         ></ion-input>
+        <ion-text *ngIf="(event?.eventType === 'DONATION' && event?.inProgress)" color="danger">Donation in Progress: The donation process has begun, and modifications to the amount are disabled.</ion-text>
       </div>
       <div class="edit-form-control-input form-control-input">
         <p class="edit-form-control-label">Account Name</p>
@@ -97,7 +98,7 @@
       </div>
     </ng-container>
     
-    <div class="edit-form-control-input form-control-input icon-right">
+    <div class="edit-form-control-input form-control-input icon-right" [ngStyle]="{ 'display': event?.eventType === 'DONATION' || event?.eventType === 'ASSISTANCE' ? 'none' : '' }">
       <p class="edit-form-control-label">Date & Time</p>
       <ion-input 
         mode="md"
@@ -106,11 +107,12 @@
         readonly="true"
         [disabled]="isSubmitting"
         [formControl]="dateTime"
-        placeholder="Date & Time" (mouseup)="$event.preventDefault();showDatePicker()">
-        <ion-button fill="clear" slot="end">
+        placeholder="Date & Time" (mouseup)="$event.preventDefault();(event?.eventType === 'DONATION' && event?.inProgress) ? false : showDatePicker()">
+        <ion-button [disabled]="(event?.eventType === 'DONATION' && event?.inProgress)" fill="clear" slot="end">
           <ion-icon slot="icon-only" name="calendar-clear-outline" aria-hidden="true"></ion-icon>
         </ion-button>
       </ion-input>
+      <ion-text *ngIf="(event?.eventType === 'DONATION' && event?.inProgress)" color="danger">Donation in Progress: The donation process has begun, and modifications to the date and time are disabled.</ion-text>
     </div>
     <div class="edit-form-control-input form-control-input">
       <p class="edit-form-control-label">Location</p>
@@ -121,12 +123,14 @@
         placeholder="Select Location"
         readonly="true"
         [ngModel]="event?.eventLocName"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting || (event?.eventType === 'DONATION' && event?.inProgress)"
         [formControl]="eventLocName"
-        (mouseup)="$event.preventDefault();showLocationPicker()">
-      <ion-button fill="clear" slot="end">
-        <ion-icon slot="icon-only" name="location-outline" aria-hidden="true"></ion-icon>
-      </ion-button></ion-input>
+        (mouseup)="$event.preventDefault();(event?.eventType === 'DONATION' && event?.inProgress) ? false : showLocationPicker()">
+        <ion-button [disabled]="event?.inProgress" fill="clear" slot="end">
+          <ion-icon slot="icon-only" name="location-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-input>
+      <ion-text *ngIf="(event?.eventType === 'DONATION' && event?.inProgress)" color="danger">Donation in Progress: The donation process has begun, and modifications to the location are disabled.</ion-text>
     </div>
     <div class="edit-form-control-input form-control-input">
       <p class="edit-form-control-label">Event Description </p>

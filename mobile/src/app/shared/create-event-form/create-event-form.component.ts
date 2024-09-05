@@ -150,7 +150,7 @@ export class CreateEventFormComponent implements OnInit {
     } else if(this.eventType === "DONATION") {
       _isValid = this.eventType && (this.eventName.valid) &&
       (this.eventDesc.valid) &&
-      (this.dateTime.valid) &&
+      // (this.dateTime.valid) &&
       (this.eventLocName.valid) &&
       (this.eventLocMap.valid) &&
       (this.transferType.valid) &&
@@ -191,7 +191,7 @@ export class CreateEventFormComponent implements OnInit {
       _form = {
         eventName: this.eventName.value,
         eventDesc: this.eventDesc.value,
-        dateTime: moment(this.dateTime.value).format("YYYY-MM-DD HH:mm:ss"),
+        // dateTime: moment(this.dateTime.value).format("YYYY-MM-DD HH:mm:ss"),
         eventLocName: this.eventLocName.value,
         eventLocMap: this.eventLocMap.value,
         transferType: this.transferType.value,
@@ -211,7 +211,7 @@ export class CreateEventFormComponent implements OnInit {
       _form = {
         eventName: this.eventName.value,
         eventDesc: this.eventDesc.value,
-        dateTime: moment(this.dateTime.value).format("YYYY-MM-DD HH:mm:ss"),
+        // dateTime: moment(this.dateTime.value).format("YYYY-MM-DD HH:mm:ss"),
         eventLocName: this.eventLocName.value,
         eventLocMap: this.eventLocMap.value,
         eventAssistanceItems: this.eventAssistanceItems.value,

@@ -111,7 +111,7 @@
       </div>
     </ng-container>
     
-    <div class="create-form-control-input form-control-input icon-right">
+    <div class="create-form-control-input form-control-input icon-right" [ngStyle]="{ 'display': eventType === 'DONATION' || eventType === 'ASSISTANCE' ? 'none' : '' }">
       <p class="create-form-control-label">Date & Time</p>
       <ion-input 
         mode="md"

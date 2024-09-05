@@ -13,7 +13,9 @@ import { EventThumbnailModule } from '../event-thumbnail/event-thumbnail.module'
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
+    ReactiveFormsModule.withConfig({
+      callSetDisabledState: 'whenDisabledForLegacyCode'
+    }),
     IonicModule,
     MapBoxModule,
     EventThumbnailModule
