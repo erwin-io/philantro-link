@@ -1,7 +1,7 @@
 import { map } from "rxjs";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import moment from "moment";
+// import moment from "moment";
 import { PusherService } from "nestjs-pusher";
 import {
   NOTIF_TITLE,
@@ -50,6 +50,7 @@ import { extname } from "path";
 import { EventMessage } from "src/db/entities/EventMessage";
 import { UserConversation } from "src/db/entities/UserConversation";
 import { Transactions } from "src/db/entities/Transactions";
+import * as moment from "moment-timezone";
 
 @Injectable()
 export class EventsService {
@@ -325,7 +326,7 @@ export class EventsService {
               userCode: currentUserCode,
             },
             isCompleted: true,
-            status: "COMPLETED"
+            status: "COMPLETED",
           },
         }),
       ]);
@@ -522,12 +523,7 @@ export class EventsService {
       // .then((res) => {
       //   return res[0].dateTime;
       // });
-
-      const dateTime = new Date(dto.dateTime).toLocaleString('en-PH', {
-        timeZone: 'Asia/Manila'
-      });
-      
-      event.dateTime = new Date(dateTime);
+      event.dateTime = moment.tz(dto.dateTime, 'Asia/Manila').toDate();
       const user = await entityManager.findOne(Users, {
         where: {
           userCode: dto.userCode,
@@ -634,10 +630,10 @@ export class EventsService {
       //     return res[0]["timestamp"];
       //   });
       const dateTime = await entityManager
-      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-      .then((res) => {
-        return res[0].dateTime;
-      })
+        .query(`select now()::TIMESTAMPTZ as "dateTime"`)
+        .then((res) => {
+          return res[0].dateTime;
+        });
       event.dateTime = dateTime;
       const user = await entityManager.findOne(Users, {
         where: {
@@ -743,10 +739,10 @@ export class EventsService {
       //   });
 
       const dateTime = await entityManager
-      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-      .then((res) => {
-        return res[0].dateTime;
-      })
+        .query(`select now()::TIMESTAMPTZ as "dateTime"`)
+        .then((res) => {
+          return res[0].dateTime;
+        });
       event.dateTime = dateTime;
       const user = await entityManager.findOne(Users, {
         where: {
@@ -804,11 +800,15 @@ export class EventsService {
             .map((x) => "'" + x + "'")
             .join(
               ","
-            )}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${user?.userId}
+            )}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${
+        user?.userId
+      }
         )
         SELECT "userId" from nearby WHERE "userId" <> ${user?.userId}
         UNION 
-        SELECT "userId" from specific_user WHERE "userId" <> ${user?.userId} AND  "userId" NOT IN (SELECT "userId" from nearby)`;
+        SELECT "userId" from specific_user WHERE "userId" <> ${
+          user?.userId
+        } AND  "userId" NOT IN (SELECT "userId" from nearby)`;
 
       const clientUserIds = await entityManager
         .query(getClientUserIds)
@@ -883,24 +883,21 @@ export class EventsService {
       //   .then((res) => {
       //     return res[0]["timestamp"];
       //   });
-      
+
       const timestamp = await entityManager
-      .query(` select now()::TIMESTAMPTZ as timestamp`)
-      .then((res) => {
-        return res[0].timestamp;
-      });
-      
+        .query(` select now()::TIMESTAMPTZ as timestamp`)
+        .then((res) => {
+          return res[0].timestamp;
+        });
+
       // const dateTime = await entityManager
       // .query(`select '${dto.dateTime} UTC'::TIMESTAMPTZ as "dateTime" `)
       // .then((res) => {
       //   return res[0].dateTime;
       // })
-      event.dateTimeUpdate = timestamp
-      const dateTime = new Date(dto.dateTime).toLocaleString('en-PH', {
-        timeZone: 'Asia/Manila'
-      });
-      
-      event.dateTime = new Date(dateTime);
+      event.dateTimeUpdate = timestamp;
+
+      event.dateTime = moment.tz(dto.dateTime, 'Asia/Manila').toDate();
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
         where: {
@@ -964,12 +961,12 @@ export class EventsService {
       //   .then((res) => {
       //     return res[0]["timestamp"];
       //   });
-        
+
       const timestamp = await entityManager
-      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-      .then((res) => {
-        return res[0].dateTime;
-      })
+        .query(`select now()::TIMESTAMPTZ as "dateTime"`)
+        .then((res) => {
+          return res[0].dateTime;
+        });
       event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
       event = await entityManager.findOne(Events, {
@@ -1021,12 +1018,12 @@ export class EventsService {
       //   .then((res) => {
       //     return res[0]["timestamp"];
       //   });
-      
+
       const timestamp = await entityManager
-      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-      .then((res) => {
-        return res[0].dateTime;
-      })
+        .query(`select now()::TIMESTAMPTZ as "dateTime"`)
+        .then((res) => {
+          return res[0].dateTime;
+        });
       event.dateTimeUpdate = timestamp;
       event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
@@ -1084,7 +1081,7 @@ export class EventsService {
       }
       if (
         (dto.status === EVENT_STATUS.INPROGRESS &&
-          event.eventStatus === EVENT_STATUS.PENDING ) ||
+          event.eventStatus === EVENT_STATUS.PENDING) ||
         (dto.status === EVENT_STATUS.COMPLETED &&
           event.eventStatus === EVENT_STATUS.PENDING)
       ) {
@@ -1109,7 +1106,8 @@ export class EventsService {
       }
       if (
         dto.status === EVENT_STATUS.INPROGRESS &&
-        event?.eventType !== EVENT_TYPE.ASSISTANCE && event?.eventType !== EVENT_TYPE.DONATION
+        event?.eventType !== EVENT_TYPE.ASSISTANCE &&
+        event?.eventType !== EVENT_TYPE.DONATION
       ) {
         event.inProgress = true;
         event.eventStatus = EVENT_STATUS.APPROVED;
@@ -1118,7 +1116,6 @@ export class EventsService {
         event.inProgress = false;
       }
 
-      
       if (
         dto.status === EVENT_STATUS.APPROVED &&
         event?.eventType === EVENT_TYPE.DONATION
@@ -1133,12 +1130,12 @@ export class EventsService {
       //   .then((res) => {
       //     return res[0]["timestamp"];
       //   });
-      
+
       const timestamp = await entityManager
-      .query(`select now()::TIMESTAMPTZ as "dateTime"`)
-      .then((res) => {
-        return res[0].dateTime;
-      })
+        .query(`select now()::TIMESTAMPTZ as "dateTime"`)
+        .then((res) => {
+          return res[0].dateTime;
+        });
       event.dateTimeUpdate = timestamp;
       event.dateTimeUpdate = timestamp;
       event = await entityManager.save(Events, event);
@@ -1167,9 +1164,10 @@ export class EventsService {
         (dto.status === EVENT_STATUS.APPROVED ||
           dto.status === EVENT_STATUS.REJECTED)
       ) {
-        const forClientTitle = dto.status === EVENT_STATUS.APPROVED
-          ? "Your event was approved!"
-          : "Your event was rejected";
+        const forClientTitle =
+          dto.status === EVENT_STATUS.APPROVED
+            ? "Your event was approved!"
+            : "Your event was rejected";
 
         const clientNotifications: Notifications[] = await this.logNotification(
           [event.user?.userId],
@@ -1267,17 +1265,26 @@ export class EventsService {
               ? Number(interestedCount) + 1
               : 1;
 
-          const totalOthers = Number(interestedCount) > 0 ? interestedCount - 1 : 0;
-          const pushNotifTitle = interestedCount > 1 ? `${user?.name} and ${totalOthers > 1 ? totalOthers + ' others are interested in your event.' : totalOthers + ' other are interested in your event.'}` : `${user?.name} is interested in your event.`;
+          const totalOthers =
+            Number(interestedCount) > 0 ? interestedCount - 1 : 0;
+          const pushNotifTitle =
+            interestedCount > 1
+              ? `${user?.name} and ${
+                  totalOthers > 1
+                    ? totalOthers + " others are interested in your event."
+                    : totalOthers + " other are interested in your event."
+                }`
+              : `${user?.name} is interested in your event.`;
           const pushNotifDesc = event?.eventName;
-          const clientNotifications: Notifications[] = await this.logNotification(
-            [event.user?.userId],
-            event,
-            entityManager,
-            pushNotifTitle,
-            pushNotifDesc
-          );
-  
+          const clientNotifications: Notifications[] =
+            await this.logNotification(
+              [event.user?.userId],
+              event,
+              entityManager,
+              pushNotifTitle,
+              pushNotifDesc
+            );
+
           const pushNotif =
             await this.oneSignalNotificationService.sendToExternalUser(
               event.user?.userName,
@@ -1401,17 +1408,26 @@ export class EventsService {
               ? Number(respondedCount) + 1
               : 1;
 
-          const totalOthers = Number(respondedCount) > 0 ? respondedCount - 1 : 0;
-          const pushNotifTitle = respondedCount > 1 ? `${user?.name} and ${totalOthers > 1 ? totalOthers + ' others responded for your event.' : totalOthers + ' other responded for your event.'}` : `${user?.name} responded for your event.`;
+          const totalOthers =
+            Number(respondedCount) > 0 ? respondedCount - 1 : 0;
+          const pushNotifTitle =
+            respondedCount > 1
+              ? `${user?.name} and ${
+                  totalOthers > 1
+                    ? totalOthers + " others responded for your event."
+                    : totalOthers + " other responded for your event."
+                }`
+              : `${user?.name} responded for your event.`;
           const pushNotifDesc = event?.eventName;
-          const clientNotifications: Notifications[] = await this.logNotification(
-            [event.user?.userId],
-            event,
-            entityManager,
-            pushNotifTitle,
-            pushNotifDesc
-          );
-  
+          const clientNotifications: Notifications[] =
+            await this.logNotification(
+              [event.user?.userId],
+              event,
+              entityManager,
+              pushNotifTitle,
+              pushNotifDesc
+            );
+
           const pushNotif =
             await this.oneSignalNotificationService.sendToExternalUser(
               event.user?.userName,
@@ -1669,7 +1685,7 @@ export class EventsService {
 
     return await entityManager.find(Notifications, {
       where: {
-        notificationId: In(res.map(x=> x.notificationId)),
+        notificationId: In(res.map((x) => x.notificationId)),
         referenceId: data.eventCode,
         user: {
           userId: In(userIds),

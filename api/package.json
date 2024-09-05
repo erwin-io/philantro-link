@@ -47,6 +47,7 @@
     "hbs": "^4.2.0",
     "http-proxy-middleware": "^3.0.0",
     "moment": "^2.29.4",
+    "moment-timezone": "^0.5.45",
     "nestjs-pusher": "^0.0.12",
     "nestjs-typeorm-paginate": "^4.0.2",
     "node-base64-to-file": "^1.0.4",

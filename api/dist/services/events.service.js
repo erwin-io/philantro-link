@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -37,6 +60,7 @@ const path_1 = require("path");
 const EventMessage_1 = require("../db/entities/EventMessage");
 const UserConversation_1 = require("../db/entities/UserConversation");
 const Transactions_1 = require("../db/entities/Transactions");
+const moment = __importStar(require("moment-timezone"));
 let EventsService = class EventsService {
     constructor(eventRepo, userConversationRepo, notificationsRepo, firebaseProvoder, oneSignalNotificationService) {
         this.eventRepo = eventRepo;
@@ -271,7 +295,7 @@ let EventsService = class EventsService {
                             userCode: currentUserCode,
                         },
                         isCompleted: true,
-                        status: "COMPLETED"
+                        status: "COMPLETED",
                     },
                 }),
             ]);
@@ -440,10 +464,7 @@ let EventsService = class EventsService {
             event.eventDesc = dto.eventDesc;
             event.eventLocName = dto.eventLocName;
             event.eventLocMap = dto.eventLocMap;
-            const dateTime = new Date(dto.dateTime).toLocaleString('en-PH', {
-                timeZone: 'Asia/Manila'
-            });
-            event.dateTime = new Date(dateTime);
+            event.dateTime = moment.tz(dto.dateTime, 'Asia/Manila').toDate();
             const user = await entityManager.findOne(Users_1.Users, {
                 where: {
                     userCode: dto.userCode,
@@ -711,10 +732,7 @@ let EventsService = class EventsService {
                 return res[0].timestamp;
             });
             event.dateTimeUpdate = timestamp;
-            const dateTime = new Date(dto.dateTime).toLocaleString('en-PH', {
-                timeZone: 'Asia/Manila'
-            });
-            event.dateTime = new Date(dateTime);
+            event.dateTime = moment.tz(dto.dateTime, 'Asia/Manila').toDate();
             event = await entityManager.save(Events_1.Events, event);
             event = await entityManager.findOne(Events_1.Events, {
                 where: {
@@ -895,7 +913,8 @@ let EventsService = class EventsService {
                 event.eventStatus = dto.status;
             }
             if (dto.status === events_constant_1.EVENT_STATUS.INPROGRESS &&
-                (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE && (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.DONATION) {
+                (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.ASSISTANCE &&
+                (event === null || event === void 0 ? void 0 : event.eventType) !== events_constant_1.EVENT_TYPE.DONATION) {
                 event.inProgress = true;
                 event.eventStatus = events_constant_1.EVENT_STATUS.APPROVED;
             }
@@ -1019,7 +1038,11 @@ let EventsService = class EventsService {
                             ? Number(interestedCount) + 1
                             : 1;
                     const totalOthers = Number(interestedCount) > 0 ? interestedCount - 1 : 0;
-                    const pushNotifTitle = interestedCount > 1 ? `${user === null || user === void 0 ? void 0 : user.name} and ${totalOthers > 1 ? totalOthers + ' others are interested in your event.' : totalOthers + ' other are interested in your event.'}` : `${user === null || user === void 0 ? void 0 : user.name} is interested in your event.`;
+                    const pushNotifTitle = interestedCount > 1
+                        ? `${user === null || user === void 0 ? void 0 : user.name} and ${totalOthers > 1
+                            ? totalOthers + " others are interested in your event."
+                            : totalOthers + " other are interested in your event."}`
+                        : `${user === null || user === void 0 ? void 0 : user.name} is interested in your event.`;
                     const pushNotifDesc = event === null || event === void 0 ? void 0 : event.eventName;
                     const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, pushNotifTitle, pushNotifDesc);
                     const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_c = event.user) === null || _c === void 0 ? void 0 : _c.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event === null || event === void 0 ? void 0 : event.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
@@ -1132,7 +1155,11 @@ let EventsService = class EventsService {
                             ? Number(respondedCount) + 1
                             : 1;
                     const totalOthers = Number(respondedCount) > 0 ? respondedCount - 1 : 0;
-                    const pushNotifTitle = respondedCount > 1 ? `${user === null || user === void 0 ? void 0 : user.name} and ${totalOthers > 1 ? totalOthers + ' others responded for your event.' : totalOthers + ' other responded for your event.'}` : `${user === null || user === void 0 ? void 0 : user.name} responded for your event.`;
+                    const pushNotifTitle = respondedCount > 1
+                        ? `${user === null || user === void 0 ? void 0 : user.name} and ${totalOthers > 1
+                            ? totalOthers + " others responded for your event."
+                            : totalOthers + " other responded for your event."}`
+                        : `${user === null || user === void 0 ? void 0 : user.name} responded for your event.`;
                     const pushNotifDesc = event === null || event === void 0 ? void 0 : event.eventName;
                     const clientNotifications = await this.logNotification([(_b = event.user) === null || _b === void 0 ? void 0 : _b.userId], event, entityManager, pushNotifTitle, pushNotifDesc);
                     const pushNotif = await this.oneSignalNotificationService.sendToExternalUser((_c = event.user) === null || _c === void 0 ? void 0 : _c.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event === null || event === void 0 ? void 0 : event.eventCode, clientNotifications, pushNotifTitle, pushNotifDesc);
@@ -1357,7 +1384,7 @@ let EventsService = class EventsService {
         const res = await entityManager.save(Notifications_1.Notifications, notifications);
         return await entityManager.find(Notifications_1.Notifications, {
             where: {
-                notificationId: (0, typeorm_2.In)(res.map(x => x.notificationId)),
+                notificationId: (0, typeorm_2.In)(res.map((x) => x.notificationId)),
                 referenceId: data.eventCode,
                 user: {
                     userId: (0, typeorm_2.In)(userIds),
