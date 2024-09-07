@@ -9,7 +9,6 @@ import {
   ValidateNested,
 } from "class-validator";
 import moment from "moment";
-import { MapDto } from "../map/map.dto";
 
 export class DefaultSupportTicketDto {
   @ApiProperty()

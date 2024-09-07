@@ -496,34 +496,10 @@ let EventsService = class EventsService {
                     },
                 },
             });
-            const KM_DISTANCE_NEARBY_DRIVER = 10;
-            const getNearbyClients = ` Select "UserId" as "userId"
-      from dbo."Users" 
-      WHERE "UserType" = 'CLIENT' AND round(
-     (earth_distance(
-             ll_to_earth(${dto.eventLocMap.latitude}::float, ${dto.eventLocMap.longitude}::float),-- driver point
-             ll_to_earth(("CurrentLocation"->>'latitude')::float, ("CurrentLocation"->>'longitude')::float)-- pickup
-        )/1000)::decimal, 2) <= ${KM_DISTANCE_NEARBY_DRIVER}`;
-            const nearbyClientUserIds = await entityManager
-                .query(getNearbyClients)
-                .then((res) => {
-                return res ? res.map((x) => x.userId) : [];
-            });
-            console.log("nearbyClientUserIds ", nearbyClientUserIds);
-            if (nearbyClientUserIds.length > 0) {
-                const forClientTitle = "There's an event nearby that could use your attention!";
-                const clientNotifications = await this.logNotification(nearbyClientUserIds, event, entityManager, forClientTitle, event.eventName);
-                const multipleClientReq = clientNotifications.map((x) => {
-                    var _a;
-                    return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
-                });
-                const pushToClients = await Promise.all(multipleClientReq);
-                console.log(pushToClients);
-            }
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
-            await this.saveEventImages(entityManager, event, dto.eventImages);
+            this.saveEventImages(entityManager, event, dto.eventImages);
             (_a = event.user) === null || _a === void 0 ? true : delete _a.password;
             return event;
         });
@@ -573,30 +549,6 @@ let EventsService = class EventsService {
                     },
                 },
             });
-            const KM_DISTANCE_NEARBY_DRIVER = 10;
-            const getNearbyClients = ` Select "UserId" as "userId"
-      from dbo."Users" 
-      WHERE "UserType" = 'CLIENT' AND round(
-     (earth_distance(
-             ll_to_earth(${dto.eventLocMap.latitude}::float, ${dto.eventLocMap.longitude}::float),-- driver point
-             ll_to_earth(("CurrentLocation"->>'latitude')::float, ("CurrentLocation"->>'longitude')::float)-- pickup
-        )/1000)::decimal, 2) <= ${KM_DISTANCE_NEARBY_DRIVER}`;
-            const nearbyClientUserIds = await entityManager
-                .query(getNearbyClients)
-                .then((res) => {
-                return res ? res.map((x) => x.userId) : [];
-            });
-            console.log("nearbyClientUserIds ", nearbyClientUserIds);
-            if (nearbyClientUserIds.length > 0) {
-                const forClientTitle = "There's an event nearby that could use your attention!";
-                const clientNotifications = await this.logNotification(nearbyClientUserIds, event, entityManager, forClientTitle, event.eventName);
-                const multipleClientReq = clientNotifications.map((x) => {
-                    var _a;
-                    return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
-                });
-                const pushToClients = await Promise.all(multipleClientReq);
-                console.log(pushToClients);
-            }
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
@@ -647,48 +599,6 @@ let EventsService = class EventsService {
                     },
                 },
             });
-            const KM_DISTANCE_NEARBY_DRIVER = 10;
-            const getClientUserIds = ` 
-      WITH 
-      nearby AS (
-          Select "UserId" as "userId"
-          from dbo."Users" WHERE "UserType" = 'CLIENT' 
-          AND "Active" = true
-          AND "UserId" <> ${user === null || user === void 0 ? void 0 : user.userId}
-          AND round(
-          (earth_distance(
-                  ll_to_earth(
-                  ${dto.eventLocMap.latitude}::float, 
-                  ${dto.eventLocMap.longitude}::float),-- driver point
-                  ll_to_earth(("CurrentLocation"->>'latitude')::float, ("CurrentLocation"->>'longitude')::float)-- pickup
-              )/1000)::decimal, 2) <= ${KM_DISTANCE_NEARBY_DRIVER}
-      ),
-      specific_user AS (
-          SELECT "UserId" as "userId"
-          FROM dbo."Users"
-          WHERE ARRAY[${dto.eventAssistanceItems
-                .map((x) => "'" + x + "'")
-                .join(",")}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${user === null || user === void 0 ? void 0 : user.userId}
-        )
-        SELECT "userId" from nearby WHERE "userId" <> ${user === null || user === void 0 ? void 0 : user.userId}
-        UNION 
-        SELECT "userId" from specific_user WHERE "userId" <> ${user === null || user === void 0 ? void 0 : user.userId} AND  "userId" NOT IN (SELECT "userId" from nearby)`;
-            const clientUserIds = await entityManager
-                .query(getClientUserIds)
-                .then((res) => {
-                return res ? res.map((x) => x.userId) : [];
-            });
-            console.log("clientUserIds ", clientUserIds);
-            if (clientUserIds.length > 0) {
-                const forClientTitle = "There's an event nearby that could use your attention!";
-                const clientNotifications = await this.logNotification(clientUserIds, event, entityManager, forClientTitle, event.eventName);
-                const multipleClientReq = clientNotifications.map((x) => {
-                    var _a;
-                    return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
-                });
-                const pushToClients = await Promise.all(multipleClientReq);
-                console.log(pushToClients);
-            }
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
             }
@@ -941,6 +851,12 @@ let EventsService = class EventsService {
             }
             if (!event) {
                 throw Error(events_constant_1.EVENT_ERROR_NOT_FOUND);
+            }
+            if (event.eventStatus === events_constant_1.EVENT_STATUS.APPROVED && (event === null || event === void 0 ? void 0 : event.eventType) === events_constant_1.EVENT_TYPE.ASSISTANCE) {
+                await this.notifyOtherUserForAssistance(entityManager, event);
+            }
+            else if (event.eventStatus === events_constant_1.EVENT_STATUS.APPROVED) {
+                await this.notifyNearbyUser(entityManager, event);
             }
             (_c = event.user) === null || _c === void 0 ? true : delete _c.password;
             return event;
@@ -1326,6 +1242,127 @@ let EventsService = class EventsService {
                 console.log(ex);
             }
             throw ex;
+        }
+    }
+    async notifyNearbyUser(entityManager, event) {
+        const KM_DISTANCE_NEARBY_HOST = 10;
+        const getNearbyClients = ` Select "UserId" as "userId"
+      from dbo."Users" 
+      WHERE "UserType" = 'CLIENT' AND round(
+     (earth_distance(
+             ll_to_earth(${event.eventLocMap['latitude']}::float, ${event.eventLocMap['longitude']}::float),-- host
+             ll_to_earth(("CurrentLocation"->>'latitude')::float, ("CurrentLocation"->>'longitude')::float)-- pickup
+        )/1000)::decimal, 2) <= ${KM_DISTANCE_NEARBY_HOST}`;
+        const nearbyClientUserIds = await entityManager
+            .query(getNearbyClients)
+            .then((res) => {
+            return res ? res.map((x) => x.userId) : [];
+        });
+        console.log("nearbyClientUserIds ", nearbyClientUserIds);
+        if (nearbyClientUserIds.length > 0) {
+            const forClientTitle = "There's an event nearby that could use your attention!";
+            const clientNotifications = await this.logNotification(nearbyClientUserIds, event, entityManager, forClientTitle, event.eventName);
+            const multipleClientReq = clientNotifications.map((x) => {
+                var _a;
+                return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
+            });
+            const pushToClients = await Promise.all(multipleClientReq);
+            console.log(pushToClients);
+        }
+    }
+    async notifyOtherUserForAssistance(entityManager, event) {
+        var _a, _b, _c, _d, _e, _f;
+        const KM_DISTANCE_NEARBY_HOST = 10;
+        const getClientUserIds = ` 
+      WITH 
+      nearby AS (
+          Select "UserId" as "userId"
+          from dbo."Users" WHERE "UserType" = 'CLIENT' 
+          AND "Active" = true
+          AND "UserId" <> ${(_a = event === null || event === void 0 ? void 0 : event.user) === null || _a === void 0 ? void 0 : _a.userId}
+          AND round(
+          (earth_distance(
+                  ll_to_earth(
+                  ${event.eventLocMap['latitude']}::float, 
+                  ${event.eventLocMap['longitude']}::float),-- host point
+                  ll_to_earth(("CurrentLocation"->>'latitude')::float, ("CurrentLocation"->>'longitude')::float)-- user
+              )/1000)::decimal, 2) <= ${KM_DISTANCE_NEARBY_HOST}
+      ),
+      user_preferences_based AS (
+          SELECT "UserId" as "userId"
+          FROM dbo."Users"
+          WHERE ARRAY[${event.eventAssistanceItems
+            .map((x) => "'" + x + "'")
+            .join(",")}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${(_b = event === null || event === void 0 ? void 0 : event.user) === null || _b === void 0 ? void 0 : _b.userId}
+        ),
+      nearby_and_preferences_based AS (
+          SELECT "UserId" as "userId"
+          FROM dbo."Users"
+          WHERE ARRAY[${event.eventAssistanceItems
+            .map((x) => "'" + x + "'")
+            .join(",")}]::character varying[] && "HelpNotifPreferences" AND "Active" = true AND "UserId" <> ${(_c = event === null || event === void 0 ? void 0 : event.user) === null || _c === void 0 ? void 0 : _c.userId} AND round(
+          (earth_distance(
+                  ll_to_earth(
+                  ${event.eventLocMap['latitude']}::float, 
+                  ${event.eventLocMap['longitude']}::float),-- host point
+                  ll_to_earth(("CurrentLocation"->>'latitude')::float, ("CurrentLocation"->>'longitude')::float)-- user
+              )/1000)::decimal, 2) <= ${KM_DISTANCE_NEARBY_HOST}
+        )
+        SELECT 'NEARBY' as "type", "userId" from nearby WHERE "userId" <> ${(_d = event === null || event === void 0 ? void 0 : event.user) === null || _d === void 0 ? void 0 : _d.userId} 
+        AND "userId" NOT IN (SELECT "userId" from user_preferences_based) 
+        AND "userId" NOT IN (SELECT "userId" from nearby_and_preferences_based)
+
+        UNION 
+        SELECT 'USER_BASED_PREFERENCES' as "type", "userId" from user_preferences_based WHERE "userId" <> ${(_e = event === null || event === void 0 ? void 0 : event.user) === null || _e === void 0 ? void 0 : _e.userId} 
+        AND  "userId" NOT IN (SELECT "userId" from nearby)
+        AND  "userId" NOT IN (SELECT "userId" from nearby_and_preferences_based)
+
+        UNION 
+        SELECT 'NEARBY_AND_PREFERENCES_BASED' as "type", "userId" from nearby_and_preferences_based WHERE "userId" <> ${(_f = event === null || event === void 0 ? void 0 : event.user) === null || _f === void 0 ? void 0 : _f.userId} 
+        AND "userId" NOT IN (SELECT "userId" from nearby) 
+        AND "userId" NOT IN (SELECT "userId" from user_preferences_based)`;
+        const { nearby, userPreferencesBased, nearbyAndUserPreferencesBased } = await entityManager
+            .query(getClientUserIds)
+            .then((res) => {
+            return res ? {
+                nearby: res.filter(t => t.type === "NEARBY").map((x) => x.userId),
+                userPreferencesBased: res.filter(t => t.type === "USER_BASED_PREFERENCES").map((x) => x.userId),
+                nearbyAndUserPreferencesBased: res.filter(t => t.type === "NEARBY_AND_PREFERENCES_BASED").map((x) => x.userId),
+            } : { nearby: [], userPreferencesBased: [], nearbyAndUserPreferencesBased: [] };
+        });
+        console.log("nearby ", nearby);
+        console.log("userPreferencesBased ", userPreferencesBased);
+        console.log("nearbyAndUserPreferencesBased ", nearbyAndUserPreferencesBased);
+        let clientNotif = [];
+        if (nearby.length > 0) {
+            const forClientTitle = "There's an event nearby that could use your attention!";
+            clientNotif = await this.logNotification(nearby, event, entityManager, forClientTitle, event.eventName);
+            const multipleClientReq = clientNotif.map((x) => {
+                var _a;
+                return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
+            });
+            const pushToClients = await Promise.all(multipleClientReq);
+            console.log(pushToClients);
+        }
+        if (userPreferencesBased.length > 0) {
+            const forClientTitle = "There's an event based on your notification preferences that could use your attention!";
+            clientNotif = await this.logNotification(userPreferencesBased, event, entityManager, forClientTitle, event.eventName);
+            const multipleClientReq = clientNotif.map((x) => {
+                var _a;
+                return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
+            });
+            const pushToClients = await Promise.all(multipleClientReq);
+            console.log(pushToClients);
+        }
+        if (nearbyAndUserPreferencesBased.length > 0) {
+            const forClientTitle = "There's an event nearby that could use your attention based on your preferences!";
+            clientNotif = await this.logNotification(nearbyAndUserPreferencesBased, event, entityManager, forClientTitle, event.eventName);
+            const multipleClientReq = clientNotif.map((x) => {
+                var _a;
+                return this.oneSignalNotificationService.sendToExternalUser((_a = x.user) === null || _a === void 0 ? void 0 : _a.userName, notifications_constant_1.NOTIF_TYPE.EVENTS, event.eventCode, [x.notificationId], forClientTitle, event.eventName);
+            });
+            const pushToClients = await Promise.all(multipleClientReq);
+            console.log(pushToClients);
         }
     }
     async logNotification(userIds, data, entityManager, title, description) {

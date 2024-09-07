@@ -15,7 +15,6 @@ import {
   ValidationArguments,
 } from "class-validator";
 import { AnnualFilterDashboardDto } from "src/core/dto/dashboard/dashboard-base.dto";
-import { MapDto } from "src/core/dto/map/map.dto";
 import { ApiResponseModel } from "src/core/models/api-response.model";
 import { SupportTicket } from "src/db/entities/SupportTicket";
 import { DashboardService } from "src/services/dashboard.service";

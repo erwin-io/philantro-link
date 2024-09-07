@@ -17,6 +17,7 @@ import {
   ProfileResetPasswordDto,
   UpdateUserPasswordDto,
 } from "src/core/dto/auth/reset-password.dto";
+import { MapDto } from "src/core/dto/map/map.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
 import {
   CreateAdminUserDto,
@@ -732,6 +733,26 @@ export class UsersService {
       }
 
       user.accessGranted = true;
+      user = await entityManager.save(Users, user);
+      delete user.password;
+      return user;
+    });
+  }
+
+  async updateUserLocation(userCode, dto: MapDto) {
+    return await this.userRepo.manager.transaction(async (entityManager) => {
+      let user = await entityManager.findOne(Users, {
+        where: {
+          userCode,
+          active: true,
+        },
+      });
+
+      if (!user) {
+        throw Error(USER_ERROR_USER_NOT_FOUND);
+      }
+
+      user.currentLocation = dto;
       user = await entityManager.save(Users, user);
       delete user.password;
       return user;

@@ -62,7 +62,7 @@
     </div>
   </div>
   <div class="details-content ion-padding">
-    <ng-container *ngIf="currentUser?.userCode === event?.user?.userCode">
+    <ng-container *ngIf="!isLoading && currentUser?.userCode === event?.user?.userCode">
       <ion-button (click)="onUpdateStaus('INPROGRESS')" shape="round" fill="outline" color="tertiary" *ngIf="event?.eventStatus === 'APPROVED' && !event?.inProgress && event?.eventType !== 'ASSISTANCE'" >
         Mark as In progress
       </ion-button>
@@ -90,7 +90,7 @@
       </ng-template>
     </ion-text>
     <h2 *ngIf="!isLoading; else loadingEventName"class="details-cards-title">{{event?.eventName}}</h2>
-    <ion-text color="primary"><b>{{event?.eventType}}</b></ion-text>
+    <ion-text *ngIf="!isLoading" color="primary"><b>{{event?.eventType}}</b></ion-text>
     <ng-container *ngIf="event?.eventAssistanceItems && event?.eventAssistanceItems.length > 0">
       <div class="help-type">
         <ng-container *ngFor="let item of event?.eventAssistanceItems">
@@ -109,7 +109,7 @@
     <ng-template #loadingEventName>
       <ion-skeleton-text [animated]="true"></ion-skeleton-text>
     </ng-template>
-    <div class="details-dontation" *ngIf="event?.eventType === 'DONATION'" >    
+    <div class="details-dontation" *ngIf="!isLoading && event?.eventType === 'DONATION'" >    
       <ng-container *ngIf="event?.raisedDonation > 0; else noDonationYet">
         <div class="ion-activatable" (click)="onOpenEventDonationList()" style="
         position: relative;
@@ -130,13 +130,14 @@
         
       </ng-container>
       <ng-template #noDonationYet>
+        <p>Target Amount: {{event?.donationTargetAmount | currency: 'PHP'}}</p>
         <p>NO DONATION YET</p>
       </ng-template>
     </div>
     <div class="details-actions">
 
       <ng-container *ngIf="currentUser?.userCode !== event?.user?.userCode">
-        <ng-container *ngIf="event?.eventType === 'CHARITY' || event?.eventType === 'VOLUNTEER'">
+        <ng-container *ngIf="!isLoading && (event?.eventType === 'CHARITY' || event?.eventType === 'VOLUNTEER')">
           <ion-button [disabled]="isProcessing" size="small" [color]="event?.isCurrentUserInterested ? 'danger' : 'primary'" (click)="updateEventInterested()">
             <ion-icon slot="start" [name]="event?.isCurrentUserInterested ? 'thumbs-down': 'heart'"></ion-icon>
             {{event?.isCurrentUserInterested ? 'No thanks' : 'Interested'}}
@@ -147,7 +148,7 @@
             {{event?.isCurrentUserResponded ? "I'm not sure" : 'Going'}}
           </ion-button>
         </ng-container>
-        <ng-container *ngIf="event?.eventType === 'DONATION'">
+        <ng-container *ngIf="!isLoading && event?.eventType === 'DONATION'">
           <ion-button [disabled]="isProcessing" size="small" color="primary" (click)="donate()">
             <ion-icon size="large" slot="start" name="cash-outline"></ion-icon>
             Donate
@@ -155,18 +156,18 @@
   
         </ng-container>
       
-        <ion-button size="small" fill="clear" badge-button (click)="onOpenEventMessage()">
+        <ion-button *ngIf="!isLoading" [disabled]="isProcessing" size="small" fill="clear" badge-button (click)="onOpenEventMessage()">
           <ion-badge color="danger">{{event?.visitorUnReadMessage > 99 ? '99+' : (event?.visitorUnReadMessage > 0 ? event?.visitorUnReadMessage : '') }}</ion-badge>
           <ion-icon size="large" slot="icon-only" name="chatbubble-ellipses-outline"></ion-icon>
         </ion-button>
       </ng-container>
       
-      <ion-button *ngIf="currentUser?.userCode === event?.user?.userCode" size="small" fill="clear" badge-button (click)="onOpenEventNotification()">
+      <ion-button *ngIf="!isLoading && currentUser?.userCode === event?.user?.userCode" size="small" fill="clear" badge-button (click)="onOpenEventNotification()">
         <ion-badge color="danger">{{event?.ownerUnReadNotifications > 99 ? '99+' : (event?.ownerUnReadNotifications > 0 ? event?.ownerUnReadNotifications : '') }}</ion-badge>
         <ion-icon size="large" slot="icon-only" name="notifications-outline"></ion-icon>
       </ion-button>
     </div>
-    <div class="details-more-info">
+    <div class="details-more-info" *ngIf="!isLoading">
       <div class="details-more-info-item" (click)="openMap(event?.eventLocMap?.latitude, event?.eventLocMap?.longitude)">
         <ion-icon color="primary" slot="start" name="list-circle" size="large"></ion-icon>
         <p>{{event?.eventLocName}}</p>
@@ -175,14 +176,25 @@
         <ion-icon color="primary" slot="start" name="checkmark-circle" size="large"></ion-icon>
         <p>{{event?.responded}} going - {{event?.interested}} interested</p>
       </div>
-      <div class="details-more-info-item">
-        <ion-icon color="primary" slot="start" name="person-circle" size="large"></ion-icon>
+      <div class="details-more-info-item" *ngIf="!isLoading && currentUser?.userCode !== event?.user?.userCode">
+        <!-- <ion-icon color="primary" slot="start" name="person-circle" size="large"></ion-icon> -->
+        <ion-avatar slot="start">
+          <img
+            alt="{{event?.user?.name}}" 
+            src="{{event?.user?.userProfilePic && event?.user?.userProfilePic?.file?.url ? event?.user?.userProfilePic?.file?.url : '../../../../../assets/img/person.png' }}"
+            (error)="profilePicErrorHandler($event)" id="profilePicture">
+        </ion-avatar>
         <p>{{event?.user?.name}}</p>
       </div>
     </div>
-    <div class="details-desc">
+    <div class="details-desc" *ngIf="!isLoading; else elseLoadingDesc">
       <h4>Description</h4>
       <p>{{event?.eventDesc}}</p>
     </div>
+    <ng-template #elseLoadingDesc>
+      <ion-skeleton-text style="width: 100%;" [animated]="true"></ion-skeleton-text>
+      <ion-skeleton-text style="width: 100%;" [animated]="true"></ion-skeleton-text>
+      <ion-skeleton-text style="width: 100%;" [animated]="true"></ion-skeleton-text>
+    </ng-template>
   </div>
 </ion-content>

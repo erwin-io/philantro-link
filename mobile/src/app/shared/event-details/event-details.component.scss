@@ -130,6 +130,8 @@
                     position: relative!important;
                     width: fit-content!important;
                     --overflow: visible!important;
+                    --padding-start: 0px!important;
+                    --padding-end: 0px!important;
                     ion-badge {
                         position: absolute;
                         right: -10px;
@@ -153,8 +155,9 @@
                 p {
                     font-family: 'Poppins-Regular'!important;
                 }
-                ion-icon {
-                    min-width: 32px;
+                ion-icon, ion-avatar{
+                    min-width: 32px !important;
+                    max-width: 32px!important;
                     height: 32px;
                 }
             }

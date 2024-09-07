@@ -17,6 +17,7 @@ import {
   ProfileResetPasswordDto,
   UpdateUserPasswordDto,
 } from "src/core/dto/auth/reset-password.dto";
+import { MapDto } from "src/core/dto/map/map.dto";
 import { PaginationParamsDto } from "src/core/dto/pagination-params.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
 import {
@@ -238,6 +239,25 @@ export class UsersController {
     const res: ApiResponseModel<Users> = {} as any;
     try {
       res.data = await this.userService.approveAccessRequest(userCode);
+      res.success = true;
+      res.message = `User access request ${UPDATE_SUCCESS}`;
+      return res;
+    } catch (e) {
+      res.success = false;
+      res.message = e.message !== undefined ? e.message : e;
+      return res;
+    }
+  }
+
+  @Put("/updateUserLocation/:userCode")
+  //   @UseGuards(JwtAuthGuard)
+  async updateUserLocation(
+    @Param("userCode") userCode: string,
+    @Body() dto: MapDto
+  ) {
+    const res: ApiResponseModel<Users> = {} as any;
+    try {
+      res.data = await this.userService.updateUserLocation(userCode, dto);
       res.success = true;
       res.message = `User access request ${UPDATE_SUCCESS}`;
       return res;

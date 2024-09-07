@@ -22,7 +22,8 @@
       "updatePassword": "/users/updatePassword/",
       "resetPassword": "/users/resetPassword/",
       "approveAccessRequest": "/users/approveAccessRequest/",
-      "updateProfilePicture": "/users/updateProfilePicture/"
+      "updateProfilePicture": "/users/updateProfilePicture/",
+      "updateUserLocation": "/users/updateUserLocation/"
     },
     "events": {
       "getByAdvanceSearch": "/events/page/",

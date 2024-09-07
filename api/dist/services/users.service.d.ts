@@ -1,4 +1,5 @@
 import { ProfileResetPasswordDto, UpdateUserPasswordDto } from "src/core/dto/auth/reset-password.dto";
+import { MapDto } from "src/core/dto/map/map.dto";
 import { UpdateProfilePictureDto } from "src/core/dto/user/user-base.dto";
 import { CreateAdminUserDto, CreateClientUserDto } from "src/core/dto/user/users.create.dto";
 import { UpdateClientUserProfileDto, UpdateClientUserDto, UpdateAdminUserDto, UpdateUserProfileDto } from "src/core/dto/user/users.update.dto";
@@ -66,4 +67,5 @@ export declare class UsersService {
     updateUserPassword(userCode: any, dto: UpdateUserPasswordDto): Promise<Users>;
     deleteUser(userCode: any): Promise<Users>;
     approveAccessRequest(userCode: any): Promise<Users>;
+    updateUserLocation(userCode: any, dto: MapDto): Promise<Users>;
 }

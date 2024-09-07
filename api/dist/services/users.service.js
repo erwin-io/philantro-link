@@ -627,6 +627,23 @@ let UsersService = class UsersService {
             return user;
         });
     }
+    async updateUserLocation(userCode, dto) {
+        return await this.userRepo.manager.transaction(async (entityManager) => {
+            let user = await entityManager.findOne(Users_1.Users, {
+                where: {
+                    userCode,
+                    active: true,
+                },
+            });
+            if (!user) {
+                throw Error(user_error_constant_1.USER_ERROR_USER_NOT_FOUND);
+            }
+            user.currentLocation = dto;
+            user = await entityManager.save(Users_1.Users, user);
+            delete user.password;
+            return user;
+        });
+    }
 };
 UsersService = __decorate([
     (0, common_1.Injectable)(),

@@ -10,7 +10,7 @@ import { StorageService } from 'src/app/services/storage.service';
 import { DonateFormComponent } from '../donate-form/donate-form.component';
 import { AnimationService } from 'src/app/services/animation.service';
 import { EditEventFormComponent } from '../edit-event-form/edit-event-form.component';
-import { getEventCardDefaultImage } from '../utility/utility';
+import { getEventCardDefaultImage, getPersonDefaultImage } from '../utility/utility';
 import { MessageDetailsPage } from 'src/app/pages/message/message-details/message-details.page';
 import { UserConversation } from 'src/app/model/user-conversation.model';
 import { EventNotificationsComponent } from '../event-notifications/event-notifications.component';
@@ -556,6 +556,10 @@ export class EventDetailsComponent  implements OnInit {
 
   imageErrorHandler(event, type: "CHARITY" | "VOLUNTEER" | "DONATION" | "ASSISTANCE") {
     event.target.src = getEventCardDefaultImage(this.event?.eventType);
+  }
+  
+  profilePicErrorHandler(event) {
+    event.target.src = getPersonDefaultImage(null);
   }
 
   async presentAlert(options: AlertOptions) {

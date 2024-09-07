@@ -177,5 +177,7 @@ export declare class EventsService {
         transactions: Transactions[];
     }>;
     saveEventImages(entityManager: EntityManager, event: Events, eventImages?: any[]): Promise<void>;
+    notifyNearbyUser(entityManager: EntityManager, event: Events): Promise<void>;
+    notifyOtherUserForAssistance(entityManager: EntityManager, event: Events): Promise<void>;
     logNotification(userIds: string[], data: Events, entityManager: EntityManager, title: string, description: string): Promise<Notifications[]>;
 }
